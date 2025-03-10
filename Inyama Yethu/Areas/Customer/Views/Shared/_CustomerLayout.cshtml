@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Inyama Yethu Customer Portal</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Inyama_Yethu.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3" style="background-color: var(--inyama-white);">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="Customer" asp-controller="Home" asp-action="Index" style="color: var(--inyama-dark-blue); font-weight: bold;">
+                    Inyama Yethu
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--inyama-dark-blue);" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--inyama-dark-blue);" asp-area="Customer" asp-controller="Products" asp-action="Index">Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--inyama-dark-blue);" asp-area="Customer" asp-controller="Orders" asp-action="Index">My Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--inyama-dark-blue);" asp-area="Customer" asp-controller="Feedback" asp-action="Index">Feedback</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--inyama-dark-blue);" asp-area="Customer" asp-controller="Contact" asp-action="Index">Contact Us</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-inyama-orange me-2">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            <span id="cartCount" class="badge bg-inyama-blue">0</span>
+                        </a>
+                    </div>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="list-group mt-3">
+                    <a asp-area="Customer" asp-controller="Account" asp-action="Dashboard" class="list-group-item list-group-item-action bg-inyama-blue text-white">
+                        My Account
+                    </a>
+                    <a asp-area="Customer" asp-controller="Orders" asp-action="Index" class="list-group-item list-group-item-action">
+                        Order History
+                    </a>
+                    <a asp-area="Customer" asp-controller="Feedback" asp-action="Index" class="list-group-item list-group-item-action">
+                        My Feedback
+                    </a>
+                    <a asp-area="Customer" asp-controller="Account" asp-action="Settings" class="list-group-item list-group-item-action">
+                        Account Settings
+                    </a>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header bg-inyama-orange text-white">
+                        Quick Order
+                    </div>
+                    <div class="card-body">
+                        <p>Need your regular order?</p>
+                        <a asp-area="Customer" asp-controller="Orders" asp-action="QuickOrder" class="btn btn-inyama-blue w-100">Place Quick Order</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <main role="main" class="pb-3">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-top footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 style="color: var(--inyama-orange);">Inyama Yethu</h5>
+                    <p>Quality meats for township shisanyamas since 2015.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5 style="color: var(--inyama-orange);">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-area="Customer" asp-controller="Home" asp-action="About">About Us</a></li>
+                        <li><a asp-area="Customer" asp-controller="Products" asp-action="Index">Products</a></li>
+                        <li><a asp-area="Customer" asp-controller="Home" asp-action="PrivacyPolicy">Privacy Policy</a></li>
+                        <li><a asp-area="Customer" asp-controller="Home" asp-action="Terms">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 style="color: var(--inyama-orange);">Contact</h5>
+                    <address>
+                        <strong>Inyama Yethu</strong><br>
+                        123 Farm Road<br>
+                        Cape Town, Western Cape<br>
+                        <abbr title="Phone">P:</abbr> (012) 345-6789
+                    </address>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center">
+                    <span style="color: var(--inyama-orange);">&copy; 2025 - Inyama Yethu. All rights reserved.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> 

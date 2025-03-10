@@ -1,0 +1,358 @@
+@{
+    ViewData["Title"] = "Employee Dashboard";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var isCheckedIn = (bool)ViewData["IsCheckedIn"];
+    var todaysTasks = ViewData["TodaysTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+    var overdueTasks = ViewData["OverdueTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+    var upcomingTasks = ViewData["UpcomingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+    var unprocessedPigletsCount = (int)ViewData["UnprocessedPigletsCount"];
+    var upcomingFarrowingsCount = (int)ViewData["UpcomingFarrowingsCount"];
+    var recentFarrowingsCount = (int)ViewData["RecentFarrowingsCount"];
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Employee Dashboard</h1>
+    <p class="lead mb-4">Welcome, @employee.Name</p>
+    
+    <!-- Attendance Status -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Attendance Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        @if (isCheckedIn)
+                        {
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> You are currently checked in.
+                            </div>
+                            <a asp-area="Employee" asp-controller="Attendance" asp-action="CheckOut" 
+                               class="btn btn-danger">Check Out</a>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle"></i> You are not checked in.
+                            </div>
+                            <a asp-area="Employee" asp-controller="Attendance" asp-action="CheckIn" 
+                               class="btn btn-success">Check In</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Links</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6 mb-2">
+                            <a asp-area="Employee" asp-controller="Attendance" asp-action="Index" 
+                               class="btn btn-info btn-block">
+                                <i class="fas fa-clock"></i> Attendance History
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a asp-area="Employee" asp-controller="Tasks" asp-action="Index" 
+                               class="btn btn-warning btn-block">
+                                <i class="fas fa-tasks"></i> View All Tasks
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a asp-area="Employee" asp-controller="PigletProcessing" asp-action="Index" 
+                               class="btn btn-success btn-block">
+                                <i class="fas fa-piggy-bank"></i> Piglet Processing
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a asp-area="Employee" asp-controller="Matings" asp-action="Index" 
+                               class="btn btn-primary btn-block">
+                                <i class="fas fa-venus-mars"></i> Breeding Management
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a asp-area="Employee" asp-controller="Farrowings" asp-action="Index" 
+                               class="btn btn-danger btn-block">
+                                <i class="fas fa-baby"></i> Farrowings
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a asp-area="Employee" asp-controller="Livestock" asp-action="Index" 
+                               class="btn btn-secondary btn-block">
+                                <i class="fas fa-database"></i> Livestock
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Farm Activity Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Piglet Processing</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@unprocessedPigletsCount unprocessed</div>
+                            <div class="text-gray-800">Track piglet processing tasks including tail docking, iron injections, and ear notching.</div>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-area="Employee" asp-controller="PigletProcessing" asp-action="Index" class="btn btn-sm btn-success">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Breeding Management</div>
+                            <div class="text-gray-800">Manage scheduled matings, track pregnancy status, and monitor expected farrowings.</div>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-area="Employee" asp-controller="Matings" asp-action="Index" class="btn btn-sm btn-primary">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Farrowings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@upcomingFarrowingsCount upcoming</div>
+                            <div class="text-gray-800">Manage upcoming and recent farrowings, monitor litter information and farrowing tasks.</div>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-area="Employee" asp-controller="Farrowings" asp-action="Index" class="btn btn-sm btn-danger">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Today's Tasks -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Today's Tasks</h6>
+        </div>
+        <div class="card-body">
+            @if (todaysTasks != null && todaysTasks.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="todaysTasks" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Priority</th>
+                                <th>Animal</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in todaysTasks)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td>@task.Description</td>
+                                    <td>
+                                        @{
+                                            string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                "badge-danger";
+                                        }
+                                        <span class="badge @priorityClass">@task.Priority</span>
+                                    </td>
+                                    <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-sm" 
+                                                data-toggle="modal" 
+                                                data-target="#completeTaskModal" 
+                                                data-task-id="@task.Id">
+                                            Complete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No tasks scheduled for today.
+                </div>
+            }
+        </div>
+    </div>
+    
+    <!-- Overdue Tasks -->
+    @if (overdueTasks != null && overdueTasks.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-danger text-white">
+                <h6 class="m-0 font-weight-bold">Overdue Tasks (@overdueTasks.Count)</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="overdueTasks" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Due Date</th>
+                                <th>Days Overdue</th>
+                                <th>Priority</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var today = (DateTime)ViewData["Today"];
+                            }
+                            @foreach (var task in overdueTasks)
+                            {
+                                var daysOverdue = (today - task.DueDate.Date).Days;
+                                
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td>@task.DueDate.ToShortDateString()</td>
+                                    <td>@daysOverdue</td>
+                                    <td>
+                                        @{
+                                            string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                "badge-danger";
+                                        }
+                                        <span class="badge @priorityClass">@task.Priority</span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-sm" 
+                                                data-toggle="modal" 
+                                                data-target="#completeTaskModal" 
+                                                data-task-id="@task.Id">
+                                            Complete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <!-- Upcoming Tasks -->
+    @if (upcomingTasks != null && upcomingTasks.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Upcoming Tasks</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="upcomingTasks" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Due Date</th>
+                                <th>Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in upcomingTasks)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td>@task.Description</td>
+                                    <td>@task.DueDate.ToShortDateString()</td>
+                                    <td>
+                                        @{
+                                            string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                "badge-danger";
+                                        }
+                                        <span class="badge @priorityClass">@task.Priority</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Complete Task Modal -->
+<div class="modal fade" id="completeTaskModal" tabindex="-1" role="dialog" aria-labelledby="completeTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completeTaskModalLabel">Complete Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form asp-area="Employee" asp-controller="Tasks" asp-action="CompleteTask" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="taskId" name="taskId" value="" />
+                    <input type="hidden" id="employeeId" name="employeeId" value="@employee.Id" />
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes (optional)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Enter any notes about task completion..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Complete Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#completeTaskModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var taskId = button.data('task-id');
+                var modal = $(this);
+                modal.find('#taskId').val(taskId);
+            });
+        });
+    </script>
+} 

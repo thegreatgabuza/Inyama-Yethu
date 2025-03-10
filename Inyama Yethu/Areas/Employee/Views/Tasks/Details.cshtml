@@ -1,0 +1,316 @@
+@model Inyama_Yethu.Models.TaskAssignment
+@{
+    ViewData["Title"] = "Task Details";
+    Layout = "_EmployeeLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Task Details</h1>
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Tasks
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        @Model.Title 
+                        @{
+                            string statusClass = Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed ? "badge-success" :
+                                               Model.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress ? "badge-info" :
+                                               Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Delayed ? "badge-warning" :
+                                               Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Cancelled ? "badge-danger" :
+                                               "badge-secondary";
+                        }
+                        <span class="badge @statusClass ml-2">@Model.Status</span>
+                    </h6>
+                    @if (Model.Status != Inyama_Yethu.Models.FarmTaskStatus.Completed && 
+                         Model.Status != Inyama_Yethu.Models.FarmTaskStatus.Cancelled)
+                    {
+                        <button type="button" class="btn btn-success btn-sm" 
+                                data-toggle="modal" 
+                                data-target="#completeTaskModal">
+                            <i class="fas fa-check mr-1"></i> Mark as Complete
+                        </button>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold">Description</h5>
+                        <p>@Model.Description</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="font-weight-bold">Due Date</h5>
+                            <p>@Model.DueDate.ToString("MMM dd, yyyy HH:mm")</p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="font-weight-bold">Category</h5>
+                            <p>@Model.Category</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="font-weight-bold">Priority</h5>
+                            @{
+                                string priorityClass = Model.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                    Model.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                    Model.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                    "badge-danger";
+                            }
+                            <p><span class="badge @priorityClass">@Model.Priority</span></p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="font-weight-bold">Completion Status</h5>
+                            @if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed && Model.CompletionDate != null)
+                            {
+                                <p>Completed on @Model.CompletionDate</p>
+                            }
+                            else
+                            {
+                                <p>Not completed</p>
+                            }
+                        </div>
+                    </div>
+                    
+                    @if (Model.Animal != null)
+                    {
+                        <div class="mb-4">
+                            <h5 class="font-weight-bold">Related Animal</h5>
+                            <p>
+                                <strong>Tag Number:</strong> #@Model.Animal.TagNumber<br />
+                                <strong>Type:</strong> @Model.Animal.Type<br />
+                                <strong>Gender:</strong> @Model.Animal.Gender<br />
+                            </p>
+                            
+                            @if (Model.Animal.BirthDate != default(DateTime))
+                            {
+                                <p>
+                                    <strong>Birth Date:</strong> @Model.Animal.BirthDate.ToShortDateString()<br />
+                                    <strong>Age:</strong> @((DateTime.Now - Model.Animal.BirthDate).Days) days
+                                </p>
+                            }
+                            
+                            <a asp-area="" asp-controller="Animals" asp-action="Details" asp-route-id="@Model.AnimalId" 
+                               class="btn btn-info btn-sm">
+                                <i class="fas fa-info-circle mr-1"></i> View Animal Details
+                            </a>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="mb-4">
+                            <h5 class="font-weight-bold">Notes</h5>
+                            <p>@Model.Notes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Task Timeline -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Task Timeline</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <!-- Created -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h5 class="timeline-title">Task Created</h5>
+                                <p class="timeline-text">Due on @Model.DueDate.ToShortDateString()</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Status -->
+                        @if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h5 class="timeline-title">In Progress</h5>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed && Model.CompletionDate != null)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h5 class="timeline-title">Completed</h5>
+                                    <p class="timeline-text">@Model.CompletionDate</p>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Delayed)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h5 class="timeline-title">Delayed</h5>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Cancelled)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h5 class="timeline-title">Cancelled</h5>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Related Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Days Due</h6>
+                        @{
+                            DateTime currentDate = DateTime.Now.Date;
+                            DateTime taskDueDate = Model.DueDate.Date;
+                            int daysDiff = (taskDueDate - currentDate).Days;
+                            
+                            if (daysDiff < 0)
+                            {
+                                <p class="text-danger">Overdue by @Math.Abs(daysDiff) days</p>
+                            }
+                            else if (daysDiff == 0)
+                            {
+                                <p class="text-warning">Due today</p>
+                            }
+                            else
+                            {
+                                <p class="text-info">Due in @daysDiff days</p>
+                            }
+                        }
+                    </div>
+                    
+                    <!-- Additional information could be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Task Modal -->
+<div class="modal fade" id="completeTaskModal" tabindex="-1" role="dialog" aria-labelledby="completeTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completeTaskModalLabel">Complete Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form asp-action="CompleteTask" method="post">
+                <div class="modal-body">
+                    <p>Are you sure you want to mark <strong>@Model.Title</strong> as completed?</p>
+                    
+                    <input type="hidden" id="taskId" name="taskId" value="@Model.Id" />
+                    <input type="hidden" id="employeeId" name="employeeId" value="@Model.EmployeeId" />
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes (optional)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Enter any notes about task completion..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Complete Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -30px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+        
+        .timeline-content {
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e3e6f0;
+        }
+        
+        .timeline-title {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-text {
+            font-size: 0.85rem;
+            color: #858796;
+            margin-bottom: 0;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+} 

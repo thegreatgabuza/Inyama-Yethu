@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Attendance";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var today = (DateTime)ViewData["Today"];
+    var todayAttendance = ViewData["TodayAttendance"] as Inyama_Yethu.Models.Attendance;
+    var monthlyAttendance = ViewData["MonthlyAttendance"] as List<Inyama_Yethu.Models.Attendance>;
+    var startOfMonth = (DateTime)ViewData["StartOfMonth"];
+    var endOfMonth = (DateTime)ViewData["EndOfMonth"];
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Attendance</h1>
+    <p class="lead mb-4">Track your attendance and time records</p>
+    
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Today's Attendance</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        @if (todayAttendance != null)
+                        {
+                            <div class="alert alert-info">
+                                <p><strong>Check-In Time:</strong> @todayAttendance.CheckInTime.ToString("HH:mm")</p>
+                                
+                                @if (todayAttendance.CheckOutTime != null)
+                                {
+                                    <p><strong>Check-Out Time:</strong> @todayAttendance.CheckOutTime.Value.ToString("HH:mm")</p>
+                                    
+                                    var hoursWorked = Math.Round((todayAttendance.CheckOutTime.Value - todayAttendance.CheckInTime).TotalHours, 2);
+                                    <p><strong>Hours Worked:</strong> @hoursWorked</p>
+                                }
+                                else
+                                {
+                                    <p><strong>Status:</strong> <span class="badge badge-success">Currently Working</span></p>
+                                    <a asp-area="Employee" asp-controller="Attendance" asp-action="CheckOut" 
+                                       class="btn btn-danger">Check Out</a>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle"></i> You haven't checked in today.
+                            </div>
+                            <a asp-area="Employee" asp-controller="Attendance" asp-action="CheckIn" 
+                               class="btn btn-success">Check In</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Monthly Summary</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Month:</strong> @startOfMonth.ToString("MMMM yyyy")</p>
+                    
+                    @{
+                        // Calculate monthly statistics
+                        var daysWorked = monthlyAttendance.Select(a => a.CheckInTime.Date).Distinct().Count();
+                        var totalHours = monthlyAttendance
+                            .Where(a => a.CheckOutTime != null)
+                            .Sum(a => (a.CheckOutTime.Value - a.CheckInTime).TotalHours);
+                    }
+                    
+                    <p><strong>Days Worked:</strong> @daysWorked / @(endOfMonth.Day)</p>
+                    <p><strong>Total Hours:</strong> @Math.Round(totalHours, 2)</p>
+                    <p><strong>Average Hours/Day:</strong> @(daysWorked > 0 ? Math.Round(totalHours / daysWorked, 2) : 0)</p>
+                    
+                    <div class="text-center mt-3">
+                        <a asp-area="Employee" asp-controller="Attendance" asp-action="History" 
+                           class="btn btn-primary">View Detailed History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Recent Attendance</h6>
+        </div>
+        <div class="card-body">
+            @if (monthlyAttendance != null && monthlyAttendance.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="attendanceTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Hours</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attendance in monthlyAttendance.Take(10))
+                            {
+                                <tr>
+                                    <td>@attendance.CheckInTime.ToShortDateString()</td>
+                                    <td>@attendance.CheckInTime.ToString("HH:mm")</td>
+                                    <td>
+                                        @if (attendance.CheckOutTime != null)
+                                        {
+                                            @attendance.CheckOutTime.Value.ToString("HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-info">Active</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (attendance.CheckOutTime != null)
+                                        {
+                                            @Math.Round((attendance.CheckOutTime.Value - attendance.CheckInTime).TotalHours, 2)
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>@attendance.Notes</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No attendance records found for this month.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#attendanceTable').DataTable({
+                order: [[0, 'desc'], [1, 'desc']]
+            });
+        });
+    </script>
+} 

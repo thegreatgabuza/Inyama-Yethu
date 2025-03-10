@@ -1,0 +1,436 @@
+@{
+    ViewData["Title"] = "Pig Breeding Management";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var today = (DateTime)ViewData["Today"];
+    var scheduledMatings = ViewData["ScheduledMatings"] as List<Inyama_Yethu.Models.Mating>;
+    var pregnantSows = ViewData["PregnantSows"] as List<Inyama_Yethu.Models.Mating>;
+    var upcomingFarrowings = ViewData["UpcomingFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+    var recentFarrowings = ViewData["RecentFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Pig Breeding Management</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Breeding Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Scheduled Matings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(scheduledMatings?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Pregnant Sows</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(pregnantSows?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-female fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Upcoming Farrowings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(upcomingFarrowings?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-baby fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Recent Farrowings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(recentFarrowings?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-piggy-bank fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breeding Tabs -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <ul class="nav nav-tabs card-header-tabs" id="breedingTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="scheduled-tab" data-toggle="tab" href="#scheduled" role="tab" aria-controls="scheduled" aria-selected="true">
+                        Scheduled Matings <span class="badge badge-primary">@(scheduledMatings?.Count ?? 0)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pregnant-tab" data-toggle="tab" href="#pregnant" role="tab" aria-controls="pregnant" aria-selected="false">
+                        Pregnant Sows <span class="badge badge-success">@(pregnantSows?.Count ?? 0)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="farrowing-tab" data-toggle="tab" href="#farrowing" role="tab" aria-controls="farrowing" aria-selected="false">
+                        Upcoming Farrowings <span class="badge badge-warning">@(upcomingFarrowings?.Count ?? 0)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="recent-tab" data-toggle="tab" href="#recent" role="tab" aria-controls="recent" aria-selected="false">
+                        Recent Farrowings <span class="badge badge-info">@(recentFarrowings?.Count ?? 0)</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="breedingTabsContent">
+                <!-- Scheduled Matings Tab -->
+                <div class="tab-pane fade show active" id="scheduled" role="tabpanel" aria-labelledby="scheduled-tab">
+                    @if (scheduledMatings != null && scheduledMatings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="scheduledMatingsTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Sow ID</th>
+                                        <th>Sow</th>
+                                        <th>Boar ID</th>
+                                        <th>Boar</th>
+                                        <th>Mating Date</th>
+                                        <th>Expected Pregnancy Check</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mating in scheduledMatings.OrderBy(m => m.MatingDate))
+                                    {
+                                        <tr>
+                                            <td>@mating.MotherAnimalId</td>
+                                            <td>@mating.Mother.TagNumber</td>
+                                            <td>@mating.FatherAnimalId</td>
+                                            <td>@mating.Father.TagNumber</td>
+                                            <td>@mating.MatingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@mating.ExpectedPregnancyCheck1.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-info-circle mr-1"></i> Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i> No scheduled matings.
+                        </div>
+                    }
+                </div>
+                
+                <!-- Pregnant Sows Tab -->
+                <div class="tab-pane fade" id="pregnant" role="tabpanel" aria-labelledby="pregnant-tab">
+                    @if (pregnantSows != null && pregnantSows.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="pregnantSowsTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Sow ID</th>
+                                        <th>Sow</th>
+                                        <th>Mating Date</th>
+                                        <th>Expected Farrowing</th>
+                                        <th>Days Pregnant</th>
+                                        <th>Expected Vaccination 1</th>
+                                        <th>Expected Vaccination 2</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mating in pregnantSows.OrderBy(m => m.ExpectedFarrowingDate))
+                                    {
+                                        int daysPregant = (today - mating.MatingDate).Days;
+                                        
+                                        // Get housing/pen info for mother
+                                        string penText = "Not assigned";
+                                        try
+                                        {
+                                            string[] possiblePropertyNames = { "Location", "HousingLocation", "HousingId", "PenNumber", "Housing" };
+                                            foreach (string propName in possiblePropertyNames)
+                                            {
+                                                var prop = mating.Mother.GetType().GetProperty(propName);
+                                                if (prop != null)
+                                                {
+                                                    var value = prop.GetValue(mating.Mother);
+                                                    if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                    {
+                                                        penText = value.ToString();
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch { /* Safely ignore any errors */ }
+
+                                        <tr>
+                                            <td>@mating.MotherAnimalId</td>
+                                            <td>@mating.Mother.TagNumber</td>
+                                            <td>@mating.MatingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@daysPregant days</td>
+                                            <td>
+                                                @mating.ExpectedVaccinationDate1.ToString("MMM dd, yyyy")
+                                                @if (mating.Vaccination1Completed)
+                                                {
+                                                    <span class="badge badge-success">Done</span>
+                                                }
+                                                else if (today >= mating.ExpectedVaccinationDate1)
+                                                {
+                                                    <span class="badge badge-danger">Overdue</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @mating.ExpectedVaccinationDate2.ToString("MMM dd, yyyy")
+                                                @if (mating.Vaccination2Completed)
+                                                {
+                                                    <span class="badge badge-success">Done</span>
+                                                }
+                                                else if (today >= mating.ExpectedVaccinationDate2)
+                                                {
+                                                    <span class="badge badge-danger">Overdue</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-info-circle mr-1"></i> Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i> No pregnant sows at this time.
+                        </div>
+                    }
+                </div>
+                
+                <!-- Upcoming Farrowings Tab -->
+                <div class="tab-pane fade" id="farrowing" role="tabpanel" aria-labelledby="farrowing-tab">
+                    @if (upcomingFarrowings != null && upcomingFarrowings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="upcomingFarrowingsTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Sow ID</th>
+                                        <th>Sow</th>
+                                        <th>Expected Farrowing</th>
+                                        <th>Days Until Farrowing</th>
+                                        <th>Days Pregnant</th>
+                                        <th>Pen</th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mating in upcomingFarrowings.OrderBy(m => m.ExpectedFarrowingDate))
+                                    {
+                                        int daysUntilFarrowing = (mating.ExpectedFarrowingDate - today).Days;
+                                        int daysPregant = (today - mating.MatingDate).Days;
+                                        
+                                        // Get housing/pen info for mother
+                                        string penText = "Not assigned";
+                                        try
+                                        {
+                                            string[] possiblePropertyNames = { "Location", "HousingLocation", "HousingId", "PenNumber", "Housing" };
+                                            foreach (string propName in possiblePropertyNames)
+                                            {
+                                                var prop = mating.Mother.GetType().GetProperty(propName);
+                                                if (prop != null)
+                                                {
+                                                    var value = prop.GetValue(mating.Mother);
+                                                    if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                    {
+                                                        penText = value.ToString();
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch { /* Safely ignore any errors */ }
+
+                                        <tr>
+                                            <td>@mating.MotherAnimalId</td>
+                                            <td>@mating.Mother.TagNumber</td>
+                                            <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (daysUntilFarrowing <= 0)
+                                                {
+                                                    <span class="text-danger font-weight-bold">Due today or overdue</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="font-weight-bold">@daysUntilFarrowing days</span>
+                                                }
+                                            </td>
+                                            <td>@daysPregant days</td>
+                                            <td>@penText</td>
+                                            <td>@(string.IsNullOrEmpty(mating.Notes) ? "No notes" : mating.Notes)</td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-info-circle mr-1"></i> Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i> No upcoming farrowings in the next 14 days.
+                        </div>
+                    }
+                </div>
+                
+                <!-- Recent Farrowings Tab -->
+                <div class="tab-pane fade" id="recent" role="tabpanel" aria-labelledby="recent-tab">
+                    @if (recentFarrowings != null && recentFarrowings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="recentFarrowingsTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Sow ID</th>
+                                        <th>Sow</th>
+                                        <th>Farrowing Date</th>
+                                        <th>Days Since</th>
+                                        <th>Total Born</th>
+                                        <th>Born Alive</th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mating in recentFarrowings.OrderByDescending(m => m.ActualFarrowingDate))
+                                    {
+                                        int daysSinceFarrowing = mating.ActualFarrowingDate.HasValue ? 
+                                                               (today - mating.ActualFarrowingDate.Value).Days : 0;
+                                        
+                                        <tr>
+                                            <td>@mating.MotherAnimalId</td>
+                                            <td>@mating.Mother.TagNumber</td>
+                                            <td>@(mating.ActualFarrowingDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
+                                            <td>@daysSinceFarrowing days</td>
+                                            <td>@(mating.NumberOfPigletsBorn ?? 0)</td>
+                                            <td>@(mating.NumberOfPigletsBornAlive ?? 0)</td>
+                                            <td>@(string.IsNullOrEmpty(mating.Notes) ? "No notes" : mating.Notes)</td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-info-circle mr-1"></i> Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i> No recent farrowings in the past 14 days.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            $('#scheduledMatingsTable').DataTable({
+                "order": [[4, "asc"]] // Sort by mating date
+            });
+            
+            $('#pregnantSowsTable').DataTable({
+                "order": [[3, "asc"]] // Sort by expected farrowing date
+            });
+            
+            $('#upcomingFarrowingsTable').DataTable({
+                "order": [[3, "asc"]] // Sort by days until farrowing
+            });
+            
+            $('#recentFarrowingsTable').DataTable({
+                "order": [[2, "desc"]] // Sort by farrowing date (newest first)
+            });
+            
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+} 

@@ -1,0 +1,161 @@
+@model List<Inyama_Yethu.Models.Attendance>
+@{
+    ViewData["Title"] = "Attendance History";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var startDate = ViewData["StartDate"] as string;
+    var endDate = ViewData["EndDate"] as string;
+    var totalHours = (double)ViewData["TotalHours"];
+    var avgHoursPerDay = (double)ViewData["AvgHoursPerDay"];
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Attendance History</h1>
+    <p class="lead mb-4">View and filter your attendance records</p>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Search Attendance Records</h6>
+        </div>
+        <div class="card-body">
+            <form asp-area="Employee" asp-controller="Attendance" asp-action="History" method="get" class="form-inline">
+                <div class="form-group mb-2 mr-2">
+                    <label for="startDate" class="mr-2">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" value="@startDate">
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="endDate" class="mr-2">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="@endDate">
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Filter</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Records</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Hours</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@totalHours</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Average Hours/Day</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@avgHoursPerDay</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Attendance Records</h6>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="attendanceHistoryTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Hours</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attendance in Model)
+                            {
+                                <tr>
+                                    <td>@attendance.CheckInTime.ToShortDateString()</td>
+                                    <td>@attendance.CheckInTime.ToString("dddd")</td>
+                                    <td>@attendance.CheckInTime.ToString("HH:mm")</td>
+                                    <td>
+                                        @if (attendance.CheckOutTime != null)
+                                        {
+                                            @attendance.CheckOutTime.Value.ToString("HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-info">Active</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (attendance.CheckOutTime != null)
+                                        {
+                                            var hours = Math.Round((attendance.CheckOutTime.Value - attendance.CheckInTime).TotalHours, 2);
+                                            @hours
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>@attendance.Notes</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No attendance records found for the selected period.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#attendanceHistoryTable').DataTable({
+                order: [[0, 'desc'], [2, 'desc']]
+            });
+        });
+    </script>
+} 

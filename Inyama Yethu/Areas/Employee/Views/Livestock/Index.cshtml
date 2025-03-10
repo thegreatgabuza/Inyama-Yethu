@@ -1,0 +1,497 @@
+@{
+    ViewData["Title"] = "Livestock Management";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var today = (DateTime)ViewData["Today"];
+    var animals = ViewData["Animals"] as List<Inyama_Yethu.Models.Animal>;
+    var animalsByType = ViewData["AnimalsByType"] as List<dynamic>;
+    var recentHealthRecords = ViewData["RecentHealthRecords"] as List<Inyama_Yethu.Models.HealthRecord>;
+    var recentWeightRecords = ViewData["RecentWeightRecords"] as List<Inyama_Yethu.Models.WeightRecord>;
+    var livestockTasks = ViewData["LivestockTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Livestock Management</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Livestock Stats Cards -->
+    <div class="row mb-4">
+        @if (animalsByType != null)
+        {
+            foreach (var animalType in animalsByType)
+            {
+                // Get the type as a string to avoid enum comparison issues
+                string typeAsString = animalType.Type.ToString();
+                string cardColor = typeAsString.Contains("Sow") ? "primary" :
+                                  typeAsString.Contains("Boar") ? "success" :
+                                  typeAsString.Contains("Piglet") ? "info" :
+                                  typeAsString.Contains("Grower") ? "warning" :
+                                  "secondary";
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-@cardColor shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-@cardColor text-uppercase mb-1">
+                                        @typeAsString</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@animalType.Count</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-piggy-bank fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Livestock Tasks</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(livestockTasks?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Livestock Content -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#animalsCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="animalsCard">
+                    <h6 class="m-0 font-weight-bold text-primary">Animal Inventory</h6>
+                </a>
+                <div class="collapse show" id="animalsCard">
+                    <div class="card-body">
+                        @if (animals != null && animals.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="animalsTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Tag Number</th>
+                                            <th>Type</th>
+                                            <th>Gender</th>
+                                            <th>Birth Date</th>
+                                            <th>Age</th>
+                                            <th>Housing</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var animal in animals)
+                                        {
+                                            // Calculate age safely
+                                            int ageDays = 0;
+                                            string birthDateStr = "Unknown";
+                                            
+                                            // Safe age calculation
+                                            try 
+                                            {
+                                                // Use reflection to get BirthDate safely
+                                                var birthDateProperty = animal.GetType().GetProperty("BirthDate");
+                                                if (birthDateProperty != null)
+                                                {
+                                                    var birthDateValue = birthDateProperty.GetValue(animal);
+                                                    if (birthDateValue != null && birthDateValue is DateTime)
+                                                    {
+                                                        DateTime birthDate = (DateTime)birthDateValue;
+                                                        ageDays = (today - birthDate).Days;
+                                                        birthDateStr = birthDate.ToString("MMM dd, yyyy");
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            string ageDisplay = ageDays > 365 ? $"{ageDays / 365} years" : 
+                                                              ageDays > 30 ? $"{ageDays / 30} months" : 
+                                                              $"{ageDays} days";
+                                            
+                                            // Get housing location (try all possible property names)
+                                            string housingText = "Not assigned";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = new string[] { "Location", "HousingLocation", "Pen", "PenNumber", "Housing" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = animal.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(animal);
+                                                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                        {
+                                                            housingText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            // Get status text and class
+                                            string statusText = animal.Status.ToString();
+                                            string statusClass = statusText.Contains("Active") ? "badge-success" :
+                                                               statusText.Contains("Sick") ? "badge-warning" :
+                                                               statusText.Contains("Sold") ? "badge-info" :
+                                                               statusText.Contains("Deceased") ? "badge-danger" :
+                                                               "badge-secondary";
+                                            
+                                            <tr>
+                                                <td>#@animal.Id</td>
+                                                <td>@animal.TagNumber</td>
+                                                <td>@animal.Type</td>
+                                                <td>@animal.Gender</td>
+                                                <td>@birthDateStr</td>
+                                                <td>@ageDisplay</td>
+                                                <td>@housingText</td>
+                                                <td>
+                                                    <span class="badge @statusClass">@statusText</span>
+                                                </td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@animal.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No animals found.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#healthCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="healthCard">
+                    <h6 class="m-0 font-weight-bold text-warning">Recent Health Records (30 Days)</h6>
+                </a>
+                <div class="collapse show" id="healthCard">
+                    <div class="card-body">
+                        @if (recentHealthRecords != null && recentHealthRecords.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="healthTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Animal</th>
+                                            <th>Record Date</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Treatment</th>
+                                            <th>Notes</th>
+                                            <th>Recorded By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var record in recentHealthRecords)
+                                        {
+                                            // Get description text (try all possible property names)
+                                            string descriptionText = "";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = new string[] { "Description", "Diagnosis", "Issue", "Condition", "Problem" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = record.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(record);
+                                                        if (value != null)
+                                                        {
+                                                            descriptionText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            // Get recorded by text (try all possible property names)
+                                            string recordedByText = "Unknown";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = new string[] { "EmployeeId", "RecordedBy", "EmployeeName", "RecordedByEmployee" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = record.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(record);
+                                                        if (value != null)
+                                                        {
+                                                            recordedByText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            <tr>
+                                                <td>
+                                                    #@record.AnimalId - @record.Animal.TagNumber
+                                                    <span class="badge badge-secondary">@record.Animal.Type</span>
+                                                </td>
+                                                <td>@record.RecordDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@record.RecordType</td>
+                                                <td>@descriptionText</td>
+                                                <td>@record.Treatment</td>
+                                                <td>@record.Notes</td>
+                                                <td>@recordedByText</td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@record.AnimalId" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Animal Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No health records in the past 30 days.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#weightCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="weightCard">
+                    <h6 class="m-0 font-weight-bold text-success">Recent Weight Records (30 Days)</h6>
+                </a>
+                <div class="collapse show" id="weightCard">
+                    <div class="card-body">
+                        @if (recentWeightRecords != null && recentWeightRecords.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="weightTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Animal</th>
+                                            <th>Record Date</th>
+                                            <th>Weight (kg)</th>
+                                            <th>Age at Weighing</th>
+                                            <th>Notes</th>
+                                            <th>Recorded By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var record in recentWeightRecords)
+                                        {
+                                            // Calculate age at weighing
+                                            int ageAtWeighing = 0;
+                                            try
+                                            {
+                                                // Get birth date from animal
+                                                var birthDateProperty = record.Animal.GetType().GetProperty("BirthDate");
+                                                if (birthDateProperty != null)
+                                                {
+                                                    var birthDateValue = birthDateProperty.GetValue(record.Animal);
+                                                    if (birthDateValue != null && birthDateValue is DateTime)
+                                                    {
+                                                        DateTime birthDate = (DateTime)birthDateValue;
+                                                        ageAtWeighing = (record.RecordDate - birthDate).Days;
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            // Get recorded by text (try all possible property names)
+                                            string recordedByText = "Unknown";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = new string[] { "EmployeeId", "RecordedBy", "EmployeeName", "RecordedByEmployee" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = record.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(record);
+                                                        if (value != null)
+                                                        {
+                                                            recordedByText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            <tr>
+                                                <td>
+                                                    #@record.AnimalId - @record.Animal.TagNumber
+                                                    <span class="badge badge-secondary">@record.Animal.Type</span>
+                                                </td>
+                                                <td>@record.RecordDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@record.Weight kg</td>
+                                                <td>@ageAtWeighing days</td>
+                                                <td>@(string.IsNullOrEmpty(record.Notes) ? "No notes" : record.Notes)</td>
+                                                <td>@recordedByText</td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@record.AnimalId" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Animal Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No weight records in the past 30 days.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Livestock Tasks -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#tasksCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="tasksCard">
+                    <h6 class="m-0 font-weight-bold text-danger">Livestock Tasks</h6>
+                </a>
+                <div class="collapse show" id="tasksCard">
+                    <div class="card-body">
+                        @if (livestockTasks != null && livestockTasks.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="tasksTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Description</th>
+                                            <th>Category</th>
+                                            <th>Priority</th>
+                                            <th>Due Date</th>
+                                            <th>Animal</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var task in livestockTasks.OrderBy(t => t.DueDate))
+                                        {
+                                            <tr>
+                                                <td>@task.Title</td>
+                                                <td>@task.Description</td>
+                                                <td>@task.Category</td>
+                                                <td>
+                                                    @{
+                                                        string priorityString = task.Priority.ToString();
+                                                        string priorityClass = priorityString.Contains("Low") ? "badge-info" :
+                                                                             priorityString.Contains("Medium") ? "badge-primary" :
+                                                                             priorityString.Contains("High") ? "badge-warning" :
+                                                                             priorityString.Contains("Critical") ? "badge-danger" :
+                                                                             "badge-secondary";
+                                                    }
+                                                    <span class="badge @priorityClass">@task.Priority</span>
+                                                </td>
+                                                <td>@task.DueDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
+                                                <td>
+                                                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No livestock tasks currently assigned.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            $('#animalsTable').DataTable({
+                "order": [[2, "asc"]] // Sort by type
+            });
+            
+            $('#healthTable').DataTable({
+                "order": [[1, "desc"]] // Sort by record date
+            });
+            
+            $('#weightTable').DataTable({
+                "order": [[1, "desc"]] // Sort by record date
+            });
+            
+            $('#tasksTable').DataTable({
+                "order": [[4, "asc"]] // Sort by due date
+            });
+            
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+} 

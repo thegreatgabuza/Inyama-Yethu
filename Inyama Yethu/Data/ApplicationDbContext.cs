@@ -1,0 +1,100 @@
+﻿using Inyama_Yethu.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace Inyama_Yethu.Data
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        // Employee Management
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<TaskAssignment> TaskAssignments { get; set; }
+
+        // Livestock Management
+        public DbSet<Animal> Animals { get; set; }
+        public DbSet<Mating> Matings { get; set; }
+        public DbSet<PigletProcessing> PigletProcessings { get; set; }
+        public DbSet<Feeding> Feedings { get; set; }
+        public DbSet<HealthRecord> HealthRecords { get; set; }
+        public DbSet<WeightRecord> WeightRecords { get; set; }
+        public DbSet<AbattoirShipment> AbattoirShipments { get; set; }
+
+        // Customer Management
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Product> Products { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure relationships
+            
+            // Configure Animal self-referencing relationships (parent-child)
+            modelBuilder.Entity<Animal>()
+                .HasOne(a => a.Mother)
+                .WithMany(a => a.Offspring)
+                .HasForeignKey(a => a.MotherAnimalId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Animal>()
+                .HasOne(a => a.Father)
+                .WithMany()
+                .HasForeignKey(a => a.FatherAnimalId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // Configure Mating relationships
+            modelBuilder.Entity<Mating>()
+                .HasOne(m => m.Mother)
+                .WithMany(a => a.MatingsAsMother)
+                .HasForeignKey(m => m.MotherAnimalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Mating>()
+                .HasOne(m => m.Father)
+                .WithMany(a => a.MatingsAsFather)
+                .HasForeignKey(m => m.FatherAnimalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Seed initial data
+            SeedData(modelBuilder);
+        }
+
+        private void SeedData(ModelBuilder modelBuilder)
+        {
+            // Seed 2 employees as mentioned in the requirements
+            modelBuilder.Entity<Employee>().HasData(
+                new Employee
+                {
+                    Id = 1,
+                    Name = "John Doe",
+                    Email = "john.doe@inyamayethu.co.za",
+                    Phone = "072-123-4567",
+                    Position = "Farm Worker",
+                    HireDate = new DateTime(2023, 1, 15),
+                    IsActive = true
+                },
+                new Employee
+                {
+                    Id = 2,
+                    Name = "Jane Smith",
+                    Email = "jane.smith@inyamayethu.co.za",
+                    Phone = "073-987-6543",
+                    Position = "Farm Manager",
+                    HireDate = new DateTime(2022, 8, 10),
+                    IsActive = true
+                }
+            );
+        }
+    }
+}

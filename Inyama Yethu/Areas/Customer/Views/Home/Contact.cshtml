@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = ViewData["Title"] as string ?? "Contact Us";
+    Layout = "_CustomerLayout";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">Contact Us</h1>
+                    <p class="lead text-center mb-4">@ViewData["Message"]</p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title">Contact Information</h4>
+                                    <hr>
+                                    <p><i class="fas fa-map-marker-alt mr-2 text-primary"></i> <strong>Address:</strong><br>
+                                        @ViewData["Address"]
+                                    </p>
+                                    <p><i class="fas fa-phone mr-2 text-primary"></i> <strong>Phone:</strong><br>
+                                        @ViewData["Phone"]
+                                    </p>
+                                    <p><i class="fas fa-envelope mr-2 text-primary"></i> <strong>Email:</strong><br>
+                                        <a href="mailto:@ViewData["Email"]">@ViewData["Email"]</a>
+                                    </p>
+                                    <p><i class="fas fa-clock mr-2 text-primary"></i> <strong>Business Hours:</strong><br>
+                                        Monday - Friday: 8:00 AM - 5:00 PM<br>
+                                        Saturday: 8:00 AM - 1:00 PM<br>
+                                        Sunday: Closed
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title">Send Us a Message</h4>
+                                    <hr>
+                                    <form asp-area="Customer" asp-controller="Home" asp-action="SubmitContact" method="post">
+                                        <div class="form-group">
+                                            <label for="name">Your Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email">Email Address</label>
+                                            <input type="email" class="form-control" id="email" name="email" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="phone">Phone Number</label>
+                                            <input type="tel" class="form-control" id="phone" name="phone">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="subject">Subject</label>
+                                            <input type="text" class="form-control" id="subject" name="subject" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="message">Message</label>
+                                            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title">Location</h4>
+                            <hr>
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <!-- Replace with your actual Google Maps embed code -->
+                                <iframe class="embed-responsive-item" 
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3307.1390905553256!2d18.4240029!3d-33.9248685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDU1JzI5LjUiUyAxOMKwMjUnMjYuNCJF!5e0!3m2!1sen!2sza!4v1615000000000!5m2!1sen!2sza" 
+                                        allowfullscreen="" loading="lazy"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Frequently Asked Questions</h4>
+                            <hr>
+                            <div class="accordion" id="faqAccordion">
+                                <div class="card">
+                                    <div class="card-header" id="headingOne">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                Do you offer delivery services?
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#faqAccordion">
+                                        <div class="card-body">
+                                            Yes, we offer delivery services to businesses within a 50km radius of our farm. Delivery fees may apply depending on your location and order size.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" id="headingTwo">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                What is the minimum order quantity?
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#faqAccordion">
+                                        <div class="card-body">
+                                            Our minimum order quantity varies by product. For most items, we require a minimum order of 5kg. For bulk orders, please contact us directly for special pricing.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" id="headingThree">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                                How do I place an order?
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#faqAccordion">
+                                        <div class="card-body">
+                                            You can place an order through our website by creating an account, selecting your products, and proceeding to checkout. Alternatively, you can call us directly or send an email with your order details.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('form').submit(function(event) {
+                var isValid = true;
+                
+                // Simple validation example
+                if ($('#name').val().trim() === '') {
+                    isValid = false;
+                    $('#name').addClass('is-invalid');
+                } else {
+                    $('#name').removeClass('is-invalid');
+                }
+                
+                if ($('#email').val().trim() === '') {
+                    isValid = false;
+                    $('#email').addClass('is-invalid');
+                } else {
+                    $('#email').removeClass('is-invalid');
+                }
+                
+                if ($('#message').val().trim() === '') {
+                    isValid = false;
+                    $('#message').addClass('is-invalid');
+                } else {
+                    $('#message').removeClass('is-invalid');
+                }
+                
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+} 

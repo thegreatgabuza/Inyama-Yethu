@@ -1,0 +1,541 @@
+@{
+    ViewData["Title"] = "Piglet Processing";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var today = (DateTime)ViewData["Today"];
+    var processingRecords = ViewData["ProcessingRecords"] as List<Inyama_Yethu.Models.PigletProcessing>;
+    var recentFarrowings = ViewData["RecentFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+    var unprocessedPiglets = ViewData["UnprocessedPiglets"] as List<Inyama_Yethu.Models.Animal>;
+    var processingTasks = ViewData["ProcessingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Piglet Processing</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Processing Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Unprocessed Piglets</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(unprocessedPiglets?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Recent Farrowings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(recentFarrowings?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-baby fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Processed Piglets</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(processingRecords?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Processing Tasks</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(processingTasks?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Content -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#unprocessedCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="unprocessedCard">
+                    <h6 class="m-0 font-weight-bold text-warning">Unprocessed Piglets</h6>
+                </a>
+                <div class="collapse show" id="unprocessedCard">
+                    <div class="card-body">
+                        @if (unprocessedPiglets != null && unprocessedPiglets.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="unprocessedTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Piglet ID</th>
+                                            <th>Tag Number</th>
+                                            <th>Birth Date</th>
+                                            <th>Age (Days)</th>
+                                            <th>Gender</th>
+                                            <th>Housing</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var piglet in unprocessedPiglets)
+                                        {
+                                            // Calculate age safely
+                                            int ageDays = 0;
+                                            string birthDateStr = "Unknown";
+                                            
+                                            // Get birth date using reflection
+                                            try
+                                            {
+                                                var birthDateProperty = piglet.GetType().GetProperty("BirthDate");
+                                                if (birthDateProperty != null)
+                                                {
+                                                    var birthDateValue = birthDateProperty.GetValue(piglet);
+                                                    if (birthDateValue != null && birthDateValue is DateTime)
+                                                    {
+                                                        DateTime birthDate = (DateTime)birthDateValue;
+                                                        ageDays = (today - birthDate).Days;
+                                                        birthDateStr = birthDate.ToString("MMM dd, yyyy");
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            // Get housing info
+                                            string housingText = "Not assigned";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = { "Location", "HousingLocation", "HousingId", "PenNumber", "Housing" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = piglet.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(piglet);
+                                                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                        {
+                                                            housingText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            string rowClass = ageDays >= 7 ? "table-danger" : "";
+                                            
+                                            <tr class="@rowClass">
+                                                <td>#@piglet.Id</td>
+                                                <td>@piglet.TagNumber</td>
+                                                <td>@birthDateStr</td>
+                                                <td>
+                                                    @ageDays days
+                                                    @if (ageDays >= 7)
+                                                    {
+                                                        <span class="badge badge-danger">Overdue</span>
+                                                    }
+                                                    else if (ageDays >= 5)
+                                                    {
+                                                        <span class="badge badge-warning">Due Soon</span>
+                                                    }
+                                                </td>
+                                                <td>@piglet.Gender</td>
+                                                <td>@housingText</td>
+                                                <td>
+                                                    <a asp-controller="Animals" asp-action="Details" asp-route-id="@piglet.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No unprocessed piglets at this time.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#farrowingsCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="farrowingsCard">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Farrowings (14 Days)</h6>
+                </a>
+                <div class="collapse show" id="farrowingsCard">
+                    <div class="card-body">
+                        @if (recentFarrowings != null && recentFarrowings.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="farrowingsTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Sow ID</th>
+                                            <th>Sow</th>
+                                            <th>Farrowing Date</th>
+                                            <th>Days Ago</th>
+                                            <th>Total Born</th>
+                                            <th>Born Alive</th>
+                                            <th>Piglets</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var mating in recentFarrowings)
+                                        {
+                                            // Get farrowing date
+                                            string farrowingDateStr = "Unknown";
+                                            int daysAgo = 0;
+                                            
+                                            try
+                                            {
+                                                var farrowingDateProperty = mating.GetType().GetProperty("ActualFarrowingDate");
+                                                if (farrowingDateProperty != null)
+                                                {
+                                                    var farrowingDateValue = farrowingDateProperty.GetValue(mating);
+                                                    if (farrowingDateValue != null && farrowingDateValue is DateTime)
+                                                    {
+                                                        DateTime farrowingDate = (DateTime)farrowingDateValue;
+                                                        daysAgo = (today - farrowingDate).Days;
+                                                        farrowingDateStr = farrowingDate.ToString("MMM dd, yyyy");
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            <tr>
+                                                <td>#@mating.MotherAnimalId</td>
+                                                <td>@mating.Mother.TagNumber</td>
+                                                <td>@farrowingDateStr</td>
+                                                <td>@daysAgo days</td>
+                                                <td>@(mating.NumberOfPigletsBorn ?? 0)</td>
+                                                <td>@(mating.NumberOfPigletsBornAlive ?? 0)</td>
+                                                <td>
+                                                    @if (mating.Offspring != null && mating.Offspring.Any())
+                                                    {
+                                                        <span class="badge badge-primary">@mating.Offspring.Count() piglet(s)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">None recorded</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a asp-controller="Farrowings" asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No farrowings in the past 14 days.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#processedCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="processedCard">
+                    <h6 class="m-0 font-weight-bold text-success">Processed Piglets</h6>
+                </a>
+                <div class="collapse show" id="processedCard">
+                    <div class="card-body">
+                        @if (processingRecords != null && processingRecords.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="processedTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Piglet ID</th>
+                                            <th>Tag Number</th>
+                                            <th>Processing Date</th>
+                                            <th>Age at Processing</th>
+                                            <th>Procedures</th>
+                                            <th>Processed By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var record in processingRecords)
+                                        {
+                                            // Get processing date - use TailDockingDate as the main date
+                                            string processingDateStr = "Unknown";
+                                            DateTime? processingDate = record.TailDockingDate;
+                                            
+                                            // If TailDockingDate is not available, try to find another date property
+                                            if (!processingDate.HasValue)
+                                            {
+                                                // Try these properties in order
+                                                if (record.IronInjectionDate.HasValue) processingDate = record.IronInjectionDate;
+                                                else if (record.EarNotchingDate.HasValue) processingDate = record.EarNotchingDate;
+                                                else if (record.TattooingDate.HasValue) processingDate = record.TattooingDate;
+                                                else if (record.InitialVaccinationDate.HasValue) processingDate = record.InitialVaccinationDate;
+                                            }
+                                            
+                                            if (processingDate.HasValue)
+                                            {
+                                                processingDateStr = processingDate.Value.ToString("MMM dd, yyyy");
+                                            }
+                                            
+                                            // Calculate age at processing
+                                            int ageAtProcessing = 0;
+                                            if (processingDate.HasValue)
+                                            {
+                                                ageAtProcessing = (processingDate.Value - record.Animal.BirthDate).Days;
+                                            }
+                                            
+                                            // Get procedures
+                                            string proceduresStr = "None";
+                                            try
+                                            {
+                                                var procedures = new List<string>();
+                                                
+                                                // Check processing tasks directly
+                                                if (record.TailDockingCompleted) procedures.Add("Tail Docking");
+                                                if (record.IronInjectionCompleted) procedures.Add("Iron Injection");
+                                                if (record.EarNotchingCompleted) procedures.Add("Ear Notching");
+                                                if (record.TattooingCompleted) procedures.Add("Tattooing");
+                                                if (record.InitialVaccinationCompleted) procedures.Add("Vaccination");
+                                                if (record.CreepFeedIntroductionCompleted) procedures.Add("Creep Feed");
+                                                
+                                                if (procedures.Count > 0)
+                                                {
+                                                    proceduresStr = string.Join(", ", procedures);
+                                                }
+                                            }
+                                            catch { proceduresStr = "Processing details not available"; }
+                                            
+                                            // Get processed by
+                                            string processedBy = "Unknown";
+                                            try
+                                            {
+                                                string[] employeeProps = { "ProcessedByName", "EmployeeName", "EmployeeId", "ProcessedBy" };
+                                                foreach (string propName in employeeProps)
+                                                {
+                                                    var prop = record.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(record);
+                                                        if (value != null)
+                                                        {
+                                                            processedBy = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+                                            
+                                            <tr>
+                                                <td>#@record.AnimalId</td>
+                                                <td>@record.Animal.TagNumber</td>
+                                                <td>@processingDateStr</td>
+                                                <td>@ageAtProcessing days</td>
+                                                <td>@proceduresStr</td>
+                                                <td>@processedBy</td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@record.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No processing records found.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Tasks -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#tasksCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="tasksCard">
+                    <h6 class="m-0 font-weight-bold text-info">Processing Tasks</h6>
+                </a>
+                <div class="collapse show" id="tasksCard">
+                    <div class="card-body">
+                        @if (processingTasks != null && processingTasks.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="tasksTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Description</th>
+                                            <th>Category</th>
+                                            <th>Priority</th>
+                                            <th>Due Date</th>
+                                            <th>Animal</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var task in processingTasks.OrderBy(t => t.DueDate))
+                                        {
+                                            string priorityString = task.Priority.ToString();
+                                            string priorityClass = priorityString.Contains("Low") ? "badge-info" :
+                                                              priorityString.Contains("Medium") ? "badge-primary" :
+                                                              priorityString.Contains("High") ? "badge-warning" :
+                                                              priorityString.Contains("Critical") ? "badge-danger" :
+                                                              "badge-secondary";
+                                            
+                                            <tr>
+                                                <td>@task.Title</td>
+                                                <td>@task.Description</td>
+                                                <td>@task.Category</td>
+                                                <td>
+                                                    <span class="badge @priorityClass">@task.Priority</span>
+                                                </td>
+                                                <td>@task.DueDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
+                                                <td>
+                                                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No processing tasks currently assigned.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private bool TryGetBoolProperty(object obj, string propertyName)
+    {
+        try
+        {
+            var prop = obj.GetType().GetProperty(propertyName);
+            if (prop != null)
+            {
+                var value = prop.GetValue(obj);
+                if (value != null && value is bool)
+                {
+                    return (bool)value;
+                }
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            $('#unprocessedTable').DataTable({
+                "order": [[3, "desc"]] // Sort by age (oldest first)
+            });
+            
+            $('#farrowingsTable').DataTable({
+                "order": [[3, "asc"]] // Sort by days ago
+            });
+            
+            $('#processedTable').DataTable({
+                "order": [[2, "desc"]] // Sort by processing date
+            });
+            
+            $('#tasksTable').DataTable({
+                "order": [[4, "asc"]] // Sort by due date
+            });
+            
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+} 

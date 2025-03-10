@@ -1,0 +1,249 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Admin Dashboard</h1>
+    <p class="lead mb-4">Welcome to Inyama Yethu Farm Management System</p>
+    
+    <div class="row">
+        <!-- Livestock Summary -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Livestock Summary</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var livestockStats = ViewData["LivestockStats"] as List<dynamic>;
+                                    if (livestockStats != null && livestockStats.Any())
+                                    {
+                                        foreach(var stat in livestockStats)
+                                        {
+                                            <div>@stat.Type: @stat.Count</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div>No livestock data available</div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-pig fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Status -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Employee Status</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var employees = ViewData["Employees"] as List<dynamic>;
+                                    if (employees != null)
+                                    {
+                                        <div>Active: @employees.Count(e => e.Employee.IsActive)</div>
+                                        <div>Checked In: @employees.Count(e => e.CheckedIn)</div>
+                                    }
+                                    else
+                                    {
+                                        <div>No employee data available</div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Tasks -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Tasks</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var pendingTasks = ViewData["PendingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+                                    if (pendingTasks != null)
+                                    {
+                                        <div>@pendingTasks.Count Tasks</div>
+                                    }
+                                    else
+                                    {
+                                        <div>0 Tasks</div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Recent Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var recentOrders = ViewData["RecentOrders"] as List<Inyama_Yethu.Models.Order>;
+                                    if (recentOrders != null)
+                                    {
+                                        <div>@recentOrders.Count Orders</div>
+                                    }
+                                    else
+                                    {
+                                        <div>0 Orders</div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Pending Tasks Detail -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pending Tasks</h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        var tasks = ViewData["PendingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+                        if (tasks != null && tasks.Any())
+                        {
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Employee</th>
+                                        <th>Due Date</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in tasks)
+                                    {
+                                        <tr>
+                                            <td>@task.Title</td>
+                                            <td>@(task.Employee?.Name ?? "Unassigned")</td>
+                                            <td>@task.DueDate.ToShortDateString()</td>
+                                            <td>@task.Priority</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>No pending tasks</p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Upcoming Events</h6>
+                </div>
+                <div class="card-body">
+                    <h5>Upcoming Matings</h5>
+                    @{
+                        var matings = ViewData["UpcomingMatings"] as List<Inyama_Yethu.Models.Mating>;
+                        if (matings != null && matings.Any())
+                        {
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Sow</th>
+                                        <th>Boar</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mating in matings)
+                                    {
+                                        <tr>
+                                            <td>@mating.Mother.TagNumber</td>
+                                            <td>@mating.Father.TagNumber</td>
+                                            <td>@mating.MatingDate.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>No upcoming matings</p>
+                        }
+                    }
+
+                    <h5 class="mt-4">Upcoming Farrowings</h5>
+                    @{
+                        var farrowings = ViewData["UpcomingFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+                        if (farrowings != null && farrowings.Any())
+                        {
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Sow</th>
+                                        <th>Expected Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var farrowing in farrowings)
+                                    {
+                                        <tr>
+                                            <td>@farrowing.Mother.TagNumber</td>
+                                            <td>@farrowing.ExpectedFarrowingDate.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>No upcoming farrowings</p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

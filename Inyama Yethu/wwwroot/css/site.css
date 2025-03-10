@@ -1,0 +1,73 @@
+:root {
+  --inyama-orange: #FF8C00;
+  --inyama-dark-blue: #00008B;
+  --inyama-white: #FFFFFF;
+}
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem var(--inyama-white), 0 0 0 0.25rem var(--inyama-orange);
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  color: var(--inyama-dark-blue);
+  background-color: var(--inyama-white);
+}
+
+/* Custom styles for Inyama Yethu */
+.text-inyama-orange {
+  color: var(--inyama-orange);
+}
+
+.text-inyama-blue {
+  color: var(--inyama-dark-blue);
+}
+
+.bg-inyama-orange {
+  background-color: var(--inyama-orange);
+  color: var(--inyama-white);
+}
+
+.bg-inyama-blue {
+  background-color: var(--inyama-dark-blue);
+  color: var(--inyama-white);
+}
+
+.btn-inyama-orange {
+  background-color: var(--inyama-orange);
+  color: var(--inyama-white);
+  border-color: var(--inyama-orange);
+}
+
+.btn-inyama-orange:hover {
+  background-color: #e67e00;
+  border-color: #e67e00;
+  color: var(--inyama-white);
+}
+
+.btn-inyama-blue {
+  background-color: var(--inyama-dark-blue);
+  color: var(--inyama-white);
+  border-color: var(--inyama-dark-blue);
+}
+
+.btn-inyama-blue:hover {
+  background-color: #000077;
+  border-color: #000077;
+  color: var(--inyama-white);
+}

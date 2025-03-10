@@ -1,0 +1,474 @@
+@{
+    ViewData["Title"] = "Farrowings";
+    Layout = "_EmployeeLayout";
+    
+    var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
+    var today = (DateTime)ViewData["Today"];
+    var upcomingFarrowings = ViewData["UpcomingFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+    var farrowingsDueThisWeek = ViewData["FarrowingsDueThisWeek"] as List<Inyama_Yethu.Models.Mating>;
+    var recentFarrowings = ViewData["RecentFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+    var farrowingTasks = ViewData["FarrowingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Farrowings Management</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Farrowing Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Due This Week</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(farrowingsDueThisWeek?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Upcoming (30 Days)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(upcomingFarrowings?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Recent Farrowings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(recentFarrowings?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-baby fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Farrowing Tasks</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(farrowingTasks?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Farrowing Content -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#dueSoonCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="dueSoonCard">
+                    <h6 class="m-0 font-weight-bold text-warning">Farrowings Due This Week</h6>
+                </a>
+                <div class="collapse show" id="dueSoonCard">
+                    <div class="card-body">
+                        @if (farrowingsDueThisWeek != null && farrowingsDueThisWeek.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dueSoonTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Sow ID</th>
+                                            <th>Sow</th>
+                                            <th>Due Date</th>
+                                            <th>Days Until</th>
+                                            <th>Pen</th>
+                                            <th>Status</th>
+                                            <th>Tasks</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var mating in farrowingsDueThisWeek.OrderBy(m => m.ExpectedFarrowingDate))
+                                        {
+                                            int daysUntil = (mating.ExpectedFarrowingDate - today).Days;
+                                            
+                                            // Get housing/pen info for mother
+                                            string penText = "Not assigned";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = { "Location", "HousingLocation", "HousingId", "PenNumber", "Housing" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = mating.Mother.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(mating.Mother);
+                                                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                        {
+                                                            penText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+
+                                            <tr class="@(daysUntil <= 2 ? "table-danger" : "")">
+                                                <td>#@mating.MotherAnimalId</td>
+                                                <td>@mating.Mother.TagNumber</td>
+                                                <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    @if (daysUntil <= 0)
+                                                    {
+                                                        <span class="text-danger font-weight-bold">Due today/overdue</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="font-weight-bold">@daysUntil days</span>
+                                                    }
+                                                </td>
+                                                <td>@penText</td>
+                                                <td>
+                                                    @if (daysUntil <= 2)
+                                                    {
+                                                        <span class="badge badge-danger">Critical</span>
+                                                    }
+                                                    else if (daysUntil <= 4)
+                                                    {
+                                                        <span class="badge badge-warning">Watch Closely</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-info">Prepare</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var sectionTasks = farrowingTasks?
+                                                            .Where(t => t.AnimalId == mating.MotherAnimalId)
+                                                            .Count() ?? 0;
+                                                    }
+                                                    @if (sectionTasks > 0)
+                                                    {
+                                                        <span class="badge badge-primary">@sectionTasks task(s)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">None</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                            <i class="fas fa-info-circle mr-1"></i> Details
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No farrowings due this week.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#upcomingCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="upcomingCard">
+                    <h6 class="m-0 font-weight-bold text-primary">Upcoming Farrowings (30 Days)</h6>
+                </a>
+                <div class="collapse show" id="upcomingCard">
+                    <div class="card-body">
+                        @if (upcomingFarrowings != null && upcomingFarrowings.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="upcomingTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Sow ID</th>
+                                            <th>Sow</th>
+                                            <th>Expected Date</th>
+                                            <th>Days Until</th>
+                                            <th>Pen</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var mating in upcomingFarrowings.OrderBy(m => m.ExpectedFarrowingDate))
+                                        {
+                                            int daysUntil = (mating.ExpectedFarrowingDate - today).Days;
+                                            
+                                            // Get housing/pen info for mother
+                                            string penText = "Not assigned";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = { "Location", "HousingLocation", "HousingId", "PenNumber", "Housing" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = mating.Mother.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(mating.Mother);
+                                                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                        {
+                                                            penText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+
+                                            <tr>
+                                                <td>#@mating.MotherAnimalId</td>
+                                                <td>@mating.Mother.TagNumber</td>
+                                                <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@daysUntil days</td>
+                                                <td>@penText</td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No upcoming farrowings in the next 30 days.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#recentCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="recentCard">
+                    <h6 class="m-0 font-weight-bold text-success">Recent Farrowings</h6>
+                </a>
+                <div class="collapse show" id="recentCard">
+                    <div class="card-body">
+                        @if (recentFarrowings != null && recentFarrowings.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="recentTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Sow ID</th>
+                                            <th>Sow</th>
+                                            <th>Farrowing Date</th>
+                                            <th>Days Ago</th>
+                                            <th>Total Born</th>
+                                            <th>Born Alive</th>
+                                            <th>Notes</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var mating in recentFarrowings.OrderByDescending(m => m.ActualFarrowingDate))
+                                        {
+                                            int daysAgo = mating.ActualFarrowingDate.HasValue ? 
+                                                        (today - mating.ActualFarrowingDate.Value).Days : 0;
+                                            
+                                            // Get housing/pen info for mother
+                                            string penText = "Not assigned";
+                                            try
+                                            {
+                                                string[] possiblePropertyNames = { "Location", "HousingLocation", "HousingId", "PenNumber", "Housing" };
+                                                foreach (string propName in possiblePropertyNames)
+                                                {
+                                                    var prop = mating.Mother.GetType().GetProperty(propName);
+                                                    if (prop != null)
+                                                    {
+                                                        var value = prop.GetValue(mating.Mother);
+                                                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                                                        {
+                                                            penText = value.ToString();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            catch { /* Safely ignore any errors */ }
+
+                                            <tr>
+                                                <td>#@mating.MotherAnimalId</td>
+                                                <td>@mating.Mother.TagNumber</td>
+                                                <td>@(mating.ActualFarrowingDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
+                                                <td>@daysAgo days</td>
+                                                <td>@(mating.NumberOfPigletsBorn ?? 0)</td>
+                                                <td>@(mating.NumberOfPigletsBornAlive ?? 0)</td>
+                                                <td>@(string.IsNullOrEmpty(mating.Notes) ? "No notes" : mating.Notes)</td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No farrowings in the past 30 days.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Farrowing Tasks -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <a href="#tasksCard" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="tasksCard">
+                    <h6 class="m-0 font-weight-bold text-info">Farrowing Tasks</h6>
+                </a>
+                <div class="collapse show" id="tasksCard">
+                    <div class="card-body">
+                        @if (farrowingTasks != null && farrowingTasks.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="tasksTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Description</th>
+                                            <th>Category</th>
+                                            <th>Priority</th>
+                                            <th>Due Date</th>
+                                            <th>Animal</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var task in farrowingTasks.OrderBy(t => t.DueDate))
+                                        {
+                                            <tr>
+                                                <td>@task.Title</td>
+                                                <td>@task.Description</td>
+                                                <td>@task.Category</td>
+                                                <td>
+                                                    @{
+                                                        string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                            task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                            task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                            "badge-danger";
+                                                    }
+                                                    <span class="badge @priorityClass">@task.Priority</span>
+                                                </td>
+                                                <td>@task.DueDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
+                                                <td>
+                                                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle mr-1"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i> No farrowing tasks currently assigned.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            $('#dueSoonTable').DataTable({
+                "order": [[3, "asc"]] // Sort by days until
+            });
+            
+            $('#upcomingTable').DataTable({
+                "order": [[3, "asc"]] // Sort by days until
+            });
+            
+            $('#recentTable').DataTable({
+                "order": [[3, "asc"]] // Sort by days ago
+            });
+            
+            $('#tasksTable').DataTable({
+                "order": [[4, "asc"]] // Sort by due date
+            });
+            
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+} 

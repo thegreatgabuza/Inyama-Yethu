@@ -1,0 +1,68 @@
+﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+:root {
+  --inyama-orange: #FF8C00;
+  --inyama-dark-blue: #00008B;
+  --inyama-white: #FFFFFF;
+}
+
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+  color: var(--inyama-dark-blue);
+}
+
+a {
+  color: var(--inyama-dark-blue);
+}
+
+a:hover {
+  color: var(--inyama-orange);
+}
+
+.btn-primary {
+  color: var(--inyama-white);
+  background-color: var(--inyama-dark-blue);
+  border-color: var(--inyama-dark-blue);
+}
+
+.btn-primary:hover {
+  background-color: var(--inyama-orange);
+  border-color: var(--inyama-orange);
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: var(--inyama-white);
+  background-color: var(--inyama-dark-blue);
+  border-color: var(--inyama-dark-blue);
+}
+
+.border-top {
+  border-top: 1px solid var(--inyama-dark-blue);
+}
+.border-bottom {
+  border-bottom: 1px solid var(--inyama-dark-blue);
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 139, .15);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+  color: var(--inyama-dark-blue);
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+  background-color: var(--inyama-white);
+  color: var(--inyama-dark-blue);
+  border-top: 1px solid var(--inyama-dark-blue);
+}

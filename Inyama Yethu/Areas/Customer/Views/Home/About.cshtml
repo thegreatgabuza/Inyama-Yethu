@@ -1,0 +1,74 @@
+@{
+    ViewData["Title"] = ViewData["Title"] as string ?? "About Us";
+    Layout = "_CustomerLayout";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">About Inyama Yethu</h1>
+                    <p class="lead text-center mb-4">@ViewData["Message"]</p>
+                    
+                    <div class="mb-4">
+                        <h4>Our Story</h4>
+                        <p>
+                            Inyama Yethu was founded in 2015 with a simple mission: to provide high-quality, 
+                            ethically raised pork products to township shisanyamas and local businesses. 
+                            What started as a small family farm has grown into a trusted supplier for 
+                            businesses across the region.
+                        </p>
+                        <p>
+                            Our name, which means "Our Meat" in isiXhosa, reflects our commitment to the 
+                            community and our belief that quality meat should be accessible to all South Africans.
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h4>Our Farm</h4>
+                        <p>
+                            Located in the beautiful countryside of the Western Cape, our farm spans over 50 hectares 
+                            of land where we raise our pigs with care and respect. We follow sustainable farming 
+                            practices and ensure that our animals have plenty of space to roam and express their 
+                            natural behaviors.
+                        </p>
+                        <p>
+                            We believe that happy, healthy animals produce the best meat, which is why we prioritize 
+                            animal welfare in all aspects of our operation.
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h4>Our Commitment</h4>
+                        <p>
+                            At Inyama Yethu, we are committed to:
+                        </p>
+                        <ul>
+                            <li>Providing the highest quality pork products</li>
+                            <li>Supporting local businesses and the township economy</li>
+                            <li>Practicing ethical and sustainable farming</li>
+                            <li>Creating employment opportunities in our community</li>
+                            <li>Maintaining transparent and fair business practices</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4>Our Team</h4>
+                        <p>
+                            Our dedicated team consists of experienced farmers, livestock specialists, and 
+                            business professionals who work together to ensure that we deliver on our promises. 
+                            From caring for our animals to processing orders and making deliveries, every member 
+                            of our team plays a vital role in our success.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mb-4">
+                <a asp-area="Customer" asp-controller="Home" asp-action="Contact" class="btn btn-primary">Contact Us</a>
+                <a asp-area="Customer" asp-controller="Products" asp-action="Index" class="btn btn-success">View Our Products</a>
+            </div>
+        </div>
+    </div>
+</div> 
