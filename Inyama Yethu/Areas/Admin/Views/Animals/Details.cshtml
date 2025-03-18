@@ -1,0 +1,286 @@
+@model Inyama_Yethu.Models.Animal
+
+@{
+    ViewData["Title"] = "Animal Details";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Animal Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Livestock</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Basic Information
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tag Number</dt>
+                        <dd class="col-sm-8">@Model.TagNumber</dd>
+
+                        <dt class="col-sm-4">Type</dt>
+                        <dd class="col-sm-8">@Model.Type</dd>
+
+                        <dt class="col-sm-4">Gender</dt>
+                        <dd class="col-sm-8">@Model.Gender</dd>
+
+                        <dt class="col-sm-4">Birth Date</dt>
+                        <dd class="col-sm-8">@Model.BirthDate.ToShortDateString()</dd>
+
+                        <dt class="col-sm-4">Age</dt>
+                        <dd class="col-sm-8">@((DateTime.Now - Model.BirthDate).Days / 365) years, @(((DateTime.Now - Model.BirthDate).Days % 365) / 30) months</dd>
+
+                        <dt class="col-sm-4">Weight</dt>
+                        <dd class="col-sm-8">@Model.Weight kg</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8"><span class="badge bg-@(Model.Status == AnimalStatus.Active ? "success" : Model.Status == AnimalStatus.Sold ? "warning" : "danger")">@Model.Status</span></dd>
+
+                        <dt class="col-sm-4">Mother</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Mother != null)
+                            {
+                                <a asp-action="Details" asp-route-id="@Model.MotherAnimalId">@Model.Mother.TagNumber</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not specified</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Father</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Father != null)
+                            {
+                                <a asp-action="Details" asp-route-id="@Model.FatherAnimalId">@Model.Father.TagNumber</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not specified</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="mt-3">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#health" role="tab">
+                                <i class="fas fa-heartbeat me-1"></i> Health Records
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#weight" role="tab">
+                                <i class="fas fa-weight me-1"></i> Weight History
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#feeding" role="tab">
+                                <i class="fas fa-utensils me-1"></i> Feeding Records
+                            </a>
+                        </li>
+                        @if (Model.Gender == Gender.Female)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#offspring" role="tab">
+                                    <i class="fas fa-baby me-1"></i> Offspring
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="health" role="tabpanel">
+                            @if (Model.HealthRecords != null && Model.HealthRecords.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Description</th>
+                                                <th>Treatment</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var record in Model.HealthRecords.OrderByDescending(h => h.RecordDate))
+                                            {
+                                                <tr>
+                                                    <td>@record.RecordDate.ToShortDateString()</td>
+                                                    <td>@record.RecordType</td>
+                                                    <td>@record.Description</td>
+                                                    <td>@record.Treatment</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No health records found.</p>
+                            }
+                        </div>
+
+                        <div class="tab-pane fade" id="weight" role="tabpanel">
+                            @if (Model.WeightRecords != null && Model.WeightRecords.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Weight (kg)</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var record in Model.WeightRecords.OrderByDescending(w => w.RecordDate))
+                                            {
+                                                <tr>
+                                                    <td>@record.RecordDate.ToShortDateString()</td>
+                                                    <td>@record.Weight</td>
+                                                    <td>@record.Notes</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No weight records found.</p>
+                            }
+                        </div>
+
+                        <div class="tab-pane fade" id="feeding" role="tabpanel">
+                            @if (Model.Feedings != null && Model.Feedings.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Feed Type</th>
+                                                <th>Quantity</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var record in Model.Feedings.OrderByDescending(f => f.FeedDate))
+                                            {
+                                                <tr>
+                                                    <td>@record.FeedDate.ToShortDateString()</td>
+                                                    <td>@record.FeedType</td>
+                                                    <td>@record.Quantity</td>
+                                                    <td>@record.Notes</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No feeding records found.</p>
+                            }
+                        </div>
+
+                        @if (Model.Gender == Gender.Female)
+                        {
+                            <div class="tab-pane fade" id="offspring" role="tabpanel">
+                                @if (Model.Offspring != null && Model.Offspring.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tag Number</th>
+                                                    <th>Birth Date</th>
+                                                    <th>Gender</th>
+                                                    <th>Status</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var offspring in Model.Offspring.OrderByDescending(o => o.BirthDate))
+                                                {
+                                                    <tr>
+                                                        <td>@offspring.TagNumber</td>
+                                                        <td>@offspring.BirthDate.ToShortDateString()</td>
+                                                        <td>@offspring.Gender</td>
+                                                        <td>
+                                                            <span class="badge bg-@(offspring.Status == AnimalStatus.Active ? "success" : offspring.Status == AnimalStatus.Sold ? "warning" : "danger")">
+                                                                @offspring.Status
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <a asp-action="Details" asp-route-id="@offspring.Id" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">No offspring records found.</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Notes))
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-sticky-note me-1"></i>
+                Notes
+            </div>
+            <div class="card-body">
+                <p class="mb-0">@Model.Notes</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('table').DataTable({
+                "order": [[0, "desc"]],
+                "pageLength": 5,
+                "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
+            });
+        });
+    </script>
+} 

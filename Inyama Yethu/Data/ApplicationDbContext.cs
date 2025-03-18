@@ -36,6 +36,27 @@ namespace Inyama_Yethu.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure decimal properties
+            modelBuilder.Entity<AbattoirShipment>()
+                .Property(a => a.ActualPayment)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<AbattoirShipment>()
+                .Property(a => a.EstimatedValue)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<AbattoirShipment>()
+                .Property(a => a.TransportationCost)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Feeding>()
+                .Property(f => f.CostPerKg)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<HealthRecord>()
+                .Property(h => h.Cost)
+                .HasColumnType("decimal(18,2)");
+
             // Configure relationships
             
             // Configure Animal self-referencing relationships (parent-child)

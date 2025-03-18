@@ -15,25 +15,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlServerOptionsAction: sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null);
+    }));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>() // Add role support
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddControllersWithViews(options => 
-{
-    // Register area conventions
-    options.Conventions.Add(new AdminAreaRegistration());
-    options.Conventions.Add(new EmployeeAreaRegistration());
-    options.Conventions.Add(new CustomerAreaRegistration());
-});
-
-// Add the TaskSchedulerService as a hosted service
-builder.Services.AddHostedService<TaskSchedulerService>();
-
-// Configure identity options
+// Configure Identity options
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Password settings
@@ -54,22 +49,28 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
-// Configure time zone for South Africa (UTC+2)
-try
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    var southAfricaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time");
-    builder.Services.AddSingleton(southAfricaTimeZone);
-}
-catch (TimeZoneNotFoundException)
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
+
+builder.Services.AddControllersWithViews(options => 
 {
-    // Fallback to a manually created time zone if the system one is not found
-    var southAfricaTimeZone = TimeZoneInfo.CreateCustomTimeZone(
-        "South Africa Standard Time", 
-        new TimeSpan(2, 0, 0), 
-        "South Africa Standard Time", 
-        "South Africa Standard Time");
-    builder.Services.AddSingleton(southAfricaTimeZone);
-}
+    // Register area conventions
+    options.Conventions.Add(new AdminAreaRegistration());
+    options.Conventions.Add(new EmployeeAreaRegistration());
+    options.Conventions.Add(new CustomerAreaRegistration());
+});
+
+builder.Services.AddRazorPages();
+
+// Register TimeZoneInfo for South Africa
+builder.Services.AddSingleton(TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time"));
+
+// Add the TaskSchedulerService as a hosted service
+builder.Services.AddHostedService<TaskSchedulerService>();
 
 var app = builder.Build();
 
@@ -93,15 +94,24 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map Identity endpoints
+app.MapRazorPages();
+
+// Add a specific route for the Admin area
+app.MapControllerRoute(
+    name: "admin",
+    pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}",
+    defaults: new { area = "Admin" });
+
+// Map area routes
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
+// Map default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapRazorPages();
 
 // Seed roles and admin user
 using (var scope = app.Services.CreateScope())
@@ -111,6 +121,16 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.EnsureCreated();
+        
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            logger.LogInformation("Applying pending migrations...");
+            context.Database.Migrate();
+            logger.LogInformation("Migrations applied successfully.");
+        }
+
         // Create roles
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var roles = new[] { "Administrator", "Employee", "Customer" };
@@ -160,7 +180,7 @@ using (var scope = app.Services.CreateScope())
         // Create default employee users for the two farm workers
         var defaultEmployees = new[]
         {
-            new { Email = "john.doe@inyamayethu.co.za", Name = "John Doe" },
+            new { Email = "", Name = "John Doe" },
             new { Email = "jane.smith@inyamayethu.co.za", Name = "Jane Smith" }
         };
 

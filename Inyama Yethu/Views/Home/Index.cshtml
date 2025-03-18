@@ -1,8 +1,110 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inyama Yethu - Piggery Management System";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="landing-page">
+    <!-- Hero Section -->
+    <div class="hero-section text-center py-5 mb-4">
+        <h1 class="display-4 mb-3">Inyama Yethu</h1>
+        <p class="lead mb-4">Piggery Management System</p>
+        <p class="mb-5">Comprehensive farm management platform for operational excellence</p>
+        <div class="hero-buttons">
+            <a href="/Identity/Account/Login" class="btn btn-primary btn-lg px-5 py-3">
+                <i class="fas fa-lock mr-2"></i> Access Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container mb-5">
+        <h2 class="text-center mb-4">Farm Management Tools</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-piggy-bank fa-3x mb-3"></i>
+                        <h3 class="card-title">Piglet Processing</h3>
+                        <p class="card-text">Track daily piglet processing tasks including tail docking, iron injections, and ear notching.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-venus-mars fa-3x mb-3"></i>
+                        <h3 class="card-title">Breeding Records</h3>
+                        <p class="card-text">Manage mating schedules, track pregnancies, and monitor upcoming farrowings.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-baby fa-3x mb-3"></i>
+                        <h3 class="card-title">Farrowing Management</h3>
+                        <p class="card-text">Record farrowing data, track litter information, and schedule piglet care tasks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tasks fa-3x mb-3"></i>
+                        <h3 class="card-title">Daily Tasks</h3>
+                        <p class="card-text">View today's tasks, mark completions, and update task status for farm operations.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                        <h3 class="card-title">Farm Reports</h3>
+                        <p class="card-text">Access farm productivity metrics, inventory reports, and operational statistics.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-3x mb-3"></i>
+                        <h3 class="card-title">Attendance</h3>
+                        <p class="card-text">Check in and out, view your work schedule, and manage time records.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Access -->
+    <div class="cta-section text-center py-5 mb-5">
+        <div class="container">
+            <h2 class="mb-3">Intelligent Farm Management</h2>
+            <p class="mb-4">Your personalized dashboard adapts to your role automatically</p>
+            <div class="login-card mx-auto" style="max-width: 500px;">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                            <h3>Secure Access Portal</h3>
+                            <p class="text-muted">Our intelligent system adapts to your credentials automatically</p>
+                        </div>
+                        <a href="/Identity/Account/Login" class="btn btn-primary btn-lg btn-block">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Login to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add any JavaScript needed for the landing page
+        });
+    </script>
+}

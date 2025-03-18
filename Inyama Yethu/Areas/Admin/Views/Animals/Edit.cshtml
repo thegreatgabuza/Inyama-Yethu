@@ -1,0 +1,121 @@
+@model Inyama_Yethu.Models.Animal
+
+@{
+    ViewData["Title"] = "Edit Animal";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Edit Animal</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Livestock</a></li>
+        <li class="breadcrumb-item active">Edit</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit me-1"></i>
+            Edit Animal Details
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="TagNumber" class="control-label"></label>
+                            <input asp-for="TagNumber" class="form-control" />
+                            <span asp-validation-for="TagNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Type" class="control-label"></label>
+                            <select asp-for="Type" asp-items="Html.GetEnumSelectList<AnimalType>()" class="form-select">
+                                <option value="">Select Type</option>
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Gender" class="control-label"></label>
+                            <select asp-for="Gender" asp-items="Html.GetEnumSelectList<Gender>()" class="form-select">
+                                <option value="">Select Gender</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="BirthDate" class="control-label"></label>
+                            <input asp-for="BirthDate" class="form-control" type="date" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Weight" class="control-label"></label>
+                            <div class="input-group">
+                                <input asp-for="Weight" class="form-control" type="number" step="0.1" />
+                                <span class="input-group-text">kg</span>
+                            </div>
+                            <span asp-validation-for="Weight" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Status" class="control-label"></label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AnimalStatus>()" class="form-select">
+                                <option value="">Select Status</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="MotherAnimalId" class="control-label">Mother</label>
+                            <select asp-for="MotherAnimalId" asp-items="ViewBag.MotherAnimalId" class="form-select">
+                                <option value="">Select Mother</option>
+                            </select>
+                            <span asp-validation-for="MotherAnimalId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="FatherAnimalId" class="control-label">Father</label>
+                            <select asp-for="FatherAnimalId" asp-items="ViewBag.FatherAnimalId" class="form-select">
+                                <option value="">Select Father</option>
+                            </select>
+                            <span asp-validation-for="FatherAnimalId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Notes" class="control-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Add client-side validation for birth date
+        $(document).ready(function () {
+            $("#BirthDate").attr("max", new Date().toISOString().split("T")[0]);
+        });
+    </script>
+} 

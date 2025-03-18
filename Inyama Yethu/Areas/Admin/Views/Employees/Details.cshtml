@@ -1,0 +1,224 @@
+@model Inyama_Yethu.Models.Employee
+
+@{
+    ViewData["Title"] = "Employee Details";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Employee Details</h1>
+        <div>
+            <a asp-area="Admin" asp-controller="Employees" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm mr-2">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+            <a asp-area="Admin" asp-controller="Employees" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left mr-1"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- Employee Profile -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Profile Information</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                            aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="Employees" asp-action="Edit" asp-route-id="@Model.Id">
+                                <i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Edit Profile
+                            </a>
+                            @if (Model.IsActive)
+                            {
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Employees" asp-action="Delete" asp-route-id="@Model.Id">
+                                    <i class="fas fa-user-slash fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Deactivate Employee
+                                </a>
+                            }
+                            else
+                            {
+                                <form asp-area="Admin" asp-controller="Employees" asp-action="Activate" asp-route-id="@Model.Id" method="post">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-user-check fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Activate Employee
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img class="img-profile rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;"
+                             src="https://source.unsplash.com/8OVDzMTQTqo/150x150" alt="Employee profile">
+                        <h4 class="font-weight-bold">@Model.Name</h4>
+                        <p class="text-muted">@Model.Position</p>
+                        <div class="mt-2">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge badge-success badge-pill py-1 px-3">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary badge-pill py-1 px-3">Inactive</span>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="py-2 border-top">
+                        <strong class="text-dark">Employee ID:</strong>
+                        <p>@Model.Id</p>
+                    </div>
+                    
+                    <div class="py-2 border-top">
+                        <strong class="text-dark">Email:</strong>
+                        <p><a href="mailto:@Model.Email">@Model.Email</a></p>
+                    </div>
+                    
+                    <div class="py-2 border-top">
+                        <strong class="text-dark">Phone:</strong>
+                        <p>@(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</p>
+                    </div>
+                    
+                    <div class="py-2 border-top">
+                        <strong class="text-dark">Position:</strong>
+                        <p>@(string.IsNullOrEmpty(Model.Position) ? "Not assigned" : Model.Position)</p>
+                    </div>
+                    
+                    <div class="py-2 border-top">
+                        <strong class="text-dark">Hire Date:</strong>
+                        <p>@Model.HireDate.ToShortDateString() (@((DateTime.Now - Model.HireDate).Days) days ago)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <!-- Recent Attendance -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Attendance</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Attendances != null && Model.Attendances.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Check In</th>
+                                        <th>Check Out</th>
+                                        <th>Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendance in Model.Attendances.OrderByDescending(a => a.CheckInTime))
+                                    {
+                                        <tr>
+                                            <td>@attendance.CheckInTime.ToShortDateString()</td>
+                                            <td>@attendance.CheckInTime.ToShortTimeString()</td>
+                                            <td>
+                                                @if (attendance.CheckOutTime.HasValue)
+                                                {
+                                                    @attendance.CheckOutTime.Value.ToShortTimeString()
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-warning">Not checked out</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (attendance.CheckOutTime.HasValue)
+                                                {
+                                                    var duration = attendance.CheckOutTime.Value - attendance.CheckInTime;
+                                                    @($"{duration.Hours}h {duration.Minutes}m")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">In progress</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <i class="fas fa-calendar-times fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-muted">No attendance records found</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Assigned Tasks -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Current Tasks</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.TaskAssignments != null && Model.TaskAssignments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Due Date</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in Model.TaskAssignments.OrderBy(t => t.DueDate))
+                                    {
+                                        <tr>
+                                            <td>@task.Title</td>
+                                            <td>@task.DueDate.ToShortDateString()</td>
+                                            <td>
+                                                @{
+                                                    string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                        "badge-danger";
+                                                }
+                                                <span class="badge @priorityClass">@task.Priority</span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    string statusClass = task.Status == Inyama_Yethu.Models.FarmTaskStatus.Pending ? "badge-secondary" :
+                                                                      task.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress ? "badge-primary" :
+                                                                      task.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed ? "badge-success" :
+                                                                      "badge-danger";
+                                                }
+                                                <span class="badge @statusClass">@task.Status</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <i class="fas fa-tasks fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-muted">No current tasks assigned</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

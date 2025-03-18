@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Inyama_Yethu.Conventions;
+using System.Linq;
 
 namespace Inyama_Yethu.Areas.Admin
 {
@@ -7,8 +8,10 @@ namespace Inyama_Yethu.Areas.Admin
     {
         public void Apply(ControllerModel controller)
         {
-            if (controller.Attributes.Any(attr => attr.GetType().Name == "AdminAreaAttribute") ||
-                controller.ControllerName.StartsWith("Admin"))
+            // Check if the controller is in the Admin area namespace
+            if (controller.ControllerType.Namespace?.Contains(".Areas.Admin.Controllers") == true ||
+                controller.Attributes.Any(attr => attr.GetType().Name == "AreaAttribute" && 
+                                                 (attr as Microsoft.AspNetCore.Mvc.AreaAttribute)?.RouteValue == "Admin"))
             {
                 controller.RouteValues["area"] = "Admin";
             }

@@ -1,0 +1,105 @@
+@model Inyama_Yethu.Models.Animal
+
+@{
+    ViewData["Title"] = $"Pig Details - {Model.TagNumber}";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h1>Pig Details</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title">@Model.TagNumber - @Model.Type</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tag Number:</dt>
+                        <dd class="col-sm-8">@Model.TagNumber</dd>
+                        
+                        <dt class="col-sm-4">Type:</dt>
+                        <dd class="col-sm-8">@Model.Type</dd>
+                        
+                        <dt class="col-sm-4">Gender:</dt>
+                        <dd class="col-sm-8">@Model.Gender</dd>
+                        
+                        <dt class="col-sm-4">Birth Date:</dt>
+                        <dd class="col-sm-8">@Model.BirthDate.ToString("dd MMM yyyy")</dd>
+                        
+                        <dt class="col-sm-4">Age:</dt>
+                        <dd class="col-sm-8">@((DateTime.Now - Model.BirthDate).Days / 30) months</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @(Model.Status == Inyama_Yethu.Models.AnimalStatus.Active ? "bg-success" : 
+                                               Model.Status == Inyama_Yethu.Models.AnimalStatus.Mating ? "bg-info" :
+                                               Model.Status == Inyama_Yethu.Models.AnimalStatus.Pregnant ? "bg-warning" :
+                                               Model.Status == Inyama_Yethu.Models.AnimalStatus.Farrowing ? "bg-danger" :
+                                               Model.Status == Inyama_Yethu.Models.AnimalStatus.Sold ? "bg-secondary" :
+                                               "bg-dark")">
+                                @Model.Status
+                            </span>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Weight:</dt>
+                        <dd class="col-sm-8">@(Model.Weight.HasValue ? $"{Model.Weight:F1} kg" : "N/A")</dd>
+                        
+                        <dt class="col-sm-4">Mother:</dt>
+                        <dd class="col-sm-8">@(Model.Mother != null ? Model.Mother.TagNumber : "Unknown")</dd>
+                        
+                        <dt class="col-sm-4">Father:</dt>
+                        <dd class="col-sm-8">@(Model.Father != null ? Model.Father.TagNumber : "Unknown")</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-12">
+                    <dt>Notes:</dt>
+                    <dd>@(string.IsNullOrEmpty(Model.Notes) ? "No notes available" : Model.Notes)</dd>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Health & Events Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">No events recorded yet.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (Model.Type == Inyama_Yethu.Models.AnimalType.Boar || Model.Type == Inyama_Yethu.Models.AnimalType.Sow)
+                        {
+                            <button class="btn btn-outline-primary" disabled>Schedule Mating</button>
+                        }
+                        <button class="btn btn-outline-warning" disabled>Record Vaccination</button>
+                        <button class="btn btn-outline-info" disabled>Record Weight</button>
+                        <button class="btn btn-outline-danger" disabled>Record Health Issue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Back to Animals List</a>
+    </div>
+</div> 

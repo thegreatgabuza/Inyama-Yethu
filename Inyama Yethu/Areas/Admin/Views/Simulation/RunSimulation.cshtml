@@ -1,0 +1,148 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Run Simulation";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Run Simulation</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Simulation" asp-action="Index">Simulation</a></li>
+        <li class="breadcrumb-item active">Run Simulation</li>
+    </ol>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+    
+    <div class="row">
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-heart me-1"></i>
+                    Mating Simulation
+                </div>
+                <div class="card-body">
+                    <p>Simulates mating between a boar and a sow in the herd. This will create a mating record and update the sow's status.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunMatingSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Mating Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-search me-1"></i>
+                    Pregnancy Check Simulation
+                </div>
+                <div class="card-body">
+                    <p>Simulates checking if mated sows are pregnant. This will update the mating record and sow status based on the pregnancy result.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunPregnancyCheckSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Pregnancy Check Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-baby me-1"></i>
+                    Farrowing Simulation
+                </div>
+                <div class="card-body">
+                    <p>Simulates the birth of piglets from a pregnant sow. This will create new piglet records and update the mating record.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunFarrowingSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Farrowing Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-syringe me-1"></i>
+                    Piglet Processing
+                </div>
+                <div class="card-body">
+                    <p>Simulates processing of piglets including tail docking, iron injection, ear notching, castration (for males), vaccination, and tattooing.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunPigletProcessingSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Piglet Processing Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-utensils me-1"></i>
+                    Weaning Simulation
+                </div>
+                <div class="card-body">
+                    <p>Simulates weaning of piglets (28+ days old) from their mothers. This will update the piglets to weaners and record their weaning weights.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunWeaningSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Weaning Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-weight me-1"></i>
+                    Grower Progression
+                </div>
+                <div class="card-body">
+                    <p>Simulates the progression of weaners to growers (70+ days) and growers to finishers (140+ days), updating their weights and statuses.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunGrowerProgressionSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Grower Progression Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-truck me-1"></i>
+                    Abattoir Shipment
+                </div>
+                <div class="card-body">
+                    <p>Simulates shipping finishers or growers to the abattoir. This will create a shipment record and update the animals' status to sold.</p>
+                    <form asp-area="Admin" asp-controller="Simulation" asp-action="RunAbattoirShipmentSimulation" method="post">
+                        <button type="submit" class="btn btn-primary">Run Abattoir Shipment Simulation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-sync me-1"></i>
+                    Run All Simulations
+                </div>
+                <div class="card-body">
+                    <p>For demonstration purposes only: This will run all available simulations in sequence to populate your database with sample data representing a full production cycle.</p>
+                    <button type="button" class="btn btn-outline-primary" disabled>Coming Soon</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin - Inyama Yethu</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Inyama_Yethu.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -27,6 +30,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Animals" asp-action="Index">Livestock</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Simulation" asp-action="Index">Simulation</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Customers" asp-action="Index">Customers</a>
@@ -56,19 +62,31 @@
             <div class="col-md-3">
                 <div class="list-group mt-3">
                     <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="list-group-item list-group-item-action bg-inyama-blue text-white">
-                        Admin Dashboard
+                        <i class="fas fa-tachometer-alt mr-2"></i> Admin Dashboard
+                    </a>
+                    <a asp-area="Admin" asp-controller="Employees" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users mr-2"></i> Employee Management
+                    </a>
+                    <a asp-area="Admin" asp-controller="Employees" asp-action="Create" class="list-group-item list-group-item-action pl-5">
+                        <i class="fas fa-user-plus mr-2"></i> Add New Employee
                     </a>
                     <a asp-area="Admin" asp-controller="Tasks" asp-action="Pending" class="list-group-item list-group-item-action">
-                        Pending Tasks
+                        <i class="fas fa-tasks mr-2"></i> Pending Tasks
+                    </a>
+                    <a asp-area="Admin" asp-controller="Simulation" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fas fa-flask mr-2"></i> Pig Farm Simulation
+                    </a>
+                    <a asp-area="Admin" asp-controller="Simulation" asp-action="RunSimulation" class="list-group-item list-group-item-action pl-5">
+                        <i class="fas fa-play-circle mr-2"></i> Run Simulations
                     </a>
                     <a asp-area="Admin" asp-controller="Reports" asp-action="Attendance" class="list-group-item list-group-item-action">
-                        Attendance Reports
+                        <i class="fas fa-clock mr-2"></i> Attendance Reports
                     </a>
                     <a asp-area="Admin" asp-controller="Reports" asp-action="Livestock" class="list-group-item list-group-item-action">
-                        Livestock Reports
+                        <i class="fas fa-piggy-bank mr-2"></i> Livestock Reports
                     </a>
                     <a asp-area="Admin" asp-controller="Reports" asp-action="Sales" class="list-group-item list-group-item-action">
-                        Sales Reports
+                        <i class="fas fa-chart-line mr-2"></i> Sales Reports
                     </a>
                 </div>
             </div>
@@ -77,14 +95,14 @@
                     @if (TempData["SuccessMessage"] != null)
                     {
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            @TempData["SuccessMessage"]
+                            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     }
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @TempData["ErrorMessage"]
+                            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     }
@@ -101,6 +119,8 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
