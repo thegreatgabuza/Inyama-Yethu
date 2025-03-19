@@ -60,7 +60,7 @@ namespace Inyama_Yethu.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> Create([Bind("Name,Email,Phone,Position,HireDate,IsActive")] Employee employee)
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,PhoneNumber,JobTitle,HireDate,IsActive")] Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -92,7 +92,7 @@ namespace Inyama_Yethu.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Phone,Position,HireDate,IsActive")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,PhoneNumber,JobTitle,HireDate,IsActive")] Employee employee)
         {
             if (id != employee.Id)
             {

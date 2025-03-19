@@ -180,8 +180,8 @@ using (var scope = app.Services.CreateScope())
         // Create default employee users for the two farm workers
         var defaultEmployees = new[]
         {
-            new { Email = "", Name = "John Doe" },
-            new { Email = "jane.smith@inyamayethu.co.za", Name = "Jane Smith" }
+            new { Email = "", FirstName = "John", LastName = "Doe" },
+            new { Email = "jane.smith@inyamayethu.co.za", FirstName = "Jane", LastName = "Smith" }
         };
 
         foreach (var emp in defaultEmployees)
@@ -208,11 +208,25 @@ using (var scope = app.Services.CreateScope())
                     // Assign employee role
                     await userManager.AddToRoleAsync(employeeUser, "Employee");
                     logger.LogInformation("Added user to Employee role");
+
+                    // Create the employee record
+                    var employee = new Models.Employee
+                    {
+                        FirstName = emp.FirstName,
+                        LastName = emp.LastName,
+                        Email = emp.Email,
+                        UserId = employeeUser.Id,
+                        IsActive = true,
+                        HireDate = DateTime.Now,
+                        JobTitle = "Farm Worker"
+                    };
+                    context.Employees.Add(employee);
+                    await context.SaveChangesAsync();
                 }
                 else
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    logger.LogError("Error creating employee user {Name}: {Errors}", emp.Name, errors);
+                    logger.LogError("Error creating employee user {Name}: {Errors}", $"{emp.FirstName} {emp.LastName}", errors);
                 }
             }
         }

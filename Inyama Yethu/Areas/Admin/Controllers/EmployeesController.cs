@@ -29,7 +29,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         {
             var employees = await _context.Employees
                 .OrderByDescending(e => e.IsActive)
-                .ThenBy(e => e.Name)
+                .ThenBy(e => e.FullName)
                 .ToListAsync();
 
             return View("~/Areas/Admin/Views/Employees/Index.cshtml", employees);
@@ -70,7 +70,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         [HttpPost]
         [Route("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Email,Phone,Position,HireDate,IsActive")] Inyama_Yethu.Models.Employee employee)
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,PhoneNumber,JobTitle,HireDate,IsActive")] Inyama_Yethu.Models.Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -104,7 +104,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         [HttpPost]
         [Route("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Phone,Position,HireDate,IsActive")] Inyama_Yethu.Models.Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,PhoneNumber,JobTitle,HireDate,IsActive")] Inyama_Yethu.Models.Employee employee)
         {
             if (id != employee.Id)
             {

@@ -1,0 +1,130 @@
+@model Inyama_Yethu.Models.HealthRecord
+
+@{
+    ViewData["Title"] = "Health Record Details";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Health Record Details</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h5>Animal Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Tag Number</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Animal.TagNumber)</dd>
+                            
+                            <dt class="col-sm-4">Animal Type</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Animal.Type)</dd>
+                        </dl>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5>Record Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.RecordDate)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.RecordDate)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.RecordType)</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-info">@Html.DisplayFor(model => model.RecordType)</span>
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Treatment)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Treatment)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.AdministeredBy)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.AdministeredBy)</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h5>Follow-up Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Cost)</dt>
+                            <dd class="col-sm-8">R @Html.DisplayFor(model => model.Cost)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FollowUpDate)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.FollowUpDate.HasValue)
+                                {
+                                    @Html.DisplayFor(model => model.FollowUpDate)
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not scheduled</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FollowUpCompleted)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.FollowUpCompleted)
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else if (Model.FollowUpDate.HasValue && Model.FollowUpDate.Value < DateTime.Today)
+                                {
+                                    <span class="badge bg-danger">Overdue</span>
+                                }
+                                else if (Model.FollowUpDate.HasValue)
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">N/A</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <h5>Additional Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Description)</dt>
+                            <dd class="col-sm-10">
+                                @if (!string.IsNullOrEmpty(Model.Description))
+                                {
+                                    @Html.DisplayFor(model => model.Description)
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No description provided</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Notes)</dt>
+                            <dd class="col-sm-10">
+                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                {
+                                    @Html.DisplayFor(model => model.Notes)
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No notes provided</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div> 

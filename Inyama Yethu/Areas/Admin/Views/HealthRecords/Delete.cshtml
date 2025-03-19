@@ -1,0 +1,93 @@
+@model Inyama_Yethu.Models.HealthRecord
+
+@{
+    ViewData["Title"] = "Delete Health Record";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h2 class="card-title">
+                <i class="fas fa-exclamation-triangle"></i> Delete Health Record
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <h4>Are you sure you want to delete this health record?</h4>
+                <p>This action cannot be undone.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h5>Animal Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Tag Number</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Animal.TagNumber)</dd>
+                        </dl>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5>Record Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.RecordDate)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.RecordDate)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.RecordType)</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-info">@Html.DisplayFor(model => model.RecordType)</span>
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Treatment)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Treatment)</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h5>Follow-up Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Cost)</dt>
+                            <dd class="col-sm-8">R @Html.DisplayFor(model => model.Cost)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FollowUpDate)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.FollowUpDate.HasValue)
+                                {
+                                    @Html.DisplayFor(model => model.FollowUpDate)
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not scheduled</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FollowUpCompleted)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.FollowUpCompleted)
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Delete" class="mt-4">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </form>
+        </div>
+    </div>
+</div> 

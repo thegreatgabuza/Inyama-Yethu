@@ -105,10 +105,10 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Name</th>
+                            <th>Full Name</th>
                             <th>Email</th>
-                            <th>Position</th>
-                            <th>Phone</th>
+                            <th>Job Title</th>
+                            <th>Phone Number</th>
                             <th>Hire Date</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -119,10 +119,10 @@
                         {
                             <tr class="@(employee.IsActive ? "" : "table-secondary")">
                                 <td>@employee.Id</td>
-                                <td>@employee.Name</td>
+                                <td>@employee.FullName</td>
                                 <td>@employee.Email</td>
-                                <td>@employee.Position</td>
-                                <td>@employee.Phone</td>
+                                <td>@employee.JobTitle</td>
+                                <td>@employee.PhoneNumber</td>
                                 <td>@employee.HireDate.ToShortDateString()</td>
                                 <td>
                                     @if (employee.IsActive)

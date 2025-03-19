@@ -58,8 +58,8 @@
                     <div class="text-center mb-4">
                         <img class="img-profile rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;"
                              src="https://source.unsplash.com/8OVDzMTQTqo/150x150" alt="Employee profile">
-                        <h4 class="font-weight-bold">@Model.Name</h4>
-                        <p class="text-muted">@Model.Position</p>
+                        <h4 class="font-weight-bold">@Model.FullName</h4>
+                        <p class="text-muted">@Model.JobTitle</p>
                         <div class="mt-2">
                             @if (Model.IsActive)
                             {
@@ -84,12 +84,12 @@
                     
                     <div class="py-2 border-top">
                         <strong class="text-dark">Phone:</strong>
-                        <p>@(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</p>
+                        <p>@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)</p>
                     </div>
                     
                     <div class="py-2 border-top">
                         <strong class="text-dark">Position:</strong>
-                        <p>@(string.IsNullOrEmpty(Model.Position) ? "Not assigned" : Model.Position)</p>
+                        <p>@(string.IsNullOrEmpty(Model.JobTitle) ? "Not assigned" : Model.JobTitle)</p>
                     </div>
                     
                     <div class="py-2 border-top">

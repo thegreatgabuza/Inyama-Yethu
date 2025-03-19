@@ -1,0 +1,118 @@
+@model IEnumerable<Inyama_Yethu.Areas.Admin.Controllers.VaccinationScheduleViewModel>
+
+@{
+    ViewData["Title"] = "Vaccination Schedule";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Vaccination Schedule</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scheduleVaccinationsModal">
+            <i class="fas fa-syringe"></i> Schedule Vaccinations
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="vaccinationScheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Tag Number</th>
+                            <th>Animal Type</th>
+                            <th>Last Vaccination</th>
+                            <th>Next Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsOverdue ? "table-danger" : "")">
+                                <td>@item.Animal.TagNumber</td>
+                                <td>@item.Animal.Type</td>
+                                <td>
+                                    @if (item.LastVaccinationDate.HasValue)
+                                    {
+                                        @item.LastVaccinationDate.Value.ToShortDateString()
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Never</span>
+                                    }
+                                </td>
+                                <td>@item.NextVaccinationDue.ToShortDateString()</td>
+                                <td>
+                                    @if (item.IsOverdue)
+                                    {
+                                        <span class="badge bg-danger">Overdue</span>
+                                    }
+                                    else
+                                    {
+                                        var daysUntilDue = (item.NextVaccinationDue - DateTime.Today).Days;
+                                        if (daysUntilDue <= 7)
+                                        {
+                                            <span class="badge bg-warning">Due Soon</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">On Schedule</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Create" asp-route-animalId="@item.Animal.Id" asp-route-recordType="Vaccination" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus"></i> Record Vaccination
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Vaccinations Modal -->
+<div class="modal fade" id="scheduleVaccinationsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="ScheduleVaccinations" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Vaccinations</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="vaccinationDate">Vaccination Date</label>
+                        <input type="date" class="form-control" id="vaccinationDate" name="vaccinationDate" 
+                               value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <p class="mt-3">
+                        This will schedule vaccinations for all animals that are due or overdue.
+                        The system will automatically set follow-up dates for the next month.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#vaccinationScheduleTable').DataTable({
+                "order": [[3, "asc"]], // Sort by Next Due Date by default
+                "pageLength": 25,
+                "responsive": true
+            });
+        });
+    </script>
+} 

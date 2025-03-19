@@ -24,6 +24,7 @@ namespace Inyama_Yethu.Data
         public DbSet<HealthRecord> HealthRecords { get; set; }
         public DbSet<WeightRecord> WeightRecords { get; set; }
         public DbSet<AbattoirShipment> AbattoirShipments { get; set; }
+        public DbSet<Birth> Births { get; set; }
 
         // Customer Management
         public DbSet<Customer> Customers { get; set; }
@@ -85,6 +86,13 @@ namespace Inyama_Yethu.Data
                 .HasOne(m => m.Father)
                 .WithMany(a => a.MatingsAsFather)
                 .HasForeignKey(m => m.FatherAnimalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Birth entity
+            modelBuilder.Entity<Birth>()
+                .HasOne(b => b.Animal)
+                .WithMany(a => a.Births)
+                .HasForeignKey(b => b.AnimalId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Seed initial data

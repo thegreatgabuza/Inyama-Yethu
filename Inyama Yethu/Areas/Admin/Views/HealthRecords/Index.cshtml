@@ -1,0 +1,151 @@
+@model IEnumerable<Inyama_Yethu.Models.HealthRecord>
+
+@{
+    ViewData["Title"] = "Health Records";
+    var animalsNeedingVaccination = ViewBag.AnimalsNeedingVaccination as List<Inyama_Yethu.Models.Animal>;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Health Records</h2>
+        <div>
+            <a asp-action="VaccinationSchedule" class="btn btn-info me-2">
+                <i class="fas fa-calendar-alt"></i> Vaccination Schedule
+            </a>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Record
+            </a>
+        </div>
+    </div>
+
+    @if (animalsNeedingVaccination != null && animalsNeedingVaccination.Any())
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">
+                <i class="fas fa-exclamation-triangle"></i> Vaccination Alert
+            </h4>
+            <p>The following animals need vaccination:</p>
+            <ul>
+                @foreach (var animal in animalsNeedingVaccination)
+                {
+                    <li>@animal.TagNumber (@animal.Type)</li>
+                }
+            </ul>
+            <hr>
+            <p class="mb-0">
+                <a asp-action="VaccinationSchedule" class="alert-link">View Vaccination Schedule</a>
+                to manage vaccinations.
+            </p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="healthRecordsTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Animal.TagNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.RecordDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.RecordType)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Treatment)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.AdministeredBy)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Cost)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.FollowUpDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.FollowUpCompleted)
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Animal.TagNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.RecordDate)
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@Html.DisplayFor(modelItem => item.RecordType)</span>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Treatment)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.AdministeredBy)
+                                </td>
+                                <td>
+                                    R @Html.DisplayFor(modelItem => item.Cost)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FollowUpDate)
+                                </td>
+                                <td>
+                                    @if (item.FollowUpCompleted)
+                                    {
+                                        <span class="badge bg-success">Completed</span>
+                                    }
+                                    else if (item.FollowUpDate.HasValue && item.FollowUpDate.Value < DateTime.Today)
+                                    {
+                                        <span class="badge bg-danger">Overdue</span>
+                                    }
+                                    else if (item.FollowUpDate.HasValue)
+                                    {
+                                        <span class="badge bg-warning">Pending</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#healthRecordsTable').DataTable({
+                "order": [[1, "desc"]], // Sort by RecordDate by default
+                "pageLength": 25,
+                "responsive": true
+            });
+        });
+    </script>
+} 

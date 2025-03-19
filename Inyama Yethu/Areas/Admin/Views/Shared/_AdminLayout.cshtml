@@ -3,125 +3,243 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Admin - Inyama Yethu</title>
+    <title>@ViewData["Title"] - Admin Dashboard</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Inyama_Yethu.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3" style="background-color: var(--inyama-dark-blue);">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index" style="color: var(--inyama-white); font-weight: bold;">Inyama Yethu Admin</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+<body class="admin-body">
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Inyama Yethu</h3>
+                <button id="sidebarCollapse" class="btn d-md-none">
+                    <i class="fas fa-bars"></i>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Employees" asp-action="Index">Employees</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Animals" asp-action="Index">Livestock</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Simulation" asp-action="Index">Simulation</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Customers" asp-action="Index">Customers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Admin" asp-controller="Reports" asp-action="Index">Reports</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" style="color: var(--inyama-white);" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Settings
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Products" asp-action="Index">Products</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Tasks" asp-action="Index">Task Management</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Settings" asp-action="Index">System Settings</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
             </div>
+            <ul class="list-unstyled components">
+                <li class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="Admin" asp-controller="Animals" asp-action="Index">
+                        <i class="fas fa-pig"></i>
+                        <span>Animals</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="Admin" asp-controller="HealthRecords" asp-action="Index">
+                        <i class="fas fa-heartbeat"></i>
+                        <span>Health Records</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="Admin" asp-controller="Employees" asp-action="Index">
+                        <i class="fas fa-users"></i>
+                        <span>Employees</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="Admin" asp-controller="Tasks" asp-action="Index">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tasks</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="Admin" asp-controller="Reports" asp-action="Index">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
         </nav>
-    </header>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="list-group mt-3">
-                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="list-group-item list-group-item-action bg-inyama-blue text-white">
-                        <i class="fas fa-tachometer-alt mr-2"></i> Admin Dashboard
-                    </a>
-                    <a asp-area="Admin" asp-controller="Employees" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fas fa-users mr-2"></i> Employee Management
-                    </a>
-                    <a asp-area="Admin" asp-controller="Employees" asp-action="Create" class="list-group-item list-group-item-action pl-5">
-                        <i class="fas fa-user-plus mr-2"></i> Add New Employee
-                    </a>
-                    <a asp-area="Admin" asp-controller="Tasks" asp-action="Pending" class="list-group-item list-group-item-action">
-                        <i class="fas fa-tasks mr-2"></i> Pending Tasks
-                    </a>
-                    <a asp-area="Admin" asp-controller="Simulation" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fas fa-flask mr-2"></i> Pig Farm Simulation
-                    </a>
-                    <a asp-area="Admin" asp-controller="Simulation" asp-action="RunSimulation" class="list-group-item list-group-item-action pl-5">
-                        <i class="fas fa-play-circle mr-2"></i> Run Simulations
-                    </a>
-                    <a asp-area="Admin" asp-controller="Reports" asp-action="Attendance" class="list-group-item list-group-item-action">
-                        <i class="fas fa-clock mr-2"></i> Attendance Reports
-                    </a>
-                    <a asp-area="Admin" asp-controller="Reports" asp-action="Livestock" class="list-group-item list-group-item-action">
-                        <i class="fas fa-piggy-bank mr-2"></i> Livestock Reports
-                    </a>
-                    <a asp-area="Admin" asp-controller="Reports" asp-action="Sales" class="list-group-item list-group-item-action">
-                        <i class="fas fa-chart-line mr-2"></i> Sales Reports
-                    </a>
+
+        <!-- Page Content -->
+        <div id="content" class="content">
+            <!-- Top Navigation -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+                <div class="container-fluid">
+                    <button type="button" id="mobileSidebarCollapse" class="btn d-md-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <div class="d-flex align-items-center ms-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle text-dark" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle fa-lg"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#">Profile</a></li>
+                                <li><a class="dropdown-item" href="#">Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-9">
-                <main role="main" class="pb-3">
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-                    @if (TempData["ErrorMessage"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-                    @RenderBody()
-                </main>
-            </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="p-4">
+                @RenderBody()
+            </main>
         </div>
     </div>
 
-    <footer class="border-top footer">
-        <div class="container">
-            <span style="color: var(--inyama-orange);">&copy; 2025 - Inyama Yethu Admin</span>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#sidebarCollapse, #mobileSidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+
+            // Handle responsive behavior
+            function handleResize() {
+                if (window.innerWidth < 768) {
+                    $('#sidebar').addClass('active');
+                    $('#content').addClass('active');
+                } else {
+                    $('#sidebar').removeClass('active');
+                    $('#content').removeClass('active');
+                }
+            }
+
+            // Initial check and listen for window resize
+            handleResize();
+            $(window).resize(handleResize);
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-</html> 
+</html>
+
+<style>
+    .admin-body {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        min-width: 250px;
+        max-width: 250px;
+        min-height: 100vh;
+        background: #2c3e50;
+        color: #fff;
+        transition: all 0.3s;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .sidebar.active {
+        margin-left: -250px;
+    }
+
+    .sidebar .sidebar-header {
+        padding: 20px;
+        background: #1a252f;
+    }
+
+    .sidebar ul.components {
+        padding: 20px 0;
+    }
+
+    .sidebar ul li a {
+        padding: 10px 20px;
+        font-size: 1.1em;
+        display: block;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .sidebar ul li a:hover {
+        background: #34495e;
+    }
+
+    .sidebar ul li.active > a {
+        background: #34495e;
+    }
+
+    .sidebar ul li a i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Content Styles */
+    .content {
+        width: calc(100% - 250px);
+        min-height: 100vh;
+        transition: all 0.3s;
+        position: relative;
+        margin-left: 250px;
+    }
+
+    .content.active {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    /* Responsive Styles */
+    @@media (max-width: 768px) {
+        .sidebar {
+            margin-left: -250px;
+        }
+
+        .sidebar.active {
+            margin-left: 0;
+        }
+
+        .content {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .content.active {
+            width: calc(100% - 250px);
+            margin-left: 250px;
+        }
+    }
+
+    /* Card Styles */
+    .card {
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Navigation Styles */
+    .navbar {
+        padding: 15px;
+        background: white;
+        border: none;
+        border-radius: 0;
+        margin-bottom: 20px;
+    }
+
+    .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+</style> 

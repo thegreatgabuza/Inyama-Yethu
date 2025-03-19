@@ -1,0 +1,114 @@
+@model Inyama_Yethu.Models.HealthRecord
+
+@{
+    ViewData["Title"] = "Edit Health Record";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Edit Health Record</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="AnimalId" class="control-label">Animal</label>
+                            <select asp-for="AnimalId" class="form-select" asp-items="ViewBag.Animals">
+                                <option value="">-- Select Animal --</option>
+                            </select>
+                            <span asp-validation-for="AnimalId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="RecordDate" class="control-label"></label>
+                            <input asp-for="RecordDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="RecordDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="RecordType" class="control-label"></label>
+                            <select asp-for="RecordType" class="form-select" asp-items="Html.GetEnumSelectList<Inyama_Yethu.Models.HealthRecordType>()">
+                                <option value="">-- Select Type --</option>
+                            </select>
+                            <span asp-validation-for="RecordType" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Treatment" class="control-label"></label>
+                            <input asp-for="Treatment" class="form-control" />
+                            <span asp-validation-for="Treatment" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="AdministeredBy" class="control-label"></label>
+                            <input asp-for="AdministeredBy" class="form-control" />
+                            <span asp-validation-for="AdministeredBy" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Cost" class="control-label"></label>
+                            <input asp-for="Cost" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="FollowUpDate" class="control-label"></label>
+                            <input asp-for="FollowUpDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="FollowUpDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                <input asp-for="FollowUpCompleted" class="form-check-input" />
+                                <label asp-for="FollowUpCompleted" class="form-check-label"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Notes" class="control-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize select2 for better dropdown experience
+            $('select').select2({
+                theme: 'bootstrap4'
+            });
+        });
+    </script>
+} 

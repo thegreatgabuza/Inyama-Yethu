@@ -60,6 +60,13 @@ namespace Inyama_Yethu.Models
         public int? MotherAnimalId { get; set; }
         public int? FatherAnimalId { get; set; }
         
+        // Tracking timestamps
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        
+        [Required]
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        
         // Navigation properties
         public virtual ICollection<HealthRecord> HealthRecords { get; set; }
         public virtual ICollection<Mating> MatingsAsMother { get; set; }
@@ -67,6 +74,7 @@ namespace Inyama_Yethu.Models
         public virtual ICollection<Feeding> Feedings { get; set; }
         public virtual ICollection<TaskAssignment> Tasks { get; set; }
         public virtual ICollection<WeightRecord> WeightRecords { get; set; }
+        public virtual ICollection<Birth> Births { get; set; }
         
         // Navigate to parent animals
         public virtual Animal Mother { get; set; }

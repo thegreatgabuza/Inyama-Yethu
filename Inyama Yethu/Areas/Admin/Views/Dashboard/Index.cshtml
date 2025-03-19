@@ -4,246 +4,432 @@
 }
 
 <div class="container-fluid">
-    <h1 class="mt-4">Admin Dashboard</h1>
-    <p class="lead mb-4">Welcome to Inyama Yethu Farm Management System</p>
-    
-    <div class="row">
-        <!-- Livestock Summary -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+    <!-- Stats Cards Row -->
+    <div class="row g-4 mb-4">
+        <!-- Total Animals Card -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Livestock Summary</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Animals</p>
+                            <h3 class="mb-0">
                                 @{
-                                    var livestockStats = ViewData["LivestockStats"] as List<dynamic>;
-                                    if (livestockStats != null && livestockStats.Any())
+                                    var totalAnimals = ViewData["TotalAnimals"] as int? ?? 0;
+                                    @totalAnimals
+                                }
+                            </h3>
+                        </div>
+                        <span class="badge bg-@(((int)ViewData["AnimalGrowth"]) > 0 ? "success" : "danger")-subtle text-@(((int)ViewData["AnimalGrowth"]) > 0 ? "success" : "danger")">
+                            <i class="fas fa-arrow-@(((int)ViewData["AnimalGrowth"]) > 0 ? "up" : "down")"></i> @Math.Abs((int)ViewData["AnimalGrowth"])%
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Healthy Animals -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <p class="text-muted mb-1 small">Healthy Animals</p>
+                            <h3 class="mb-0">
+                                @{
+                                    var healthyAnimals = ViewData["HealthyAnimals"] as int? ?? 0;
+                                    @healthyAnimals
+                                }
+                            </h3>
+                        </div>
+                        <span class="badge bg-success-subtle text-success">
+                            @ViewData["HealthyPercentage"]%
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-success" style="width: @ViewData["HealthyPercentage"]%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requiring Attention -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <p class="text-muted mb-1 small">Requiring Attention</p>
+                            <h3 class="mb-0">
+                                @{
+                                    var needingAttention = ViewData["AnimalsNeedingAttention"] as int? ?? 0;
+                                    @needingAttention
+                                }
+                            </h3>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-warning" style="width: @(totalAnimals > 0 ? (needingAttention * 100 / totalAnimals) : 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vaccination Status -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <p class="text-muted mb-1 small">Vaccination Status</p>
+                            <h3 class="mb-0">@ViewData["VaccinationPercentage"]%</h3>
+                        </div>
+                        <span class="badge bg-info-subtle text-info">
+                            <i class="fas fa-syringe"></i>
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-info" style="width: @ViewData["VaccinationPercentage"]%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Growth Chart -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Animal Population Growth</h5>
+                        <div class="btn-group" role="group" aria-label="Time range">
+                            <button type="button" class="btn btn-sm btn-outline-secondary time-filter" data-range="week">Week</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary time-filter active" data-range="month">Month</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary time-filter" data-range="year">Year</button>
+                        </div>
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Status Chart -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Health Status Distribution</h5>
+                        <button class="btn btn-sm btn-outline-secondary refresh-chart">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Recent Activities</h5>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary filter-activities active" data-filter="all">All</button>
+                            <button class="btn btn-sm btn-outline-secondary filter-activities" data-filter="Health Record">Health</button>
+                            <button class="btn btn-sm btn-outline-secondary filter-activities" data-filter="Vaccination">Vaccination</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Type</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var recentActivities = ViewData["RecentActivities"] as List<dynamic>;
+                                    if (recentActivities != null && recentActivities.Any())
                                     {
-                                        foreach(var stat in livestockStats)
+                                        foreach (var activity in recentActivities)
                                         {
-                                            <div>@stat.Type: @stat.Count</div>
+                                            <tr data-type="@activity.Type">
+                                                <td>@activity.Title</td>
+                                                <td><span class="badge bg-secondary">@activity.Type</span></td>
+                                                <td>@activity.Timestamp.ToString("MMM dd, yyyy HH:mm")</td>
+                                                <td>
+                                                    @{
+                                                        var statusClass = activity.Status switch
+                                                        {
+                                                            "Completed" => "success",
+                                                            "Overdue" => "danger",
+                                                            "Pending" => "warning",
+                                                            _ => "secondary"
+                                                        };
+                                                    }
+                                                    <span class="badge bg-@statusClass">@activity.Status</span>
+                                                </td>
+                                            </tr>
                                         }
                                     }
                                     else
                                     {
-                                        <div>No livestock data available</div>
+                                        <tr>
+                                            <td colspan="4" class="text-center">No recent activities</td>
+                                        </tr>
                                     }
                                 }
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-pig fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Employee Status -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Employee Status</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @{
-                                    var employees = ViewData["Employees"] as List<dynamic>;
-                                    if (employees != null)
-                                    {
-                                        <div>Active: @employees.Count(e => e.Employee.IsActive)</div>
-                                        <div>Checked In: @employees.Count(e => e.CheckedIn)</div>
-                                    }
-                                    else
-                                    {
-                                        <div>No employee data available</div>
-                                    }
-                                }
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Tasks -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Tasks</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @{
-                                    var pendingTasks = ViewData["PendingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
-                                    if (pendingTasks != null)
-                                    {
-                                        <div>@pendingTasks.Count Tasks</div>
-                                    }
-                                    else
-                                    {
-                                        <div>0 Tasks</div>
-                                    }
-                                }
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Orders -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Recent Orders</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @{
-                                    var recentOrders = ViewData["RecentOrders"] as List<Inyama_Yethu.Models.Order>;
-                                    if (recentOrders != null)
-                                    {
-                                        <div>@recentOrders.Count Orders</div>
-                                    }
-                                    else
-                                    {
-                                        <div>0 Orders</div>
-                                    }
-                                }
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <!-- Pending Tasks Detail -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Pending Tasks</h6>
-                </div>
-                <div class="card-body">
-                    @{
-                        var tasks = ViewData["PendingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
-                        if (tasks != null && tasks.Any())
-                        {
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Employee</th>
-                                        <th>Due Date</th>
-                                        <th>Priority</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var task in tasks)
-                                    {
-                                        <tr>
-                                            <td>@task.Title</td>
-                                            <td>@(task.Employee?.Name ?? "Unassigned")</td>
-                                            <td>@task.DueDate.ToShortDateString()</td>
-                                            <td>@task.Priority</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+
+    <script>
+        // Initialize charts with empty data
+        let growthChart, healthChart;
+        const colors = {
+            primary: '#4e73df',
+            success: '#1cc88a',
+            warning: '#f6c23e',
+            danger: '#e74a3b',
+            info: '#36b9cc'
+        };
+
+        // Initial population data
+        const monthlyData = @Html.Raw(Json.Serialize(ViewData["MonthlyPopulation"]));
+        
+        // Setup Growth Chart
+        function setupGrowthChart(data) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            if (growthChart) {
+                growthChart.destroy();
+            }
+            
+            growthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.Month),
+                    datasets: [{
+                        label: 'Population',
+                        data: data.map(d => d.Count),
+                        borderColor: colors.primary,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(78, 115, 223, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
                         }
-                        else
-                        {
-                            <p>No pending tasks</p>
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     }
-                </div>
-            </div>
-        </div>
+                }
+            });
+        }
 
-        <!-- Upcoming Events -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Upcoming Events</h6>
-                </div>
-                <div class="card-body">
-                    <h5>Upcoming Matings</h5>
-                    @{
-                        var matings = ViewData["UpcomingMatings"] as List<Inyama_Yethu.Models.Mating>;
-                        if (matings != null && matings.Any())
-                        {
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Sow</th>
-                                        <th>Boar</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var mating in matings)
-                                    {
-                                        <tr>
-                                            <td>@mating.Mother.TagNumber</td>
-                                            <td>@mating.Father.TagNumber</td>
-                                            <td>@mating.MatingDate.ToShortDateString()</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                        else
-                        {
-                            <p>No upcoming matings</p>
-                        }
-                    }
+        // Setup Health Status Chart
+        function setupHealthChart(data) {
+            const ctx = document.getElementById('healthChart').getContext('2d');
+            if (healthChart) {
+                healthChart.destroy();
+            }
 
-                    <h5 class="mt-4">Upcoming Farrowings</h5>
-                    @{
-                        var farrowings = ViewData["UpcomingFarrowings"] as List<Inyama_Yethu.Models.Mating>;
-                        if (farrowings != null && farrowings.Any())
-                        {
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Sow</th>
-                                        <th>Expected Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var farrowing in farrowings)
-                                    {
-                                        <tr>
-                                            <td>@farrowing.Mother.TagNumber</td>
-                                            <td>@farrowing.ExpectedFarrowingDate.ToShortDateString()</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+            healthChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.Status),
+                    datasets: [{
+                        data: data.map(d => d.Count),
+                        backgroundColor: [
+                            colors.success,
+                            colors.warning,
+                            colors.danger
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
-                        else
-                        {
-                            <p>No upcoming farrowings</p>
-                        }
+                    },
+                    cutout: '70%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
                     }
-                </div>
-            </div>
-        </div>
-    </div>
-</div> 
+                }
+            });
+        }
+
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial setup
+            setupGrowthChart(monthlyData);
+            updateHealthChart();
+
+            // Time range filter handlers
+            document.querySelectorAll('.time-filter').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.time-filter').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    updateGrowthChart(this.dataset.range);
+                });
+            });
+
+            // Health chart refresh handler
+            document.querySelector('.refresh-chart').addEventListener('click', updateHealthChart);
+
+            // Activity filters
+            document.querySelectorAll('.filter-activities').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-activities').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    filterActivities(this.dataset.filter);
+                });
+            });
+        });
+
+        // Update growth chart based on time range
+        function updateGrowthChart(timeRange) {
+            fetch(`/Admin/Dashboard/GetFilteredData?timeRange=${timeRange}`)
+                .then(response => response.json())
+                .then(data => {
+                    const formattedData = data.map(d => ({
+                        Month: moment(d.Date).format('MMM DD'),
+                        Count: d.Count
+                    }));
+                    setupGrowthChart(formattedData);
+                });
+        }
+
+        // Update health status chart
+        function updateHealthChart() {
+            const button = document.querySelector('.refresh-chart');
+            button.disabled = true;
+            button.querySelector('i').classList.add('fa-spin');
+
+            fetch('/Admin/Dashboard/GetHealthStatusData')
+                .then(response => response.json())
+                .then(data => {
+                    setupHealthChart(data);
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.querySelector('i').classList.remove('fa-spin');
+                    }, 1000);
+                });
+        }
+
+        // Filter activities table
+        function filterActivities(type) {
+            const rows = document.querySelectorAll('tbody tr[data-type]');
+            rows.forEach(row => {
+                if (type === 'all' || row.dataset.type === type) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .progress {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.75rem;
+        }
+
+        .refresh-chart {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .badge {
+            padding: 0.5em 0.75em;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 1rem;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+    </style>
+} 
