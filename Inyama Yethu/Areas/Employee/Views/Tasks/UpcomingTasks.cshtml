@@ -67,7 +67,7 @@
                                         <a asp-action="Details" asp-route-id="@task.Id">@task.Title</a>
                                     </td>
                                     <td>@task.Description</td>
-                                    <td>@task.Category</td>
+                                    <td>@task.Category.Name</td>
                                     <td>
                                         @{
                                             string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
@@ -110,11 +110,9 @@
     <!-- Task Categories -->
     <div class="row">
         @{
-            var categories = upcomingTasks?.GroupBy(t => t.Category)
-                                          .Where(g => !string.IsNullOrEmpty(g.Key))
-                                          .Select(g => new { Category = g.Key, Count = g.Count() })
-                                          .OrderByDescending(x => x.Count)
-                                          .ToList();
+            var categories = upcomingTasks?.GroupBy(t => t.Category.Name)
+                .Select(g => new { Category = g.Key, Count = g.Count() })
+                .ToList();
         }
         
         @if (categories != null && categories.Any())

@@ -3,6 +3,7 @@ using Inyama_Yethu.Areas.Customer;
 using Inyama_Yethu.Areas.Employee;
 using Inyama_Yethu.Conventions;
 using Inyama_Yethu.Data;
+using Inyama_Yethu.Models;
 using Inyama_Yethu.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -71,6 +72,10 @@ builder.Services.AddSingleton(TimeZoneInfo.FindSystemTimeZoneById("South Africa 
 
 // Add the TaskSchedulerService as a hosted service
 builder.Services.AddHostedService<TaskSchedulerService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITaskNotificationService, TaskNotificationService>();
+builder.Services.AddHostedService<TaskReminderService>();
 
 var app = builder.Build();
 
@@ -210,7 +215,7 @@ using (var scope = app.Services.CreateScope())
                     logger.LogInformation("Added user to Employee role");
 
                     // Create the employee record
-                    var employee = new Models.Employee
+                    var employee = new Inyama_Yethu.Models.Employee
                     {
                         FirstName = emp.FirstName,
                         LastName = emp.LastName,
@@ -218,7 +223,10 @@ using (var scope = app.Services.CreateScope())
                         UserId = employeeUser.Id,
                         IsActive = true,
                         HireDate = DateTime.Now,
-                        JobTitle = "Farm Worker"
+                        JobTitle = "Farm Worker",
+                        Address = "123 Farm Road, Inyama Yethu",
+                        DateOfBirth = new DateTime(1990, 1, 1),
+                        PhoneNumber = "0123456789"
                     };
                     context.Employees.Add(employee);
                     await context.SaveChangesAsync();
@@ -235,6 +243,14 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogError(ex, "An error occurred while seeding roles and users");
     }
+}
+
+// Seed task categories
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    await TaskCategorySeeder.SeedDefaultCategoriesAsync(context);
 }
 
 app.Run();

@@ -1,101 +1,96 @@
 @{
-    ViewData["Title"] = "Admin Dashboard";
-    Layout = "_AdminLayout";
+    ViewData["Title"] = "Pig Farm Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <!-- Stats Cards Row -->
-    <div class="row g-4 mb-4">
-        <!-- Total Animals Card -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Pig Farm Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+    
+    <!-- Cards Row -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small">Total Animals</p>
-                            <h3 class="mb-0">
-                                @{
-                                    var totalAnimals = ViewData["TotalAnimals"] as int? ?? 0;
-                                    @totalAnimals
-                                }
-                            </h3>
+                            <div class="small text-white-50">Total Pigs</div>
+                            <div class="large">248</div>
                         </div>
-                        <span class="badge bg-@(((int)ViewData["AnimalGrowth"]) > 0 ? "success" : "danger")-subtle text-@(((int)ViewData["AnimalGrowth"]) > 0 ? "success" : "danger")">
-                            <i class="fas fa-arrow-@(((int)ViewData["AnimalGrowth"]) > 0 ? "up" : "down")"></i> @Math.Abs((int)ViewData["AnimalGrowth"])%
-                        </span>
+                        <div class="small">
+                            <i class="fas fa-piggy-bank fa-2x"></i>
+                        </div>
                     </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        12 new births this month
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Healthy Animals -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small">Healthy Animals</p>
-                            <h3 class="mb-0">
-                                @{
-                                    var healthyAnimals = ViewData["HealthyAnimals"] as int? ?? 0;
-                                    @healthyAnimals
-                                }
-                            </h3>
+                            <div class="small text-white-50">Healthy Pigs</div>
+                            <div class="large">235</div>
                         </div>
-                        <span class="badge bg-success-subtle text-success">
-                            @ViewData["HealthyPercentage"]%
-                        </span>
+                        <div class="small">
+                            <i class="fas fa-heart fa-2x"></i>
+                        </div>
                     </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-success" style="width: @ViewData["HealthyPercentage"]%"></div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-check me-1"></i>
+                        95% health rate
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Requiring Attention -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small">Requiring Attention</p>
-                            <h3 class="mb-0">
-                                @{
-                                    var needingAttention = ViewData["AnimalsNeedingAttention"] as int? ?? 0;
-                                    @needingAttention
-                                }
-                            </h3>
+                            <div class="small text-white-50">Pending Health Checks</div>
+                            <div class="large">18</div>
                         </div>
-                        <span class="badge bg-warning-subtle text-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </span>
+                        <div class="small">
+                            <i class="fas fa-stethoscope fa-2x"></i>
+                        </div>
                     </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-warning" style="width: @(totalAnimals > 0 ? (needingAttention * 100 / totalAnimals) : 0)%"></div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-clock me-1"></i>
+                        5 due today
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Vaccination Status -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small">Vaccination Status</p>
-                            <h3 class="mb-0">@ViewData["VaccinationPercentage"]%</h3>
+                            <div class="small text-white-50">Pregnant Sows</div>
+                            <div class="large">15</div>
                         </div>
-                        <span class="badge bg-info-subtle text-info">
-                            <i class="fas fa-syringe"></i>
-                        </span>
+                        <div class="small">
+                            <i class="fas fa-baby fa-2x"></i>
+                        </div>
                     </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-info" style="width: @ViewData["VaccinationPercentage"]%"></div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-calendar me-1"></i>
+                        3 due this week
                     </div>
                 </div>
             </div>
@@ -103,102 +98,95 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="row g-4 mb-4">
-        <!-- Growth Chart -->
-        <div class="col-12 col-lg-8">
-            <div class="card border-0 shadow-sm">
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-area me-1"></i>
+                    Pig Population Growth
+                </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="card-title mb-0">Animal Population Growth</h5>
-                        <div class="btn-group" role="group" aria-label="Time range">
-                            <button type="button" class="btn btn-sm btn-outline-secondary time-filter" data-range="week">Week</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary time-filter active" data-range="month">Month</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary time-filter" data-range="year">Year</button>
-                        </div>
-                    </div>
-                    <div style="height: 300px;">
-                        <canvas id="growthChart"></canvas>
-                    </div>
+                    <canvas id="revenueChart" width="100%" height="40"></canvas>
                 </div>
             </div>
         </div>
-
-        <!-- Health Status Chart -->
-        <div class="col-12 col-lg-4">
-            <div class="card border-0 shadow-sm">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Pig Age Distribution
+                </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="card-title mb-0">Health Status Distribution</h5>
-                        <button class="btn btn-sm btn-outline-secondary refresh-chart">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                    <div style="height: 300px;">
-                        <canvas id="healthChart"></canvas>
-                    </div>
+                    <canvas id="livestockChart" width="100%" height="40"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activities -->
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
+    <!-- Recent Activities and Tasks -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-list me-1"></i>
+                    Recent Activities
+                </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="card-title mb-0">Recent Activities</h5>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-secondary filter-activities active" data-filter="all">All</button>
-                            <button class="btn btn-sm btn-outline-secondary filter-activities" data-filter="Health Record">Health</button>
-                            <button class="btn btn-sm btn-outline-secondary filter-activities" data-filter="Vaccination">Vaccination</button>
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">New Piglets Born</h6>
+                                <small>3 hours ago</small>
+                            </div>
+                            <p class="mb-1">8 healthy piglets from Sow #A123</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Vaccination Completed</h6>
+                                <small>Yesterday</small>
+                            </div>
+                            <p class="mb-1">Batch #P45 received scheduled vaccines</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Health Check Completed</h6>
+                                <small>2 days ago</small>
+                            </div>
+                            <p class="mb-1">All pigs in Section B passed inspection</p>
                         </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Activity</th>
-                                    <th>Type</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var recentActivities = ViewData["RecentActivities"] as List<dynamic>;
-                                    if (recentActivities != null && recentActivities.Any())
-                                    {
-                                        foreach (var activity in recentActivities)
-                                        {
-                                            <tr data-type="@activity.Type">
-                                                <td>@activity.Title</td>
-                                                <td><span class="badge bg-secondary">@activity.Type</span></td>
-                                                <td>@activity.Timestamp.ToString("MMM dd, yyyy HH:mm")</td>
-                                                <td>
-                                                    @{
-                                                        var statusClass = activity.Status switch
-                                                        {
-                                                            "Completed" => "success",
-                                                            "Overdue" => "danger",
-                                                            "Pending" => "warning",
-                                                            _ => "secondary"
-                                                        };
-                                                    }
-                                                    <span class="badge bg-@statusClass">@activity.Status</span>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="4" class="text-center">No recent activities</td>
-                                        </tr>
-                                    }
-                                }
-                            </tbody>
-                        </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tasks me-1"></i>
+                    Upcoming Tasks
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Piglet Vaccination Due</h6>
+                                <small class="text-danger">Today</small>
+                            </div>
+                            <p class="mb-1">15 piglets scheduled for first vaccination</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Feed Stock Check</h6>
+                                <small class="text-warning">Tomorrow</small>
+                            </div>
+                            <p class="mb-1">Monthly inventory check of pig feed</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Sow Health Check</h6>
+                                <small>In 3 days</small>
+                            </div>
+                            <p class="mb-1">Routine check-up for pregnant sows</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -208,228 +196,70 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
-
     <script>
-        // Initialize charts with empty data
-        let growthChart, healthChart;
-        const colors = {
-            primary: '#4e73df',
-            success: '#1cc88a',
-            warning: '#f6c23e',
-            danger: '#e74a3b',
-            info: '#36b9cc'
-        };
-
-        // Initial population data
-        const monthlyData = @Html.Raw(Json.Serialize(ViewData["MonthlyPopulation"]));
-        
-        // Setup Growth Chart
-        function setupGrowthChart(data) {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            if (growthChart) {
-                growthChart.destroy();
-            }
-            
-            growthChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map(d => d.Month),
-                    datasets: [{
-                        label: 'Population',
-                        data: data.map(d => d.Count),
-                        borderColor: colors.primary,
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(78, 115, 223, 0.1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                        }
-                    },
-                    hover: {
-                        mode: 'nearest',
-                        intersect: true
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                drawBorder: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
+        // Population Growth Chart
+        var revenueCtx = document.getElementById('revenueChart');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Total Pigs',
+                    data: [180, 185, 195, 205, 215, 220, 228, 235, 240, 245, 248, 255],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' pigs';
                             }
                         }
                     }
                 }
-            });
-        }
-
-        // Setup Health Status Chart
-        function setupHealthChart(data) {
-            const ctx = document.getElementById('healthChart').getContext('2d');
-            if (healthChart) {
-                healthChart.destroy();
             }
-
-            healthChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.map(d => d.Status),
-                    datasets: [{
-                        data: data.map(d => d.Count),
-                        backgroundColor: [
-                            colors.success,
-                            colors.warning,
-                            colors.danger
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    },
-                    cutout: '70%',
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true
-                    }
-                }
-            });
-        }
-
-        // Initialize charts
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initial setup
-            setupGrowthChart(monthlyData);
-            updateHealthChart();
-
-            // Time range filter handlers
-            document.querySelectorAll('.time-filter').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.time-filter').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    updateGrowthChart(this.dataset.range);
-                });
-            });
-
-            // Health chart refresh handler
-            document.querySelector('.refresh-chart').addEventListener('click', updateHealthChart);
-
-            // Activity filters
-            document.querySelectorAll('.filter-activities').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-activities').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    filterActivities(this.dataset.filter);
-                });
-            });
         });
 
-        // Update growth chart based on time range
-        function updateGrowthChart(timeRange) {
-            fetch(`/Admin/Dashboard/GetFilteredData?timeRange=${timeRange}`)
-                .then(response => response.json())
-                .then(data => {
-                    const formattedData = data.map(d => ({
-                        Month: moment(d.Date).format('MMM DD'),
-                        Count: d.Count
-                    }));
-                    setupGrowthChart(formattedData);
-                });
-        }
-
-        // Update health status chart
-        function updateHealthChart() {
-            const button = document.querySelector('.refresh-chart');
-            button.disabled = true;
-            button.querySelector('i').classList.add('fa-spin');
-
-            fetch('/Admin/Dashboard/GetHealthStatusData')
-                .then(response => response.json())
-                .then(data => {
-                    setupHealthChart(data);
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        button.disabled = false;
-                        button.querySelector('i').classList.remove('fa-spin');
-                    }, 1000);
-                });
-        }
-
-        // Filter activities table
-        function filterActivities(type) {
-            const rows = document.querySelectorAll('tbody tr[data-type]');
-            rows.forEach(row => {
-                if (type === 'all' || row.dataset.type === type) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+        // Age Distribution Chart
+        var livestockCtx = document.getElementById('livestockChart');
+        new Chart(livestockCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Piglets (0-2m)', 'Weaners (2-4m)', 'Growers (4-6m)', 'Finishers (6m+)', 'Breeding Stock'],
+                datasets: [{
+                    label: 'Number of Pigs',
+                    data: [45, 65, 58, 60, 20],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
-            });
-        }
+            }
+        });
     </script>
-}
-
-@section Styles {
-    <style>
-        .progress {
-            background-color: #f0f0f0;
-            border-radius: 10px;
-        }
-
-        .card {
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .btn-group .btn {
-            padding: 0.25rem 0.75rem;
-        }
-
-        .refresh-chart {
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .badge {
-            padding: 0.5em 0.75em;
-        }
-
-        .table > :not(caption) > * > * {
-            padding: 1rem;
-        }
-
-        .table tbody tr {
-            transition: background-color 0.2s;
-        }
-
-        .table tbody tr:hover {
-            background-color: rgba(0,0,0,0.02);
-        }
-    </style>
 } 

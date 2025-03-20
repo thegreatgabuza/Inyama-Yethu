@@ -42,7 +42,7 @@ namespace Inyama_Yethu.Models
         public DateTime HireDate { get; set; }
 
         [StringLength(500)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [Required]
         [Display(Name = "Job Title")]
@@ -53,13 +53,13 @@ namespace Inyama_Yethu.Models
         public bool IsActive { get; set; } = true;
 
         // Navigation property for Identity User
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         [ForeignKey("UserId")]
-        public IdentityUser User { get; set; }
+        public IdentityUser? User { get; set; }
 
         // Navigation properties for related entities
-        public virtual ICollection<Attendance> Attendances { get; set; }
-        public virtual ICollection<TaskAssignment> TaskAssignments { get; set; }
+        public virtual ICollection<Attendance>? Attendances { get; set; }
+        public virtual ICollection<TaskAssignment>? TaskAssignments { get; set; }
 
         [NotMapped]
         [Display(Name = "Full Name")]
@@ -69,6 +69,8 @@ namespace Inyama_Yethu.Models
         {
             Attendances = new HashSet<Attendance>();
             TaskAssignments = new HashSet<TaskAssignment>();
+            Address = string.Empty;
+            IsActive = true;
         }
     }
 } 

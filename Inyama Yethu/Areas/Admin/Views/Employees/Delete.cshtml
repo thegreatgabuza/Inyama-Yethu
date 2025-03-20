@@ -1,76 +1,96 @@
 @model Inyama_Yethu.Models.Employee
 
 @{
-    ViewData["Title"] = "Deactivate Employee";
+    ViewData["Title"] = Model.IsActive ? "Deactivate Employee" : "Activate Employee";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Deactivate Employee</h1>
-        <div>
-            <a asp-area="Admin" asp-controller="Employees" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info btn-sm mr-2">
-                <i class="fas fa-info-circle mr-1"></i> Details
-            </a>
-            <a asp-area="Admin" asp-controller="Employees" asp-action="Index" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left mr-1"></i> Back to List
-            </a>
-        </div>
-    </div>
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Employees</a></li>
+        <li class="breadcrumb-item active">@(Model.IsActive ? "Deactivate" : "Activate")</li>
+    </ol>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card shadow mb-4 border-left-danger">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-danger">Confirm Deactivation</h6>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas @(Model.IsActive ? "fa-user-times" : "fa-user-check") me-1"></i>
+            Confirm @(Model.IsActive ? "Deactivation" : "Activation")
+        </div>
+        <div class="card-body">
+            <div class="alert @(Model.IsActive ? "alert-danger" : "alert-info")">
+                <h4>Are you sure you want to @(Model.IsActive ? "deactivate" : "activate") this employee?</h4>
+                @if (Model.IsActive)
+                {
+                    <p>This will mark the employee as inactive but preserve their records.</p>
+                }
+                else
+                {
+                    <p>This will restore the employee's access to the system.</p>
+                }
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FullName)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.FullName)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.JobTitle)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.JobTitle)</dd>
+                    </dl>
                 </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-user-slash fa-5x text-danger mb-3"></i>
-                        <h4 class="text-gray-900 mb-1">Are you sure you want to deactivate this employee?</h4>
-                        <p class="text-gray-600 mb-0">This will mark the employee as inactive in the system.</p>
-                        <div class="alert alert-warning mt-3">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>
-                            The employee will no longer be able to access the system, but their data will be preserved.
-                        </div>
-                    </div>
-                    
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered">
-                            <tr>
-                                <th class="bg-light" style="width: 30%;">Employee ID</th>
-                                <td>@Model.Id</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light">Name</th>
-                                <td>@Model.FullName</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light">Email</th>
-                                <td>@Model.Email</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light">Position</th>
-                                <td>@Model.JobTitle</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light">Hire Date</th>
-                                <td>@Model.HireDate.ToShortDateString()</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <form asp-area="Admin" asp-controller="Employees" asp-action="Delete" method="post">
-                        <input type="hidden" asp-for="Id" />
-                        <div class="d-flex justify-content-between">
-                            <a asp-area="Admin" asp-controller="Employees" asp-action="Index" class="btn btn-light">Cancel</a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-user-slash mr-1"></i> Deactivate Employee
-                            </button>
-                        </div>
-                    </form>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DateOfBirth)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.DateOfBirth)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.HireDate)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.HireDate)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Address)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.IsActive)</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </dd>
+                    </dl>
                 </div>
             </div>
+
+            <form asp-action="@(Model.IsActive ? "Delete" : "Activate")" class="mt-3">
+                <input type="hidden" asp-for="Id" />
+                @if (Model.IsActive)
+                {
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-user-times"></i> Deactivate Employee
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-check"></i> Activate Employee
+                    </button>
+                }
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </form>
         </div>
     </div>
 </div> 

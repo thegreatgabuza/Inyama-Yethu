@@ -187,7 +187,7 @@ namespace Inyama_Yethu.Controllers
 
             // Tasks grouped by category
             var tasksByCategory = allTasks
-                .GroupBy(t => t.Category)
+                .GroupBy(t => t.Category?.Name ?? "Uncategorized")
                 .Select(g => new { Category = g.Key, Tasks = g.ToList() })
                 .ToList();
 

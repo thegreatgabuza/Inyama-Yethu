@@ -1,0 +1,233 @@
+@model Inyama_Yethu.Models.TaskAssignment
+@{
+    ViewData["Title"] = "Edit Task";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit Task</h1>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info btn-sm shadow-sm mr-2">
+                <i class="fas fa-info-circle fa-sm"></i> View Details
+            </a>
+            <a asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Back to Tasks
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Task Details</h6>
+                    <span class="badge @(Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed ? "badge-success" :
+                                       Model.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress ? "badge-primary" :
+                                       Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Delayed ? "badge-warning" :
+                                       Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Cancelled ? "badge-danger" :
+                                       "badge-secondary")">
+                        @Model.Status
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Status" />
+                        <input type="hidden" asp-for="CompletionDate" />
+
+                        <div class="form-group">
+                            <label asp-for="Title" class="control-label">Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter task title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter task description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="EmployeeId" class="control-label">Assigned To</label>
+                                    <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.Employees">
+                                        <option value="">-- Select Employee --</option>
+                                    </select>
+                                    <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DueDate" class="control-label">Due Date</label>
+                                    <input asp-for="DueDate" type="datetime-local" class="form-control" />
+                                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Priority" class="control-label">Priority</label>
+                                    <select asp-for="Priority" class="form-control" asp-items="Html.GetEnumSelectList<Inyama_Yethu.Models.TaskPriority>()">
+                                        <option value="">-- Select Priority --</option>
+                                    </select>
+                                    <span asp-validation-for="Priority" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Category" class="control-label">Category</label>
+                                    <select asp-for="Category" class="form-control" asp-items="ViewBag.Categories">
+                                        <option value="">-- Select Category --</option>
+                                    </select>
+                                    <span asp-validation-for="Category" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="AnimalId" class="control-label">Related Animal (Optional)</label>
+                            <select asp-for="AnimalId" class="form-control" asp-items="ViewBag.Animals">
+                                <option value="">-- Select Animal --</option>
+                            </select>
+                            <span asp-validation-for="AnimalId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Notes" class="control-label">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any additional notes"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save fa-sm"></i> Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <!-- Task Status Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Task Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold">Current Status</h6>
+                        <p class="mb-0">@Model.Status</p>
+                        @if (Model.CompletionDate.HasValue)
+                        {
+                            <small class="text-muted">
+                                Completed on @Model.CompletionDate.Value.ToString("dd MMM yyyy HH:mm")
+                            </small>
+                        }
+                    </div>
+
+                    @if (Model.Status != Inyama_Yethu.Models.FarmTaskStatus.Completed &&
+                         Model.Status != Inyama_Yethu.Models.FarmTaskStatus.Cancelled)
+                    {
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#updateStatusModal">
+                                <i class="fas fa-check-circle fa-sm"></i> Update Status
+                            </button>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold">Time Remaining</h6>
+                        @{
+                            var timeRemaining = Model.DueDate - DateTime.Now;
+                            var daysRemaining = timeRemaining.Days;
+                            var hoursRemaining = timeRemaining.Hours;
+
+                            if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed)
+                            {
+                                <p class="text-success mb-0">Task Completed</p>
+                            }
+                            else if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Cancelled)
+                            {
+                                <p class="text-danger mb-0">Task Cancelled</p>
+                            }
+                            else if (timeRemaining.TotalHours < 0)
+                            {
+                                <p class="text-danger mb-0">Overdue by @Math.Abs(daysRemaining) days</p>
+                            }
+                            else if (daysRemaining == 0)
+                            {
+                                <p class="text-warning mb-0">Due in @hoursRemaining hours</p>
+                            }
+                            else
+                            {
+                                <p class="text-info mb-0">Due in @daysRemaining days</p>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Task Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form asp-action="UpdateStatus" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="taskId" value="@Model.Id" />
+                    <div class="form-group">
+                        <label for="newStatus">New Status:</label>
+                        <select class="form-control" id="newStatus" name="newStatus">
+                            @foreach (var status in Enum.GetValues(typeof(Inyama_Yethu.Models.FarmTaskStatus)))
+                            {
+                                if ((Inyama_Yethu.Models.FarmTaskStatus)status != Model.Status)
+                                {
+                                    <option value="@status">@status</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add notes about this status change..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            // Initialize select2 for better dropdown experience
+            $('.form-control').select2({
+                theme: 'bootstrap4'
+            });
+
+            // Format the datetime-local input
+            var dueDate = new Date('@Model.DueDate.ToString("s")');
+            $('#DueDate').val(dueDate.toISOString().slice(0,16));
+        });
+    </script>
+} 

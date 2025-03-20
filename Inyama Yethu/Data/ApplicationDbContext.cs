@@ -15,6 +15,7 @@ namespace Inyama_Yethu.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<TaskAssignment> TaskAssignments { get; set; }
+        public DbSet<TaskCategory> TaskCategories { get; set; }
 
         // Livestock Management
         public DbSet<Animal> Animals { get; set; }
@@ -106,22 +107,26 @@ namespace Inyama_Yethu.Data
                 new Employee
                 {
                     Id = 1,
-                    Name = "John Doe",
+                    FirstName = "John",
+                    LastName = "Doe",
                     Email = "john.doe@inyamayethu.co.za",
-                    Phone = "072-123-4567",
-                    Position = "Farm Worker",
+                    PhoneNumber = "072-123-4567",
+                    JobTitle = "Farm Worker",
                     HireDate = new DateTime(2023, 1, 15),
-                    IsActive = true
+                    IsActive = true,
+                    DateOfBirth = new DateTime(1990, 1, 1)
                 },
                 new Employee
                 {
                     Id = 2,
-                    Name = "Jane Smith",
+                    FirstName = "Jane",
+                    LastName = "Smith",
                     Email = "jane.smith@inyamayethu.co.za",
-                    Phone = "073-987-6543",
-                    Position = "Farm Manager",
+                    PhoneNumber = "073-987-6543",
+                    JobTitle = "Farm Manager",
                     HireDate = new DateTime(2022, 8, 10),
-                    IsActive = true
+                    IsActive = true,
+                    DateOfBirth = new DateTime(1985, 6, 15)
                 }
             );
         }

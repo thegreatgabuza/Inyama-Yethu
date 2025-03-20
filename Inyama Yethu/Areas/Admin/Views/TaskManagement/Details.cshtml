@@ -1,0 +1,181 @@
+@model Inyama_Yethu.Models.TaskAssignment
+
+@{
+    ViewData["Title"] = "Task Details";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Task Details</h1>
+        <a asp-action="Index" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">@Model.Title</h6>
+            <div class="dropdown no-arrow">
+                <button class="btn btn-link btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" 
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" asp-action="Edit" asp-route-id="@Model.Id">
+                        <i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Edit Task
+                    </a>
+                    @if (Model.Status != Inyama_Yethu.Models.FarmTaskStatus.Completed &&
+                         Model.Status != Inyama_Yethu.Models.FarmTaskStatus.Cancelled)
+                    {
+                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#updateStatusModal"
+                                data-task-id="@Model.Id" data-task-title="@Model.Title">
+                            <i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Update Status
+                        </button>
+                        <form asp-action="Complete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-check fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Mark as Completed
+                            </button>
+                        </form>
+                        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-times fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Cancel Task
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Assigned To</dt>
+                        <dd class="col-sm-8">@Model.Employee?.FullName</dd>
+
+                        <dt class="col-sm-4">Category</dt>
+                        <dd class="col-sm-8">@Model.Category?.Name</dd>
+
+                        <dt class="col-sm-4">Animal</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Animal != null)
+                            {
+                                @($"{Model.Animal.TagNumber} - {Model.Animal.Type} ({Model.Animal.Gender})")
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Due Date</dt>
+                        <dd class="col-sm-8">@Model.DueDate.ToString("MMM dd, yyyy")</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Priority</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                string priorityClass = Model.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                   Model.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                   Model.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                   "badge-danger";
+                            }
+                            <span class="badge @priorityClass">@Model.Priority</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                string statusClass = Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Completed ? "badge-success" :
+                                                Model.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress ? "badge-primary" :
+                                                Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Delayed ? "badge-warning" :
+                                                Model.Status == Inyama_Yethu.Models.FarmTaskStatus.Cancelled ? "badge-danger" :
+                                                "badge-secondary";
+                            }
+                            <span class="badge @statusClass">@Model.Status</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Created</dt>
+                        <dd class="col-sm-8">@Model.CreatedDate.ToString("MMM dd, yyyy HH:mm")</dd>
+
+                        @if (Model.CompletionDate.HasValue)
+                        {
+                            <dt class="col-sm-4">Completed</dt>
+                            <dd class="col-sm-8">@Model.CompletionDate.Value.ToString("MMM dd, yyyy HH:mm")</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5 class="font-weight-bold">Description</h5>
+                    <p class="text-gray-800">@Model.Description</p>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="font-weight-bold">Notes</h5>
+                        <pre class="text-gray-800">@Model.Notes</pre>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Task Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form asp-action="UpdateStatus" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" id="taskId" name="taskId" value="@Model.Id" />
+                    <div class="form-group">
+                        <label for="newStatus">New Status:</label>
+                        <select class="form-control" id="newStatus" name="newStatus">
+                            @foreach (var status in Enum.GetValues(typeof(Inyama_Yethu.Models.FarmTaskStatus)))
+                            {
+                                <option value="@status" selected="@(status.Equals(Model.Status))">@status</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                  placeholder="Add notes about this status change..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2
+            $('.form-control').select2({
+                theme: 'bootstrap4'
+            });
+        });
+    </script>
+} 

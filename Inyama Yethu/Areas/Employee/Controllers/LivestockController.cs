@@ -62,7 +62,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             var livestockTasks = await _context.TaskAssignments
                 .Include(t => t.Animal)
                 .Where(t => t.EmployeeId == employee.Id && 
-                          (t.Category == "Livestock" || t.Category == "Health" || t.Category == "Feeding") &&
+                          (t.Category.Name == "Livestock" || t.Category.Name == "Health" || t.Category.Name == "Feeding") &&
                           t.Status != FarmTaskStatus.Completed)
                 .ToListAsync();
 

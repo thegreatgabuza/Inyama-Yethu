@@ -39,6 +39,12 @@ namespace Inyama_Yethu.Models
         [Display(Name = "Due Date")]
         public DateTime DueDate { get; set; }
         
+        [Display(Name = "Creation Date")]
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        
+        [Display(Name = "Last Updated")]
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+        
         [Display(Name = "Completion Date")]
         public DateTime? CompletionDate { get; set; }
         
@@ -51,9 +57,9 @@ namespace Inyama_Yethu.Models
         [StringLength(500)]
         public string Notes { get; set; }
         
-        // Task category (e.g., feeding, vaccination, processing)
-        [StringLength(50)]
-        public string Category { get; set; }
+        // Task category
+        [Required]
+        public int TaskCategoryId { get; set; }
         
         // Related animal ID if applicable
         public int? AnimalId { get; set; }
@@ -61,6 +67,9 @@ namespace Inyama_Yethu.Models
         // Navigation properties
         [ForeignKey("EmployeeId")]
         public virtual Employee Employee { get; set; }
+        
+        [ForeignKey("TaskCategoryId")]
+        public virtual TaskCategory Category { get; set; }
         
         // Optional relation to an animal
         [ForeignKey("AnimalId")]

@@ -84,7 +84,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TagNumber,Type,Gender,BirthDate,Status,Weight,Notes,MotherAnimalId,FatherAnimalId")] Animal animal)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 _context.Add(animal);
                 await _context.SaveChangesAsync();

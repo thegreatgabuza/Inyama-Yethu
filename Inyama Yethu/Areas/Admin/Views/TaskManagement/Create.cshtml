@@ -1,0 +1,149 @@
+@model Inyama_Yethu.Models.TaskAssignment
+@{
+    ViewData["Title"] = "Create Task";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create New Task</h1>
+        <a asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Back to Tasks
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Task Details</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="Title" class="control-label">Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter task title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter task description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="EmployeeId" class="control-label">Assign To</label>
+                                    <select asp-for="EmployeeId" class="form-control select2" asp-items="@((SelectList)ViewData["EmployeeId"])">
+                                        <option value="">-- Select Employee --</option>
+                                    </select>
+                                    <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DueDate" class="control-label">Due Date</label>
+                                    <input asp-for="DueDate" type="datetime-local" class="form-control" />
+                                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Priority" class="control-label">Priority</label>
+                                    <select asp-for="Priority" class="form-control" asp-items="Html.GetEnumSelectList<Inyama_Yethu.Models.TaskPriority>()">
+                                        <option value="">-- Select Priority --</option>
+                                    </select>
+                                    <span asp-validation-for="Priority" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="TaskCategoryId" class="control-label">Category</label>
+                                    <select asp-for="TaskCategoryId" class="form-control select2" asp-items="@((SelectList)ViewData["TaskCategoryId"])">
+                                        <option value="">-- Select Category --</option>
+                                    </select>
+                                    <span asp-validation-for="TaskCategoryId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="AnimalId" class="control-label">Related Animal (Optional)</label>
+                            <select asp-for="AnimalId" class="form-control select2" asp-items="@((SelectList)ViewData["AnimalId"])">
+                                <option value="">-- Select Animal --</option>
+                            </select>
+                            <span asp-validation-for="AnimalId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Notes" class="control-label">Notes (Optional)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any additional notes"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save fa-sm"></i> Create Task
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Task Creation Guide</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Title</h6>
+                        <p class="mb-2">Keep it clear and concise. Use action verbs when possible.</p>
+                        <small class="text-muted">Example: "Clean Cattle Pen" or "Administer Vaccination"</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Description</h6>
+                        <p class="mb-2">Provide detailed instructions and any specific requirements.</p>
+                        <small class="text-muted">Include what needs to be done, how it should be done, and any safety precautions.</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Priority Levels</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><span class="badge badge-danger">Critical</span> - Urgent tasks requiring immediate attention</li>
+                            <li><span class="badge badge-warning">High</span> - Important tasks to be completed soon</li>
+                            <li><span class="badge badge-primary">Medium</span> - Regular priority tasks</li>
+                            <li><span class="badge badge-info">Low</span> - Tasks that can be done when time permits</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            // Set minimum date for due date picker to today
+            var today = new Date().toISOString().split('T')[0];
+            $('#DueDate').attr('min', today);
+
+            // Initialize select2 for better dropdown experience
+            $('.form-control').select2({
+                theme: 'bootstrap4'
+            });
+        });
+    </script>
+} 

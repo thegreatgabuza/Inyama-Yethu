@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250319132327_AddNewData")]
-    partial class AddNewData
+    [Migration("20250320182758_AddTaskDatesFields")]
+    partial class AddTaskDatesFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -261,7 +261,19 @@ namespace Inyama_Yethu.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -272,22 +284,26 @@ namespace Inyama_Yethu.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Position")
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Employees");
 
@@ -295,22 +311,28 @@ namespace Inyama_Yethu.Migrations
                         new
                         {
                             Id = 1,
+                            Address = "",
+                            DateOfBirth = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "john.doe@inyamayethu.co.za",
+                            FirstName = "John",
                             HireDate = new DateTime(2023, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "John Doe",
-                            Phone = "072-123-4567",
-                            Position = "Farm Worker"
+                            JobTitle = "Farm Worker",
+                            LastName = "Doe",
+                            PhoneNumber = "072-123-4567"
                         },
                         new
                         {
                             Id = 2,
+                            Address = "",
+                            DateOfBirth = new DateTime(1985, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "jane.smith@inyamayethu.co.za",
+                            FirstName = "Jane",
                             HireDate = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "Jane Smith",
-                            Phone = "073-987-6543",
-                            Position = "Farm Manager"
+                            JobTitle = "Farm Manager",
+                            LastName = "Smith",
+                            PhoneNumber = "073-987-6543"
                         });
                 });
 
@@ -746,12 +768,10 @@ namespace Inyama_Yethu.Migrations
                     b.Property<int?>("AnimalId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -765,6 +785,9 @@ namespace Inyama_Yethu.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -774,6 +797,9 @@ namespace Inyama_Yethu.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaskCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -787,7 +813,38 @@ namespace Inyama_Yethu.Migrations
 
                     b.HasIndex("EmployeeId");
 
+                    b.HasIndex("TaskCategoryId");
+
                     b.ToTable("TaskAssignments");
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.TaskCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TaskCategories");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.WeightRecord", b =>
@@ -1068,6 +1125,15 @@ namespace Inyama_Yethu.Migrations
                     b.Navigation("Animal");
                 });
 
+            modelBuilder.Entity("Inyama_Yethu.Models.Employee", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Inyama_Yethu.Models.Feedback", b =>
                 {
                     b.HasOne("Inyama_Yethu.Models.Customer", "Customer")
@@ -1173,7 +1239,15 @@ namespace Inyama_Yethu.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Inyama_Yethu.Models.TaskCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("TaskCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Animal");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Employee");
                 });

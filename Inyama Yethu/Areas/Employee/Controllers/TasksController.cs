@@ -1,5 +1,6 @@
 using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
+using Inyama_Yethu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,16 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly TimeZoneInfo _southAfricaTimeZone;
+        private readonly ITaskNotificationService _taskNotificationService;
 
-        public TasksController(ApplicationDbContext context, TimeZoneInfo timeZoneInfo)
+        public TasksController(
+            ApplicationDbContext context, 
+            TimeZoneInfo timeZoneInfo,
+            ITaskNotificationService taskNotificationService)
         {
             _context = context;
             _southAfricaTimeZone = timeZoneInfo;
+            _taskNotificationService = taskNotificationService;
         }
 
         // GET: Employee/Tasks
@@ -190,6 +196,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
                 return NotFound();
             }
 
+            var previousStatus = task.Status;
             task.Status = FarmTaskStatus.Completed;
             task.CompletionDate = TimeZoneInfo.ConvertTime(DateTime.Now, _southAfricaTimeZone);
             
@@ -199,6 +206,9 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            // Send status change notification
+            await _taskNotificationService.SendTaskStatusChangeNotificationAsync(task, employee.Email, previousStatus.ToString());
 
             // Add success message
             TempData["SuccessMessage"] = $"Task '{task.Title}' marked as completed.";
@@ -211,6 +221,51 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             }
             
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Employee/Tasks/UpdateStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int taskId, FarmTaskStatus newStatus, string notes)
+        {
+            // Get the current employee based on the logged in user
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            var employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.Email == userEmail && e.IsActive);
+
+            if (employee == null)
+            {
+                return RedirectToAction("AccessDenied", "Account", new { area = "" });
+            }
+
+            var task = await _context.TaskAssignments.FindAsync(taskId);
+            
+            if (task == null || task.EmployeeId != employee.Id)
+            {
+                return NotFound();
+            }
+
+            var previousStatus = task.Status;
+            task.Status = newStatus;
+            
+            if (!string.IsNullOrEmpty(notes))
+            {
+                task.Notes = (string.IsNullOrEmpty(task.Notes) ? "" : task.Notes + "\n") + 
+                            $"[{DateTime.Now:yyyy-MM-dd HH:mm}] Status updated to {newStatus}: {notes}";
+            }
+
+            if (newStatus == FarmTaskStatus.Completed)
+            {
+                task.CompletionDate = TimeZoneInfo.ConvertTime(DateTime.Now, _southAfricaTimeZone);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Send status change notification
+            await _taskNotificationService.SendTaskStatusChangeNotificationAsync(task, employee.Email, previousStatus.ToString());
+
+            TempData["SuccessMessage"] = $"Task status updated to {newStatus}.";
+            return RedirectToAction(nameof(Details), new { id = taskId });
         }
     }
 } 

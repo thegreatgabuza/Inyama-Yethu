@@ -5,15 +5,24 @@
     var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
     var today = (DateTime)ViewData["Today"];
     var todaysTasks = ViewData["TodaysTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
-    var overdueTasks = ViewData["OverdueTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
     var upcomingTasks = ViewData["UpcomingTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+    var overdueTasks = ViewData["OverdueTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
     var completedTasks = ViewData["CompletedTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
 }
 
 <div class="container-fluid">
-    <h1 class="mt-4">My Tasks</h1>
-    <p class="lead mb-4">Manage your assigned tasks</p>
-    
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">My Tasks</h1>
+        <div>
+            <a asp-action="TodaysTasks" class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-calendar-day fa-sm"></i> Today's Tasks
+            </a>
+            <a asp-action="UpcomingTasks" class="btn btn-info btn-sm shadow-sm">
+                <i class="fas fa-calendar-alt fa-sm"></i> Upcoming Tasks
+            </a>
+        </div>
+    </div>
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -23,25 +32,16 @@
             </button>
         </div>
     }
-    
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    }
 
-    <div class="row mb-4">
+    <!-- Task Summary Cards -->
+    <div class="row">
+        <!-- Today's Tasks Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Today's Tasks</div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Today's Tasks</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@(todaysTasks?.Count ?? 0)</div>
                         </div>
                         <div class="col-auto">
@@ -52,13 +52,30 @@
             </div>
         </div>
 
+        <!-- Upcoming Tasks Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Upcoming Tasks</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(upcomingTasks?.Count ?? 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Tasks Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-danger shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                Overdue Tasks</div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Overdue Tasks</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@(overdueTasks?.Count ?? 0)</div>
                         </div>
                         <div class="col-auto">
@@ -69,30 +86,13 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Upcoming Tasks</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(upcomingTasks?.Count ?? 0)</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Completed Tasks Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Completed Tasks</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Completed Tasks</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@(completedTasks?.Count ?? 0)</div>
                         </div>
                         <div class="col-auto">
@@ -103,263 +103,194 @@
             </div>
         </div>
     </div>
-    
-    <!-- Task Tabs -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <ul class="nav nav-tabs card-header-tabs" id="taskTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="today-tab" data-toggle="tab" href="#today" role="tab" aria-controls="today" aria-selected="true">
-                        Today <span class="badge badge-primary">@(todaysTasks?.Count ?? 0)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="overdue-tab" data-toggle="tab" href="#overdue" role="tab" aria-controls="overdue" aria-selected="false">
-                        Overdue <span class="badge badge-danger">@(overdueTasks?.Count ?? 0)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab" aria-controls="upcoming" aria-selected="false">
-                        Upcoming <span class="badge badge-info">@(upcomingTasks?.Count ?? 0)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab" aria-controls="completed" aria-selected="false">
-                        Completed <span class="badge badge-success">@(completedTasks?.Count ?? 0)</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="card-body">
-            <div class="tab-content" id="taskTabsContent">
-                <!-- Today's Tasks Tab -->
-                <div class="tab-pane fade show active" id="today" role="tabpanel" aria-labelledby="today-tab">
-                    @if (todaysTasks != null && todaysTasks.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="todaysTaskTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Priority</th>
-                                        <th>Due Time</th>
-                                        <th>Animal</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var task in todaysTasks)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <a asp-action="Details" asp-route-id="@task.Id">@task.Title</a>
-                                            </td>
-                                            <td>@task.Description</td>
-                                            <td>@task.Category</td>
-                                            <td>
-                                                @{
-                                                    string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
-                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
-                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
-                                                                        "badge-danger";
-                                                }
-                                                <span class="badge @priorityClass">@task.Priority</span>
-                                            </td>
-                                            <td>@task.DueDate.ToString("HH:mm")</td>
-                                            <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success btn-sm complete-task-btn" 
-                                                        data-toggle="modal" 
-                                                        data-target="#completeTaskModal" 
-                                                        data-task-id="@task.Id"
-                                                        data-task-title="@task.Title">
-                                                    <i class="fas fa-check mr-1"></i> Complete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle mr-2"></i> No tasks scheduled for today.
-                        </div>
-                    }
-                </div>
-                
-                <!-- Overdue Tasks Tab -->
-                <div class="tab-pane fade" id="overdue" role="tabpanel" aria-labelledby="overdue-tab">
-                    @if (overdueTasks != null && overdueTasks.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="overdueTaskTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Priority</th>
-                                        <th>Due Date</th>
-                                        <th>Days Overdue</th>
-                                        <th>Animal</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var task in overdueTasks)
-                                    {
-                                        int daysOverdue = (today - task.DueDate.Date).Days;
-                                        
-                                        <tr>
-                                            <td>
-                                                <a asp-action="Details" asp-route-id="@task.Id">@task.Title</a>
-                                            </td>
-                                            <td>@task.Description</td>
-                                            <td>@task.Category</td>
-                                            <td>
-                                                @{
-                                                    string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
-                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
-                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
-                                                                        "badge-danger";
-                                                }
-                                                <span class="badge @priorityClass">@task.Priority</span>
-                                            </td>
-                                            <td>@task.DueDate.ToShortDateString()</td>
-                                            <td><span class="text-danger">@daysOverdue</span></td>
-                                            <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success btn-sm complete-task-btn" 
-                                                        data-toggle="modal" 
-                                                        data-target="#completeTaskModal" 
-                                                        data-task-id="@task.Id"
-                                                        data-task-title="@task.Title">
-                                                    <i class="fas fa-check mr-1"></i> Complete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle mr-2"></i> No overdue tasks. Great job!
-                        </div>
-                    }
-                </div>
-                
-                <!-- Upcoming Tasks Tab -->
-                <div class="tab-pane fade" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
-                    @if (upcomingTasks != null && upcomingTasks.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="upcomingTaskTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Priority</th>
-                                        <th>Due Date</th>
-                                        <th>Animal</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var task in upcomingTasks)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <a asp-action="Details" asp-route-id="@task.Id">@task.Title</a>
-                                            </td>
-                                            <td>@task.Description</td>
-                                            <td>@task.Category</td>
-                                            <td>
-                                                @{
-                                                    string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
-                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
-                                                                        task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
-                                                                        "badge-danger";
-                                                }
-                                                <span class="badge @priorityClass">@task.Priority</span>
-                                            </td>
-                                            <td>@task.DueDate.ToShortDateString()</td>
-                                            <td>@(task.Animal != null ? $"#{task.Animal.TagNumber}" : "N/A")</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success btn-sm complete-task-btn" 
-                                                        data-toggle="modal" 
-                                                        data-target="#completeTaskModal" 
-                                                        data-task-id="@task.Id"
-                                                        data-task-title="@task.Title">
-                                                    <i class="fas fa-check mr-1"></i> Complete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle mr-2"></i> No upcoming tasks scheduled.
-                        </div>
-                    }
-                </div>
-                
-                <!-- Completed Tasks Tab -->
-                <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
-                    @if (completedTasks != null && completedTasks.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="completedTaskTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Category</th>
-                                        <th>Due Date</th>
-                                        <th>Completion Date</th>
-                                        <th>Notes</th>
-                                        <th>Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var task in completedTasks)
-                                    {
-                                        <tr>
-                                            <td>@task.Title</td>
-                                            <td>@task.Category</td>
-                                            <td>@task.DueDate.ToShortDateString()</td>
-                                            <td>@(task.CompletionDate != null ? task.CompletionDate.Value.ToShortDateString() : "-")</td>
-                                            <td>@(string.IsNullOrEmpty(task.Notes) ? "No notes" : task.Notes)</td>
-                                            <td>
-                                                <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
-                                                    <i class="fas fa-info-circle mr-1"></i> Details
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle mr-2"></i> No completed tasks yet.
-                        </div>
-                    }
+
+    <!-- Overdue Tasks -->
+    @if (overdueTasks?.Any() == true)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Overdue Tasks
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Due Date</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in overdueTasks)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td>
+                                        <span class="text-danger">@task.DueDate.ToString("MMM dd, yyyy")</span>
+                                        <small class="d-block text-muted">@((DateTime.Now - task.DueDate).Days) days overdue</small>
+                                    </td>
+                                    <td>
+                                        @{
+                                            string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                "badge-danger";
+                                        }
+                                        <span class="badge @priorityClass">@task.Priority</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-secondary">@task.Status</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#completeTaskModal" 
+                                                    data-task-id="@task.Id" data-employee-id="@employee.Id" data-task-title="@task.Title">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+    }
+
+    <!-- Today's Tasks -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-calendar-day mr-2"></i>Today's Tasks
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (todaysTasks?.Any() == true)
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in todaysTasks)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td>@task.Category.Name</td>
+                                    <td>
+                                        @{
+                                            string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                "badge-danger";
+                                        }
+                                        <span class="badge @priorityClass">@task.Priority</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-secondary">@task.Status</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#completeTaskModal" 
+                                                    data-task-id="@task.Id" data-employee-id="@employee.Id" data-task-title="@task.Title">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-check fa-3x text-gray-300 mb-3"></i>
+                    <p class="text-muted">No tasks scheduled for today.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Upcoming Tasks -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-info">
+                <i class="fas fa-calendar-alt mr-2"></i>Upcoming Tasks
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (upcomingTasks?.Any() == true)
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Due Date</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in upcomingTasks)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td>@task.DueDate.ToString("MMM dd, yyyy")</td>
+                                    <td>@task.Category.Name</td>
+                                    <td>
+                                        @{
+                                            string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.Medium ? "badge-primary" :
+                                                                task.Priority == Inyama_Yethu.Models.TaskPriority.High ? "badge-warning" :
+                                                                "badge-danger";
+                                        }
+                                        <span class="badge @priorityClass">@task.Priority</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-secondary">@task.Status</span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-info btn-sm">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar fa-3x text-gray-300 mb-3"></i>
+                    <p class="text-muted">No upcoming tasks scheduled.</p>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -376,14 +307,12 @@
             </div>
             <form asp-action="CompleteTask" method="post">
                 <div class="modal-body">
-                    <p>Are you sure you want to mark <strong id="taskTitleDisplay"></strong> as completed?</p>
-                    
-                    <input type="hidden" name="taskId" id="taskIdInput" value="" />
-                    <input type="hidden" name="employeeId" value="@employee.Id" />
-                    
+                    <input type="hidden" name="taskId" id="taskId" />
+                    <input type="hidden" name="employeeId" id="employeeId" />
+                    <p>Are you sure you want to mark "<span id="taskTitle"></span>" as completed?</p>
                     <div class="form-group">
-                        <label for="notes">Notes (optional)</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Enter any notes about task completion..."></textarea>
+                        <label for="notes">Notes (optional):</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -397,28 +326,18 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // Initialize DataTables
-            $('#todaysTaskTable').DataTable();
-            $('#overdueTaskTable').DataTable();
-            $('#upcomingTaskTable').DataTable();
-            $('#completedTaskTable').DataTable({
-                "order": [[3, "desc"]] // Sort by completion date
-            });
-            
-            // Handle modal data
-            $('.complete-task-btn').on('click', function() {
-                var taskId = $(this).data('task-id');
-                var taskTitle = $(this).data('task-title');
+        $(document).ready(function () {
+            $('#completeTaskModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var taskId = button.data('task-id');
+                var employeeId = button.data('employee-id');
+                var taskTitle = button.data('task-title');
                 
-                $('#taskIdInput').val(taskId);
-                $('#taskTitleDisplay').text(taskTitle);
+                var modal = $(this);
+                modal.find('#taskId').val(taskId);
+                modal.find('#employeeId').val(employeeId);
+                modal.find('#taskTitle').text(taskTitle);
             });
-            
-            // Auto-dismiss alerts
-            setTimeout(function() {
-                $('.alert').alert('close');
-            }, 5000);
         });
     </script>
 } 

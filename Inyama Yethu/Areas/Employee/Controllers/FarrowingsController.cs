@@ -82,7 +82,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             // Get related tasks for farrowings
             var farrowingTasks = await _context.TaskAssignments
                 .Where(t => t.EmployeeId == employee.Id && 
-                          (t.Category == "Farrowing" || t.Category == "Piglet Care") &&
+                          (t.Category.Name == "Farrowing" || t.Category.Name == "Piglet Care") &&
                           t.Status != FarmTaskStatus.Completed)
                 .ToListAsync();
                 

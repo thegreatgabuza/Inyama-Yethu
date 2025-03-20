@@ -87,7 +87,7 @@ namespace Inyama_Yethu.Services
                     {
                         // Check if there's no existing task for this sow
                         var existingTask = await dbContext.TaskAssignments
-                            .AnyAsync(t => t.Category == "Mating" && 
+                            .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Mating") && 
                                            t.AnimalId == sow.Id && 
                                            t.Status != FarmTaskStatus.Completed, 
                                      stoppingToken);
@@ -103,7 +103,7 @@ namespace Inyama_Yethu.Services
                                 DueDate = today.AddDays(1), // Schedule for tomorrow
                                 Status = FarmTaskStatus.Pending,
                                 Priority = TaskPriority.High,
-                                Category = "Mating",
+                                TaskCategoryId = GetSystemCategoryId("Mating"),
                                 AnimalId = sow.Id,
                                 EmployeeId = 1 // Assign to first employee (could be more sophisticated)
                             };
@@ -132,7 +132,7 @@ namespace Inyama_Yethu.Services
             {
                 // Create task for first pregnancy check
                 var existingTask = await dbContext.TaskAssignments
-                    .AnyAsync(t => t.Category == "PregnancyCheck" && 
+                    .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("PregnancyCheck") && 
                                    t.Title.Contains("first pregnancy check") && 
                                    t.AnimalId == mating.MotherAnimalId && 
                                    t.Status != FarmTaskStatus.Completed, 
@@ -147,7 +147,7 @@ namespace Inyama_Yethu.Services
                         DueDate = mating.ExpectedPregnancyCheck1,
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
-                        Category = "PregnancyCheck",
+                        TaskCategoryId = GetSystemCategoryId("PregnancyCheck"),
                         AnimalId = mating.MotherAnimalId,
                         EmployeeId = 1 // Assign to first employee
                     };
@@ -172,7 +172,7 @@ namespace Inyama_Yethu.Services
             {
                 // Create task for second pregnancy check
                 var existingTask = await dbContext.TaskAssignments
-                    .AnyAsync(t => t.Category == "PregnancyCheck" && 
+                    .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("PregnancyCheck") && 
                                    t.Title.Contains("second pregnancy check") && 
                                    t.AnimalId == mating.MotherAnimalId && 
                                    t.Status != FarmTaskStatus.Completed, 
@@ -187,7 +187,7 @@ namespace Inyama_Yethu.Services
                         DueDate = mating.ExpectedPregnancyCheck2,
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
-                        Category = "PregnancyCheck",
+                        TaskCategoryId = GetSystemCategoryId("PregnancyCheck"),
                         AnimalId = mating.MotherAnimalId,
                         EmployeeId = 1 // Assign to first employee
                     };
@@ -214,7 +214,7 @@ namespace Inyama_Yethu.Services
             {
                 // Create task for first vaccination
                 var existingTask = await dbContext.TaskAssignments
-                    .AnyAsync(t => t.Category == "Vaccination" && 
+                    .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Vaccination") && 
                                    t.Title.Contains("first vaccination") && 
                                    t.AnimalId == mating.MotherAnimalId && 
                                    t.Status != FarmTaskStatus.Completed, 
@@ -229,7 +229,7 @@ namespace Inyama_Yethu.Services
                         DueDate = mating.ExpectedVaccinationDate1,
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
-                        Category = "Vaccination",
+                        TaskCategoryId = GetSystemCategoryId("Vaccination"),
                         AnimalId = mating.MotherAnimalId,
                         EmployeeId = 1 // Assign to first employee
                     };
@@ -254,7 +254,7 @@ namespace Inyama_Yethu.Services
             {
                 // Create task for second vaccination
                 var existingTask = await dbContext.TaskAssignments
-                    .AnyAsync(t => t.Category == "Vaccination" && 
+                    .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Vaccination") && 
                                    t.Title.Contains("second vaccination") && 
                                    t.AnimalId == mating.MotherAnimalId && 
                                    t.Status != FarmTaskStatus.Completed, 
@@ -269,7 +269,7 @@ namespace Inyama_Yethu.Services
                         DueDate = mating.ExpectedVaccinationDate2,
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
-                        Category = "Vaccination",
+                        TaskCategoryId = GetSystemCategoryId("Vaccination"),
                         AnimalId = mating.MotherAnimalId,
                         EmployeeId = 1 // Assign to first employee
                     };
@@ -326,7 +326,7 @@ namespace Inyama_Yethu.Services
                         {
                             // Create task for initial processing
                             var existingTask = await dbContext.TaskAssignments
-                                .AnyAsync(t => t.Category == "PigletProcessing" && 
+                                .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("PigletProcessing") && 
                                              t.Title.Contains("initial processing") && 
                                              t.AnimalId == piglet.Id && 
                                              t.Status != FarmTaskStatus.Completed, 
@@ -341,7 +341,7 @@ namespace Inyama_Yethu.Services
                                     DueDate = piglet.BirthDate.AddDays(3),
                                     Status = FarmTaskStatus.Pending,
                                     Priority = TaskPriority.High,
-                                    Category = "PigletProcessing",
+                                    TaskCategoryId = GetSystemCategoryId("PigletProcessing"),
                                     AnimalId = piglet.Id,
                                     EmployeeId = 1 // Assign to first employee
                                 };
@@ -371,7 +371,7 @@ namespace Inyama_Yethu.Services
                 {
                     // Create task for day 7 processing
                     var existingTask = await dbContext.TaskAssignments
-                        .AnyAsync(t => t.Category == "PigletProcessing" && 
+                        .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("PigletProcessing") && 
                                      t.Title.Contains("day 7 processing") && 
                                      t.AnimalId == piglet.Id && 
                                      t.Status != FarmTaskStatus.Completed, 
@@ -386,7 +386,7 @@ namespace Inyama_Yethu.Services
                             DueDate = piglet.BirthDate.AddDays(7),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.High,
-                            Category = "PigletProcessing",
+                            TaskCategoryId = GetSystemCategoryId("PigletProcessing"),
                             AnimalId = piglet.Id,
                             EmployeeId = 1 // Assign to first employee
                         };
@@ -414,7 +414,7 @@ namespace Inyama_Yethu.Services
                 {
                     // Create task for creep feed introduction
                     var existingTask = await dbContext.TaskAssignments
-                        .AnyAsync(t => t.Category == "Feeding" && 
+                        .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Feeding") && 
                                      t.Title.Contains("creep feed") && 
                                      t.AnimalId == piglet.Id && 
                                      t.Status != FarmTaskStatus.Completed, 
@@ -429,7 +429,7 @@ namespace Inyama_Yethu.Services
                             DueDate = piglet.BirthDate.AddDays(10),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.Medium,
-                            Category = "Feeding",
+                            TaskCategoryId = GetSystemCategoryId("Feeding"),
                             AnimalId = piglet.Id,
                             EmployeeId = 2 // Assign to second employee
                         };
@@ -457,7 +457,7 @@ namespace Inyama_Yethu.Services
                 {
                     // Create task for day 21 weighing
                     var existingTask = await dbContext.TaskAssignments
-                        .AnyAsync(t => t.Category == "Weighing" && 
+                        .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Weighing") && 
                                      t.Title.Contains("day 21 weighing") && 
                                      t.AnimalId == piglet.Id && 
                                      t.Status != FarmTaskStatus.Completed, 
@@ -472,7 +472,7 @@ namespace Inyama_Yethu.Services
                             DueDate = piglet.BirthDate.AddDays(21),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.Medium,
-                            Category = "Weighing",
+                            TaskCategoryId = GetSystemCategoryId("Weighing"),
                             AnimalId = piglet.Id,
                             EmployeeId = 2 // Assign to second employee
                         };
@@ -500,7 +500,7 @@ namespace Inyama_Yethu.Services
                 {
                     // Create task for day 28 weighing and weaning
                     var existingTask = await dbContext.TaskAssignments
-                        .AnyAsync(t => t.Category == "Weaning" && 
+                        .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Weaning") && 
                                      t.Title.Contains("day 28 weighing and weaning") && 
                                      t.AnimalId == piglet.Id && 
                                      t.Status != FarmTaskStatus.Completed, 
@@ -515,7 +515,7 @@ namespace Inyama_Yethu.Services
                             DueDate = piglet.BirthDate.AddDays(28),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.High,
-                            Category = "Weaning",
+                            TaskCategoryId = GetSystemCategoryId("Weaning"),
                             AnimalId = piglet.Id,
                             EmployeeId = 1 // Assign to first employee
                         };
@@ -554,7 +554,7 @@ namespace Inyama_Yethu.Services
 
                     // Check if there's already a feeding task for today
                     var existingFeedingTask = await dbContext.TaskAssignments
-                        .AnyAsync(t => t.Category == "Feeding" && 
+                        .AnyAsync(t => t.TaskCategoryId == GetSystemCategoryId("Feeding") && 
                                      t.Title.Contains("creep pellets for weaner") && 
                                      t.AnimalId == pigletProcessing.AnimalId && 
                                      t.DueDate.Date == today.Date, 
@@ -569,7 +569,7 @@ namespace Inyama_Yethu.Services
                             DueDate = today,
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.Medium,
-                            Category = "Feeding",
+                            TaskCategoryId = GetSystemCategoryId("Feeding"),
                             AnimalId = pigletProcessing.AnimalId,
                             EmployeeId = 2 // Assign to second employee
                         };
@@ -601,7 +601,7 @@ namespace Inyama_Yethu.Services
                         DueDate = today,
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.Medium,
-                        Category = "Feeding",
+                        TaskCategoryId = GetSystemCategoryId("Feeding"),
                         AnimalId = pigletProcessing.AnimalId,
                         EmployeeId = 2 // Assign to second employee
                     };
@@ -636,7 +636,7 @@ namespace Inyama_Yethu.Services
                         DueDate = today,
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.Medium,
-                        Category = "Feeding",
+                        TaskCategoryId = GetSystemCategoryId("Feeding"),
                         AnimalId = pigletProcessing.AnimalId,
                         EmployeeId = 2 // Assign to second employee
                     };
@@ -681,7 +681,7 @@ namespace Inyama_Yethu.Services
                         DueDate = today.AddDays(2), // Due Wednesday
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
-                        Category = "AbattoirShipment",
+                        TaskCategoryId = GetSystemCategoryId("AbattoirShipment"),
                         EmployeeId = 1 // Assign to first employee
                     };
 
@@ -713,6 +713,30 @@ namespace Inyama_Yethu.Services
                     _logger.LogInformation("Created new abattoir shipment scheduled for {ShipmentDate}", shipment.ShipmentDate);
                 }
             }
+        }
+
+        private int GetSystemCategoryId(string categoryName)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var category = dbContext.TaskCategories
+                .FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase) && c.IsSystem);
+            
+            if (category == null)
+            {
+                // Create the system category if it doesn't exist
+                category = new TaskCategory
+                {
+                    Name = categoryName,
+                    Description = $"System category for {categoryName} tasks",
+                    IsSystem = true
+                };
+                dbContext.TaskCategories.Add(category);
+                dbContext.SaveChanges();
+            }
+            
+            return category.Id;
         }
     }
 } 

@@ -1,0 +1,88 @@
+@model Inyama_Yethu.Models.TaskCategory
+@{
+    ViewData["Title"] = "Edit Category";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit Category</h1>
+        <a asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Back to Categories
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Category Details</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="IsSystem" />
+
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label">Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter category description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input asp-for="IsDefault" class="custom-control-input" />
+                                <label asp-for="IsDefault" class="custom-control-label">Set as Default Category</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save fa-sm"></i> Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Category Guide</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Name</h6>
+                        <p class="mb-2">Choose a clear and descriptive name for the category.</p>
+                        <small class="text-muted">Example: "Animal Health", "Maintenance", "Feed Management"</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Description</h6>
+                        <p class="mb-2">Provide a brief explanation of what types of tasks belong in this category.</p>
+                        <small class="text-muted">This helps employees understand when to use this category.</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Default Category</h6>
+                        <p class="mb-2">A default category will be pre-selected when creating new tasks.</p>
+                        <small class="text-muted">Only one category can be set as default.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

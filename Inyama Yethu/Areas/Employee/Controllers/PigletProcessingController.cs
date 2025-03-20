@@ -66,7 +66,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             var processingTasks = await _context.TaskAssignments
                 .Include(t => t.Animal)
                 .Where(t => t.EmployeeId == employee.Id && 
-                          (t.Category == "Piglet Processing" || t.Category == "Piglet Care") &&
+                          (t.Category.Name == "Piglet Processing" || t.Category.Name == "Piglet Care") &&
                           t.Status != FarmTaskStatus.Completed)
                 .ToListAsync();
 

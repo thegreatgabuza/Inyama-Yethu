@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250311160912_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250320164411_AddTaskCategories")]
+    partial class AddTaskCategories
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,9 @@ namespace Inyama_Yethu.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("FatherAnimalId")
                         .HasColumnType("int");
 
@@ -113,6 +116,9 @@ namespace Inyama_Yethu.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<double?>("Weight")
                         .HasColumnType("float");
@@ -156,6 +162,41 @@ namespace Inyama_Yethu.Migrations
                     b.HasIndex("EmployeeId");
 
                     b.ToTable("Attendances");
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.Birth", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnimalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("NumberOfOffspring")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("WasAssisted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId");
+
+                    b.ToTable("Births");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.Customer", b =>
@@ -220,7 +261,19 @@ namespace Inyama_Yethu.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -231,22 +284,26 @@ namespace Inyama_Yethu.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Position")
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Employees");
 
@@ -254,22 +311,28 @@ namespace Inyama_Yethu.Migrations
                         new
                         {
                             Id = 1,
+                            Address = "",
+                            DateOfBirth = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "john.doe@inyamayethu.co.za",
+                            FirstName = "John",
                             HireDate = new DateTime(2023, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "John Doe",
-                            Phone = "072-123-4567",
-                            Position = "Farm Worker"
+                            JobTitle = "Farm Worker",
+                            LastName = "Doe",
+                            PhoneNumber = "072-123-4567"
                         },
                         new
                         {
                             Id = 2,
+                            Address = "",
+                            DateOfBirth = new DateTime(1985, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "jane.smith@inyamayethu.co.za",
+                            FirstName = "Jane",
                             HireDate = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "Jane Smith",
-                            Phone = "073-987-6543",
-                            Position = "Farm Manager"
+                            JobTitle = "Farm Manager",
+                            LastName = "Smith",
+                            PhoneNumber = "073-987-6543"
                         });
                 });
 
@@ -705,11 +768,6 @@ namespace Inyama_Yethu.Migrations
                     b.Property<int?>("AnimalId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<DateTime?>("CompletionDate")
                         .HasColumnType("datetime2");
 
@@ -735,6 +793,9 @@ namespace Inyama_Yethu.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("TaskCategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -746,7 +807,38 @@ namespace Inyama_Yethu.Migrations
 
                     b.HasIndex("EmployeeId");
 
+                    b.HasIndex("TaskCategoryId");
+
                     b.ToTable("TaskAssignments");
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.TaskCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TaskCategories");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.WeightRecord", b =>
@@ -1016,6 +1108,26 @@ namespace Inyama_Yethu.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("Inyama_Yethu.Models.Birth", b =>
+                {
+                    b.HasOne("Inyama_Yethu.Models.Animal", "Animal")
+                        .WithMany("Births")
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Animal");
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.Employee", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Inyama_Yethu.Models.Feedback", b =>
                 {
                     b.HasOne("Inyama_Yethu.Models.Customer", "Customer")
@@ -1121,7 +1233,15 @@ namespace Inyama_Yethu.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Inyama_Yethu.Models.TaskCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("TaskCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Animal");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Employee");
                 });
@@ -1195,6 +1315,8 @@ namespace Inyama_Yethu.Migrations
 
             modelBuilder.Entity("Inyama_Yethu.Models.Animal", b =>
                 {
+                    b.Navigation("Births");
+
                     b.Navigation("Feedings");
 
                     b.Navigation("HealthRecords");

@@ -6,21 +6,21 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inyama_Yethu.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNewData : Migration
+    public partial class AddTaskAssignmentDates : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "Animals",
+                name: "CreatedDate",
+                table: "TaskAssignments",
                 type: "datetime2",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.AddColumn<DateTime>(
-                name: "UpdatedAt",
-                table: "Animals",
+                name: "LastUpdated",
+                table: "TaskAssignments",
                 type: "datetime2",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
@@ -30,12 +30,12 @@ namespace Inyama_Yethu.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "Animals");
+                name: "CreatedDate",
+                table: "TaskAssignments");
 
             migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "Animals");
+                name: "LastUpdated",
+                table: "TaskAssignments");
         }
     }
 }
