@@ -4,6 +4,7 @@ using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Inyama_Yethu.Areas.Admin.Controllers
 {
@@ -145,37 +146,41 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         // GET: Admin/HealthRecords/Create
         public IActionResult Create()
         {
-            ViewBag.Animals = _context.Animals
-                .Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-                {
-                    Value = a.Id.ToString(),
-                    Text = $"{a.TagNumber} - {a.Type}"
-                })
+            var activeAnimals = _context.Animals
+                .Where(a => a.Status == AnimalStatus.Active)
+                .OrderBy(a => a.TagNumber)
                 .ToList();
-
+                
+            ViewBag.Animals = new SelectList(activeAnimals, "Id", "TagNumber");
+            ViewBag.RecordTypes = new SelectList(Enum.GetValues(typeof(HealthRecordType))
+                .Cast<HealthRecordType>()
+                .Select(e => new { Id = e, Name = e.ToString() }), "Id", "Name");
+                
             return View();
         }
 
         // POST: Admin/HealthRecords/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AnimalId,RecordDate,RecordType,Treatment,AdministeredBy,Cost,FollowUpDate,FollowUpCompleted,Description,Notes")] HealthRecord healthRecord)
+        public async Task<IActionResult> Create([Bind("AnimalId,RecordDate,RecordType,Treatment,AdministeredBy,Cost,FollowUpDate,Description,Notes")] HealthRecord healthRecord)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 _context.Add(healthRecord);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
-            ViewBag.Animals = _context.Animals
-                .Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-                {
-                    Value = a.Id.ToString(),
-                    Text = $"{a.TagNumber} - {a.Type}"
-                })
+            
+            var activeAnimals = _context.Animals
+                .Where(a => a.Status == AnimalStatus.Active)
+                .OrderBy(a => a.TagNumber)
                 .ToList();
-
+                
+            ViewBag.Animals = new SelectList(activeAnimals, "Id", "TagNumber", healthRecord.AnimalId);
+            ViewBag.RecordTypes = new SelectList(Enum.GetValues(typeof(HealthRecordType))
+                .Cast<HealthRecordType>()
+                .Select(e => new { Id = e, Name = e.ToString() }), "Id", "Name", healthRecord.RecordType);
+                
             return View(healthRecord);
         }
 

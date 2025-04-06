@@ -1,0 +1,359 @@
+@model IEnumerable<Inyama_Yethu.Models.Mating>
+
+@{
+    ViewData["Title"] = "Breeding Records";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var today = DateTime.Today;
+    
+    var upcomingFarrowings = ViewBag.UpcomingFarrowings as List<Inyama_Yethu.Models.Mating> ?? new List<Inyama_Yethu.Models.Mating>();
+    var recentFarrowings = ViewBag.RecentFarrowings as List<Inyama_Yethu.Models.Mating> ?? new List<Inyama_Yethu.Models.Mating>();
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Breeding Records</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item active">Breeding Records</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i>
+                Breeding Records
+            </div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Record New Mating
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search by tag number..." aria-label="Search">
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="btn-group float-end" role="group">
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="all">All</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="@MatingStatus.Scheduled">Scheduled</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="@MatingStatus.PregnancyConfirmed">Confirmed Pregnant</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="@MatingStatus.Farrowed">Farrowed</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="@MatingStatus.NotPregnant">Not Pregnant</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="breedingRecordsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sow ID</th>
+                            <th>Boar ID</th>
+                            <th>Service Date</th>
+                            <th>Status</th>
+                            <th>21-Day Check</th>
+                            <th>42-Day Check</th>
+                            <th>Expected Farrowing</th>
+                            <th>Actual Farrowing</th>
+                            <th>Born / Alive</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr data-status="@item.Status">
+                                <td>
+                                    <a asp-action="SowCard" asp-route-id="@item.MotherAnimalId" class="fw-bold text-decoration-none">
+                                        @item.Mother.TagNumber
+                                    </a>
+                                </td>
+                                <td>@item.Father.TagNumber</td>
+                                <td>@item.MatingDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @{
+                                        var statusBadgeClass = item.Status switch
+                                        {
+                                            MatingStatus.Scheduled => "bg-secondary",
+                                            MatingStatus.Completed => "bg-info",
+                                            MatingStatus.PregnancyConfirmed => "bg-success",
+                                            MatingStatus.NotPregnant => "bg-danger",
+                                            MatingStatus.Farrowed => "bg-primary",
+                                            MatingStatus.Aborted => "bg-warning",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusBadgeClass">@item.Status</span>
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.PregnancyCheck1Result.HasValue)
+                                        {
+                                            var resultClass = item.PregnancyCheck1Result.Value ? "text-success" : "text-danger";
+                                            var resultIcon = item.PregnancyCheck1Result.Value ? "fa-check" : "fa-times";
+                                            <span class="@resultClass"><i class="fas @resultIcon"></i></span>
+                                        }
+                                        else if (item.ExpectedPregnancyCheck1.HasValue && DateTime.Now.Ticks >= item.ExpectedPregnancyCheck1.Value.Ticks)
+                                        {
+                                            <a asp-action="PregnancyCheck" asp-route-id="@item.Id" asp-route-checkNumber="1" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-check-circle me-1"></i> Check Now
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span>@(item.ExpectedPregnancyCheck1.HasValue ? item.ExpectedPregnancyCheck1.Value.ToString("dd MMM") : "Not set")</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.PregnancyCheck2Result.HasValue)
+                                        {
+                                            var resultClass = item.PregnancyCheck2Result.Value ? "text-success" : "text-danger";
+                                            var resultIcon = item.PregnancyCheck2Result.Value ? "fa-check" : "fa-times";
+                                            <span class="@resultClass"><i class="fas @resultIcon"></i></span>
+                                        }
+                                        else if (item.ExpectedPregnancyCheck2.HasValue && DateTime.Now.Ticks >= item.ExpectedPregnancyCheck2.Value.Ticks)
+                                        {
+                                            <a asp-action="PregnancyCheck" asp-route-id="@item.Id" asp-route-checkNumber="2" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-check-circle me-1"></i> Check Now
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span>@(item.ExpectedPregnancyCheck2.HasValue ? item.ExpectedPregnancyCheck2.Value.ToString("dd MMM") : "Not set")</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.ExpectedFarrowingDate.HasValue)
+                                        {
+                                            <span>@item.ExpectedFarrowingDate.Value.ToString("dd MMM yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.ActualFarrowingDate.HasValue)
+                                        {
+                                            <span>@item.ActualFarrowingDate.Value.ToString("dd MMM yyyy")</span>
+                                        }
+                                        else if (item.Status == MatingStatus.PregnancyConfirmed && 
+                                                item.ExpectedFarrowingDate.HasValue && 
+                                                DateTime.Now >= item.ExpectedFarrowingDate.Value.AddDays(-7))
+                                        {
+                                            <a asp-action="RecordFarrowing" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                                <i class="fas fa-baby me-1"></i> Record
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            if (item.ExpectedFarrowingDate.HasValue)
+                                            {
+                                                <span>Expected: @item.ExpectedFarrowingDate.Value.ToString("dd MMM yyyy")</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Not set</span>
+                                            }
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.NumberOfPigletsBorn.HasValue && item.NumberOfPigletsBornAlive.HasValue)
+                                        {
+                                            <span>@item.NumberOfPigletsBorn / @item.NumberOfPigletsBornAlive</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-calendar-check me-1"></i>
+            Upcoming Events
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-danger h-100">
+                        <div class="card-header bg-danger text-white">Pregnancy Checks Due Today</div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="pregnancyChecksToday">
+                                @{
+                                    var checksToday = Model.Where(m => (
+                                        (m.ExpectedPregnancyCheck1.HasValue && m.ExpectedPregnancyCheck1.Value.Date == today.Date && !m.PregnancyCheck1Result.HasValue) ||
+                                        (m.ExpectedPregnancyCheck2.HasValue && m.ExpectedPregnancyCheck2.Value.Date == today.Date && !m.PregnancyCheck2Result.HasValue)
+                                    )).ToList();
+                                    
+                                    if (checksToday.Any())
+                                    {
+                                        foreach (var check in checksToday)
+                                        {
+                                            var checkNumber = check.ExpectedPregnancyCheck1.HasValue && check.ExpectedPregnancyCheck1.Value.Date == today.Date ? 1 : 2;
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">Sow @check.Mother.TagNumber</span> 
+                                                    <span class="text-muted">(@checkNumber * 21-day check)</span>
+                                                </div>
+                                                <a asp-action="PregnancyCheck" asp-route-id="@check.Id" asp-route-checkNumber="@checkNumber" class="btn btn-sm btn-danger">
+                                                    Check
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="list-group-item text-center text-muted">No pregnancy checks due today</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning h-100">
+                        <div class="card-header bg-warning text-dark">Expected Farrowings This Week</div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="farrowingsThisWeek">
+                                @{
+                                    var weekStart = DateTime.Today;
+                                    var weekEnd = weekStart.AddDays(7);
+                                    var farrowingsThisWeek = Model.Where(m => 
+                                        m.Status == MatingStatus.PregnancyConfirmed &&
+                                        m.ExpectedFarrowingDate.HasValue && 
+                                        m.ExpectedFarrowingDate.Value >= weekStart && 
+                                        m.ExpectedFarrowingDate.Value <= weekEnd
+                                    ).ToList();
+                                    
+                                    if (farrowingsThisWeek.Any())
+                                    {
+                                        foreach (var farrowing in farrowingsThisWeek)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">Sow @farrowing.Mother.TagNumber</span>
+                                                    <span class="text-muted">(@farrowing.ExpectedFarrowingDate?.ToString("dd MMM"))</span>
+                                                </div>
+                                                <span class="badge bg-warning text-dark">
+                                                    @((farrowing.ExpectedFarrowingDate.HasValue ? (farrowing.ExpectedFarrowingDate.Value - today).Days : 0)) days
+                                                </span>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="list-group-item text-center text-muted">No farrowings expected this week</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-info h-100">
+                        <div class="card-header bg-info text-white">Vaccinations Required</div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="vaccinationsRequired">
+                                @{
+                                    var vaccinationsRequired = Model.Where(m => 
+                                        m.Status == MatingStatus.PregnancyConfirmed && (
+                                            (!m.Vaccination1Completed && m.ExpectedVaccinationDate1.HasValue && m.ExpectedVaccinationDate1.Value <= today.AddDays(7)) ||
+                                            (!m.Vaccination2Completed && m.ExpectedVaccinationDate2.HasValue && m.ExpectedVaccinationDate2.Value <= today.AddDays(7))
+                                        )
+                                    ).ToList();
+                                    
+                                    if (vaccinationsRequired.Any())
+                                    {
+                                        foreach (var vaccination in vaccinationsRequired)
+                                        {
+                                            var vaccinationNumber = !vaccination.Vaccination1Completed ? 1 : 2;
+                                            var vaccinationDate = vaccinationNumber == 1 ? 
+                                                vaccination.ExpectedVaccinationDate1 : 
+                                                vaccination.ExpectedVaccinationDate2;
+                                                
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">Sow @vaccination.Mother.TagNumber</span>
+                                                    <span class="text-muted">(Vaccine #@vaccinationNumber)</span>
+                                                </div>
+                                                <span class="badge bg-info">
+                                                    @(vaccinationDate.HasValue ? vaccinationDate.Value.ToString("dd MMM") : "Not set")
+                                                </span>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="list-group-item text-center text-muted">No vaccinations required this week</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#breedingRecordsTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+            
+            // Filter functionality
+            $(".filter-btn").click(function() {
+                var filterValue = $(this).data("filter");
+                
+                // Highlight active button
+                $(".filter-btn").removeClass("active");
+                $(this).addClass("active");
+                
+                if (filterValue === "all") {
+                    $("#breedingRecordsTable tbody tr").show();
+                } else {
+                    $("#breedingRecordsTable tbody tr").hide();
+                    $("#breedingRecordsTable tbody tr[data-status='" + filterValue + "']").show();
+                }
+            });
+            
+            // Set first button as active by default
+            $(".filter-btn:first").addClass("active");
+        });
+    </script>
+} 

@@ -73,7 +73,7 @@
 
                         <div class="form-group mb-3">
                             <label asp-for="MotherAnimalId" class="control-label">Mother</label>
-                            <select asp-for="MotherAnimalId" asp-items="ViewBag.MotherAnimalId" class="form-select">
+                            <select asp-for="MotherAnimalId" asp-items="@(ViewData["MotherAnimalId"] != null ? (SelectList)ViewData["MotherAnimalId"] : new SelectList(new List<SelectListItem>()))" class="form-select">
                                 <option value="">Select Mother</option>
                             </select>
                             <span asp-validation-for="MotherAnimalId" class="text-danger"></span>
@@ -81,7 +81,7 @@
 
                         <div class="form-group mb-3">
                             <label asp-for="FatherAnimalId" class="control-label">Father</label>
-                            <select asp-for="FatherAnimalId" asp-items="ViewBag.FatherAnimalId" class="form-select">
+                            <select asp-for="FatherAnimalId" asp-items="@(ViewData["FatherAnimalId"] != null ? (SelectList)ViewData["FatherAnimalId"] : new SelectList(new List<SelectListItem>()))" class="form-select">
                                 <option value="">Select Father</option>
                             </select>
                             <span asp-validation-for="FatherAnimalId" class="text-danger"></span>

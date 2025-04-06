@@ -1,0 +1,497 @@
+@model IEnumerable<Inyama_Yethu.Models.Mating>
+
+@{
+    ViewData["Title"] = "Farrowing Records";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var recentFarrowings = ViewData["RecentFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+    var upcomingFarrowings = ViewData["UpcomingFarrowings"] as List<Inyama_Yethu.Models.Mating>;
+    var totalFarrowings = (int)ViewData["TotalFarrowings"];
+    var totalPigletsBorn = (int)ViewData["TotalPigletsBorn"];
+    var totalPigletsBornAlive = (int)ViewData["TotalPigletsBornAlive"];
+    var mortalityRate = Convert.ToDouble(ViewData["MortalityRate"]);
+    var monthlyStats = ViewData["MonthlyStats"] as List<dynamic>;
+    
+    string[] monthNames = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Farrowing Records</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item active">Farrowing Records</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Total Farrowings</div>
+                            <div class="h3">@totalFarrowings</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-piggy-bank fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="#farrowingTable" class="small text-white stretched-link">View Records</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Total Piglets Born</div>
+                            <div class="h3">@totalPigletsBorn</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-baby-carriage fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a asp-action="Report" class="small text-white stretched-link">View Report</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Piglets Born Alive</div>
+                            <div class="h3">@totalPigletsBornAlive</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-heartbeat fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small text-white">@(totalPigletsBorn > 0 ? $"{100 - mortalityRate:F1}% Survival Rate" : "N/A")</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Mortality Rate</div>
+                            <div class="h3">@mortalityRate.ToString("F1")%</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-heart-broken fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small text-white">@(totalPigletsBorn - totalPigletsBornAlive) Piglet Losses</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Upcoming Farrowings
+                        </div>
+                        <div>
+                            <a asp-action="Create" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Add New
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (upcomingFarrowings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Sow</th>
+                                        <th>Expected Date</th>
+                                        <th>Days Left</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in upcomingFarrowings)
+                                    {
+                                        var daysLeft = (item.ExpectedFarrowingDate.Value - DateTime.Now.Date).Days;
+                                        var urgencyClass = daysLeft <= 3 ? "text-danger" : (daysLeft <= 7 ? "text-warning" : "");
+                                        
+                                        <tr class="@urgencyClass">
+                                            <td>@item.Mother.TagNumber</td>
+                                            <td>@item.ExpectedFarrowingDate?.ToString("dd MMM yyyy")</td>
+                                            <td>
+                                                @daysLeft
+                                                @if (daysLeft <= 3)
+                                                {
+                                                    <span class="badge bg-danger">Urgent</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> No upcoming farrowings scheduled.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Monthly Farrowing Statistics
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyFarrowingChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-list-alt me-1"></i>
+                            All Farrowing Records
+                        </div>
+                        <div class="btn-group">
+                            <a asp-action="Create" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus me-1"></i> New Record
+                            </a>
+                            <a asp-action="Report" class="btn btn-primary btn-sm">
+                                <i class="fas fa-print me-1"></i> Print Report
+                            </a>
+                            <button type="button" class="btn btn-info btn-sm" id="toggleChart">
+                                <i class="fas fa-chart-pie me-1"></i> Toggle Chart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="farrowingChartContainer" class="mb-4" style="display: none;">
+                        <canvas id="farrowingRateChart" width="100%" height="40"></canvas>
+                    </div>
+                    
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" id="farrowingTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Sow Tag</th>
+                                        <th>Boar Tag</th>
+                                        <th>Status</th>
+                                        <th>Total Born</th>
+                                        <th>Born Alive</th>
+                                        <th>Mortality</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        var mortality = (item.NumberOfPigletsBorn ?? 0) - (item.NumberOfPigletsBornAlive ?? 0);
+                                        var mortalityPercent = item.NumberOfPigletsBorn > 0 
+                                            ? (mortality * 100.0 / item.NumberOfPigletsBorn.Value) 
+                                            : 0;
+                                        
+                                        var statusBadgeClass = item.Status == Inyama_Yethu.Models.MatingStatus.Farrowed ? "bg-success" :
+                                                              item.Status == Inyama_Yethu.Models.MatingStatus.PregnancyConfirmed ? "bg-primary" :
+                                                              item.Status == Inyama_Yethu.Models.MatingStatus.NotPregnant ? "bg-danger" : "bg-secondary";
+                                        
+                                        <tr>
+                                            <td>@(item.ActualFarrowingDate?.ToString("dd MMM yyyy") ?? item.ExpectedFarrowingDate?.ToString("dd MMM yyyy") ?? "Not set")</td>
+                                            <td>
+                                                <a asp-action="PrintSowCard" asp-route-id="@item.Mother.Id" class="text-decoration-none">
+                                                    @item.Mother.TagNumber
+                                                </a>
+                                            </td>
+                                            <td>@item.Father.TagNumber</td>
+                                            <td>
+                                                <span class="badge @statusBadgeClass">@item.Status</span>
+                                            </td>
+                                            <td>@(item.NumberOfPigletsBorn ?? 0)</td>
+                                            <td>@(item.NumberOfPigletsBornAlive ?? 0)</td>
+                                            <td>
+                                                @if (item.Status == Inyama_Yethu.Models.MatingStatus.Farrowed && item.NumberOfPigletsBorn > 0)
+                                                {
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-2">@mortality (@mortalityPercent.ToString("F1")%)</div>
+                                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                                            <div class="progress-bar bg-danger" role="progressbar" 
+                                                                 style="width: @mortalityPercent%;" 
+                                                                 aria-valuenow="@mortalityPercent" aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View Details">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Edit Record">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-action="PrintSowCard" asp-route-id="@item.Mother.Id" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="Print Sow Card">
+                                                        <i class="fas fa-id-card"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> No farrowing records found.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize DataTables
+        $(document).ready(function() {
+            $('#farrowingTable').DataTable({
+                responsive: true,
+                order: [[0, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                dom: '<"row mb-3"<"col-md-6"l><"col-md-6"f>><"row"<"col-md-12"rt>><"row"<"col-md-6"i><"col-md-6"p>>',
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search records..."
+                }
+            });
+            
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Toggle chart visibility
+            $("#toggleChart").on("click", function() {
+                $("#farrowingChartContainer").slideToggle();
+                
+                if ($("#farrowingChartContainer").is(":visible") && !window.farrowingRateChartInitialized) {
+                    initializeFarrowingRateChart();
+                    window.farrowingRateChartInitialized = true;
+                }
+            });
+        });
+        
+        // Farrowing Chart
+        var monthlyFarrowingCtx = document.getElementById('monthlyFarrowingChart');
+        var monthlyData = @Html.Raw(Json.Serialize(monthlyStats));
+        
+        var months = monthlyData.map(function(item) {
+            return '@Html.Raw(Json.Serialize(monthNames))'[item.month];
+        });
+        
+        var farrowingCounts = monthlyData.map(function(item) {
+            return item.count;
+        });
+        
+        var totalBorn = monthlyData.map(function(item) {
+            return item.totalBorn;
+        });
+        
+        var bornAlive = monthlyData.map(function(item) {
+            return item.bornAlive;
+        });
+        
+        new Chart(monthlyFarrowingCtx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Farrowings',
+                        type: 'line',
+                        data: farrowingCounts,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Total Born',
+                        data: totalBorn,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Born Alive',
+                        data: bornAlive,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Piglets'
+                        }
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Farrowings'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Function to initialize the farrowing rate chart
+        function initializeFarrowingRateChart() {
+            var ctx = document.getElementById('farrowingRateChart').getContext('2d');
+            
+            // Extract data for the rate chart
+            var monthlyMortality = monthlyData.map(function(item) {
+                if (item.totalBorn === 0) return 0;
+                return ((item.totalBorn - item.bornAlive) / item.totalBorn * 100).toFixed(1);
+            });
+            
+            var monthlyLitterSize = monthlyData.map(function(item) {
+                if (item.count === 0) return 0;
+                return (item.totalBorn / item.count).toFixed(1);
+            });
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Mortality Rate (%)',
+                            data: monthlyMortality,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderWidth: 2,
+                            pointStyle: 'circle',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Avg. Litter Size',
+                            data: monthlyLitterSize,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderWidth: 2,
+                            pointStyle: 'circle',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Mortality Rate (%)'
+                            },
+                            ticks: {
+                                stepSize: 5
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Avg. Litter Size'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Monthly Farrowing Performance'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+} 

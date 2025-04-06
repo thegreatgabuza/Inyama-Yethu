@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Batch Feed Record";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Batch Feed Recording</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/Admin/FeedManagement">Feed Management</a></li>
+        <li class="breadcrumb-item active">Batch Feed Recording</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-piggy-bank me-1"></i>
+            Batch Feeding Record
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <form asp-action="BatchRecord" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="animalType" class="control-label">Animal Type</label>
+                            <select id="animalType" name="animalType" class="form-control">
+                                @if (ViewData["AnimalTypes"] != null)
+                                {
+                                    foreach (var animalType in (IEnumerable<Inyama_Yethu.Models.AnimalType>)ViewData["AnimalTypes"])
+                                    {
+                                        <option value="@animalType">@animalType</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="">No animal types available</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="feedType" class="control-label">Feed Type</label>
+                            <select id="feedType" name="feedType" class="form-control">
+                                @foreach (var feedType in Enum.GetValues(typeof(Inyama_Yethu.Models.FeedType)))
+                                {
+                                    <option value="@feedType">@feedType</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="quantityPerAnimal" class="control-label">Quantity Per Animal (kg)</label>
+                            <input id="quantityPerAnimal" name="quantityPerAnimal" type="number" step="0.1" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="costPerKg" class="control-label">Cost per kg (ZAR)</label>
+                            <input id="costPerKg" name="costPerKg" type="number" step="0.01" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="feedDate" class="control-label">Feed Date</label>
+                            <input id="feedDate" name="feedDate" type="datetime-local" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="notes" class="control-label">Notes</label>
+                            <textarea id="notes" name="notes" class="form-control" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Batch Records
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-1"></i> Information
+                        </div>
+                        <div class="card-body">
+                            <p>Use this form to record feeding for multiple animals of the same type at once.</p>
+                            <p>The specified quantity will be applied to each animal of the selected type.</p>
+                            <p>For individual animal feeding, use the <a asp-action="Record">Individual Record</a> feature instead.</p>
+                            
+                            <hr />
+                            <h6>Recommended Daily Feed Quantities:</h6>
+                            <ul>
+                                <li><strong>Piglets (&lt; 10kg)</strong>: 0.5-1.0 kg/day</li>
+                                <li><strong>Weaners (10-25kg)</strong>: 1.0-2.0 kg/day</li>
+                                <li><strong>Growers (25-60kg)</strong>: 2.0-3.5 kg/day</li>
+                                <li><strong>Finishers (60kg+)</strong>: 3.0-4.5 kg/day</li>
+                                <li><strong>Pregnant Sows</strong>: 2.5-3.5 kg/day</li>
+                                <li><strong>Lactating Sows</strong>: 5.0-7.0 kg/day</li>
+                                <li><strong>Boars</strong>: 2.5-3.5 kg/day</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

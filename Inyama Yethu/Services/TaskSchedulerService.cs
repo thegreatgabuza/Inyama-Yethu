@@ -125,7 +125,8 @@ namespace Inyama_Yethu.Services
                 .Include(m => m.Mother)
                 .Where(m => m.Status == MatingStatus.Completed && 
                            !m.PregnancyCheck1Result.HasValue && 
-                           m.ExpectedPregnancyCheck1.Date <= tomorrow.Date)
+                           m.ExpectedPregnancyCheck1.HasValue &&
+                           m.ExpectedPregnancyCheck1.Value.Date <= tomorrow.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var mating in matingsForFirstCheck)
@@ -144,7 +145,7 @@ namespace Inyama_Yethu.Services
                     {
                         Title = $"Perform first pregnancy check for Sow #{mating.Mother.TagNumber}",
                         Description = $"Check if Sow #{mating.Mother.TagNumber} is pregnant (18-21 days after mating on {mating.MatingDate.ToShortDateString()}).",
-                        DueDate = mating.ExpectedPregnancyCheck1,
+                        DueDate = mating.ExpectedPregnancyCheck1 ?? DateTime.Today.AddDays(1),
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
                         TaskCategoryId = GetSystemCategoryId("PregnancyCheck"),
@@ -165,7 +166,8 @@ namespace Inyama_Yethu.Services
                 .Where(m => m.Status == MatingStatus.Completed && 
                            m.PregnancyCheck1Result == true && 
                            !m.PregnancyCheck2Result.HasValue && 
-                           m.ExpectedPregnancyCheck2.Date <= tomorrow.Date)
+                           m.ExpectedPregnancyCheck2.HasValue &&
+                           m.ExpectedPregnancyCheck2.Value.Date <= tomorrow.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var mating in matingsForSecondCheck)
@@ -184,7 +186,7 @@ namespace Inyama_Yethu.Services
                     {
                         Title = $"Perform second pregnancy check for Sow #{mating.Mother.TagNumber}",
                         Description = $"Confirm pregnancy for Sow #{mating.Mother.TagNumber} (42 days after mating on {mating.MatingDate.ToShortDateString()}).",
-                        DueDate = mating.ExpectedPregnancyCheck2,
+                        DueDate = mating.ExpectedPregnancyCheck2 ?? DateTime.Today.AddDays(1),
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
                         TaskCategoryId = GetSystemCategoryId("PregnancyCheck"),
@@ -207,7 +209,8 @@ namespace Inyama_Yethu.Services
                 .Include(m => m.Mother)
                 .Where(m => m.Status == MatingStatus.PregnancyConfirmed && 
                            !m.Vaccination1Completed && 
-                           m.ExpectedVaccinationDate1.Date <= tomorrow.Date)
+                           m.ExpectedVaccinationDate1.HasValue &&
+                           m.ExpectedVaccinationDate1.Value.Date <= tomorrow.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var mating in matingsForFirstVaccination)
@@ -226,7 +229,7 @@ namespace Inyama_Yethu.Services
                     {
                         Title = $"Administer first vaccination to pregnant Sow #{mating.Mother.TagNumber}",
                         Description = $"Vaccinate Sow #{mating.Mother.TagNumber} at day 100 of pregnancy.",
-                        DueDate = mating.ExpectedVaccinationDate1,
+                        DueDate = mating.ExpectedVaccinationDate1 ?? DateTime.Today.AddDays(1),
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
                         TaskCategoryId = GetSystemCategoryId("Vaccination"),
@@ -240,14 +243,15 @@ namespace Inyama_Yethu.Services
                     _logger.LogInformation("Created first vaccination task for Sow #{SowTag}", mating.Mother.TagNumber);
                 }
             }
-
+            
             // Second vaccination (day 107)
             var matingsForSecondVaccination = await dbContext.Matings
                 .Include(m => m.Mother)
                 .Where(m => m.Status == MatingStatus.PregnancyConfirmed && 
                            m.Vaccination1Completed && 
                            !m.Vaccination2Completed && 
-                           m.ExpectedVaccinationDate2.Date <= tomorrow.Date)
+                           m.ExpectedVaccinationDate2.HasValue &&
+                           m.ExpectedVaccinationDate2.Value.Date <= tomorrow.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var mating in matingsForSecondVaccination)
@@ -266,7 +270,7 @@ namespace Inyama_Yethu.Services
                     {
                         Title = $"Administer second vaccination to pregnant Sow #{mating.Mother.TagNumber}",
                         Description = $"Vaccinate Sow #{mating.Mother.TagNumber} at day 107 of pregnancy.",
-                        DueDate = mating.ExpectedVaccinationDate2,
+                        DueDate = mating.ExpectedVaccinationDate2 ?? DateTime.Today.AddDays(1),
                         Status = FarmTaskStatus.Pending,
                         Priority = TaskPriority.High,
                         TaskCategoryId = GetSystemCategoryId("Vaccination"),
@@ -299,7 +303,8 @@ namespace Inyama_Yethu.Services
                 var piglets = await dbContext.Animals
                     .Where(a => a.Type == AnimalType.Piglet && 
                               a.MotherAnimalId == farrowing.MotherAnimalId && 
-                              a.BirthDate == farrowing.ActualFarrowingDate.Value)
+                              a.BirthDate.HasValue && 
+                              a.BirthDate.Value == farrowing.ActualFarrowingDate.Value)
                     .ToListAsync(stoppingToken);
 
                 if (piglets.Any())
@@ -337,8 +342,8 @@ namespace Inyama_Yethu.Services
                                 var task = new TaskAssignment
                                 {
                                     Title = $"Perform initial processing for Piglet #{piglet.TagNumber}",
-                                    Description = $"Complete tail docking, iron injection, and ear notching for piglet born on {piglet.BirthDate.ToShortDateString()}.",
-                                    DueDate = piglet.BirthDate.AddDays(3),
+                                    Description = $"Complete tail docking, iron injection, and ear notching for piglet born on {(piglet.BirthDate.HasValue ? piglet.BirthDate.Value.ToShortDateString() : "Unknown date")}.",
+                                    DueDate = piglet.BirthDate.HasValue ? piglet.BirthDate.Value.AddDays(3) : DateTime.Today.AddDays(3),
                                     Status = FarmTaskStatus.Pending,
                                     Priority = TaskPriority.High,
                                     TaskCategoryId = GetSystemCategoryId("PigletProcessing"),
@@ -359,7 +364,8 @@ namespace Inyama_Yethu.Services
             // Tattooing and vaccination (day 7)
             var pigletsDaySevenProcessing = await dbContext.Animals
                 .Where(a => a.Type == AnimalType.Piglet && 
-                          a.BirthDate.AddDays(7).Date == today.Date)
+                          a.BirthDate.HasValue && 
+                          a.BirthDate.Value.AddDays(7).Date == today.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var piglet in pigletsDaySevenProcessing)
@@ -383,7 +389,7 @@ namespace Inyama_Yethu.Services
                         {
                             Title = $"Perform day 7 processing for Piglet #{piglet.TagNumber}",
                             Description = $"Complete tattooing and initial vaccination for piglet.",
-                            DueDate = piglet.BirthDate.AddDays(7),
+                            DueDate = piglet.BirthDate.HasValue ? piglet.BirthDate.Value.AddDays(7) : DateTime.Today.AddDays(7),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.High,
                             TaskCategoryId = GetSystemCategoryId("PigletProcessing"),
@@ -402,7 +408,8 @@ namespace Inyama_Yethu.Services
             // Introduce to creep feed (day 10)
             var pigletsDayTenProcessing = await dbContext.Animals
                 .Where(a => a.Type == AnimalType.Piglet && 
-                          a.BirthDate.AddDays(10).Date == today.Date)
+                          a.BirthDate.HasValue && 
+                          a.BirthDate.Value.AddDays(10).Date == today.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var piglet in pigletsDayTenProcessing)
@@ -426,7 +433,7 @@ namespace Inyama_Yethu.Services
                         {
                             Title = $"Introduce creep feed to Piglet #{piglet.TagNumber}",
                             Description = $"Begin introducing creep feed to piglet on day 10.",
-                            DueDate = piglet.BirthDate.AddDays(10),
+                            DueDate = piglet.BirthDate.HasValue ? piglet.BirthDate.Value.AddDays(10) : DateTime.Today.AddDays(10),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.Medium,
                             TaskCategoryId = GetSystemCategoryId("Feeding"),
@@ -445,7 +452,8 @@ namespace Inyama_Yethu.Services
             // Weighing (day 21)
             var pigletsDayTwentyOneProcessing = await dbContext.Animals
                 .Where(a => a.Type == AnimalType.Piglet && 
-                          a.BirthDate.AddDays(21).Date == today.Date)
+                          a.BirthDate.HasValue && 
+                          a.BirthDate.Value.AddDays(21).Date == today.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var piglet in pigletsDayTwentyOneProcessing)
@@ -469,7 +477,7 @@ namespace Inyama_Yethu.Services
                         {
                             Title = $"Weigh Piglet #{piglet.TagNumber} (day 21)",
                             Description = $"Weigh piglet at 21 days of age and record weight.",
-                            DueDate = piglet.BirthDate.AddDays(21),
+                            DueDate = piglet.BirthDate.HasValue ? piglet.BirthDate.Value.AddDays(21) : DateTime.Today.AddDays(21),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.Medium,
                             TaskCategoryId = GetSystemCategoryId("Weighing"),
@@ -488,7 +496,8 @@ namespace Inyama_Yethu.Services
             // Weighing and weaning prep (day 28)
             var pigletsDayTwentyEightProcessing = await dbContext.Animals
                 .Where(a => a.Type == AnimalType.Piglet && 
-                          a.BirthDate.AddDays(28).Date == today.Date)
+                          a.BirthDate.HasValue && 
+                          a.BirthDate.Value.AddDays(28).Date == today.Date)
                 .ToListAsync(stoppingToken);
 
             foreach (var piglet in pigletsDayTwentyEightProcessing)
@@ -512,7 +521,7 @@ namespace Inyama_Yethu.Services
                         {
                             Title = $"Day 28 weighing and weaning for Piglet #{piglet.TagNumber}",
                             Description = $"Weigh piglet at 28 days of age and complete weaning process.",
-                            DueDate = piglet.BirthDate.AddDays(28),
+                            DueDate = piglet.BirthDate.HasValue ? piglet.BirthDate.Value.AddDays(28) : DateTime.Today.AddDays(28),
                             Status = FarmTaskStatus.Pending,
                             Priority = TaskPriority.High,
                             TaskCategoryId = GetSystemCategoryId("Weaning"),
@@ -666,7 +675,8 @@ namespace Inyama_Yethu.Services
                 var readyPigs = await dbContext.Animals
                     .Where(a => (a.Type == AnimalType.Grower || a.Type == AnimalType.Finisher) && 
                               a.Status == AnimalStatus.Active && 
-                              a.BirthDate.AddDays(150) <= today) // Typically around 5 months old
+                              a.BirthDate.HasValue &&
+                              a.BirthDate.Value.AddDays(150) <= today) // Typically around 5 months old
                     .OrderBy(a => a.BirthDate)
                     .Take(10)
                     .ToListAsync(stoppingToken);

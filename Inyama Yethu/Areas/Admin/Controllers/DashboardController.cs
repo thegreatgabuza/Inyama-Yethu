@@ -45,22 +45,22 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             ViewData["TotalAnimals"] = totalAnimals;
             ViewData["AnimalGrowth"] = growthPercentage;
 
-            // Get healthy animals count
-            var healthyAnimals = await _context.Animals
-                .Where(a => a.Status != AnimalStatus.Deceased && 
-                           a.Status != AnimalStatus.Sold &&
-                           !a.HealthRecords.Any(hr => !hr.FollowUpCompleted && hr.FollowUpDate >= today))
+            // Get animals requiring attention (using HealthRecordsController logic)
+            var animalsNeedingAttention = await _context.Animals
+                .Include(a => a.HealthRecords)
+                .Where(a => a.Status != AnimalStatus.Deceased && a.Status != AnimalStatus.Sold)
+                .Where(a => a.HealthRecords.Any(hr => 
+                    !hr.FollowUpCompleted && 
+                    (hr.FollowUpDate <= today || 
+                    (hr.RecordType == HealthRecordType.Vaccination && hr.RecordDate.AddMonths(1) <= today))))
                 .CountAsync();
+
+            ViewData["AnimalsNeedingAttention"] = animalsNeedingAttention;
+
+            // Get healthy animals count (animals not needing attention)
+            var healthyAnimals = totalAnimals - animalsNeedingAttention;
             ViewData["HealthyAnimals"] = healthyAnimals;
             ViewData["HealthyPercentage"] = totalAnimals > 0 ? (healthyAnimals * 100 / totalAnimals) : 0;
-
-            // Get animals needing attention
-            var animalsNeedingAttention = await _context.Animals
-                .Where(a => a.Status != AnimalStatus.Deceased && 
-                           a.Status != AnimalStatus.Sold &&
-                           a.HealthRecords.Any(hr => !hr.FollowUpCompleted && hr.FollowUpDate >= today))
-                .CountAsync();
-            ViewData["AnimalsNeedingAttention"] = animalsNeedingAttention;
 
             // Get vaccination statistics
             var vaccinated = await _context.Animals
@@ -68,9 +68,19 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                            a.Status != AnimalStatus.Sold &&
                            a.HealthRecords.Any(hr => 
                                hr.RecordType == HealthRecordType.Vaccination && 
-                               hr.RecordDate >= today.AddMonths(-6)))
+                               hr.RecordDate >= today.AddMonths(-1)))
                 .CountAsync();
             ViewData["VaccinationPercentage"] = totalAnimals > 0 ? (vaccinated * 100 / totalAnimals) : 0;
+
+            // Get animals needing vaccination
+            var animalsNeedingVaccination = await _context.Animals
+                .Include(a => a.HealthRecords.Where(hr => hr.RecordType == HealthRecordType.Vaccination))
+                .Where(a => a.Status != AnimalStatus.Deceased && a.Status != AnimalStatus.Sold)
+                .Where(a => !a.HealthRecords.Any(hr => 
+                    hr.RecordType == HealthRecordType.Vaccination && 
+                    hr.RecordDate >= today.AddMonths(-1)))
+                .CountAsync();
+            ViewData["AnimalsNeedingVaccination"] = animalsNeedingVaccination;
 
             // Get monthly population data for the last 12 months
             var monthlyData = new List<object>();
@@ -208,14 +218,33 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 _ => today.AddMonths(-1)
             };
 
-            var data = await _context.Animals
-                .Where(a => a.CreatedAt >= startDate)
-                .GroupBy(a => a.CreatedAt.Date)
-                .Select(g => new { Date = g.Key, Count = g.Count() })
-                .OrderBy(x => x.Date)
-                .ToListAsync();
+            try
+            {
+                // Get animal counts by date
+                var animalsByDate = await _context.Animals
+                    .Where(a => a.CreatedAt >= startDate)
+                    .GroupBy(a => a.CreatedAt.Date)
+                    .Select(g => new { Date = g.Key, Count = g.Count() })
+                    .OrderBy(x => x.Date)
+                    .ToListAsync();
 
-            return Json(data);
+                // Get all dates in the range for complete timeline
+                var allDates = EachDay(startDate, today).ToList();
+
+                // Create a complete dataset with all dates
+                var completeData = allDates.Select(date => new
+                {
+                    date = date.ToString("yyyy-MM-dd"),
+                    count = animalsByDate.FirstOrDefault(x => x.Date == date)?.Count ?? 0
+                }).ToList();
+
+                return Json(completeData);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                return Json(new { error = "Failed to retrieve data", message = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -223,24 +252,32 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         {
             var today = TimeZoneInfo.ConvertTime(DateTime.Now, _southAfricaTimeZone).Date;
             
-            var data = await _context.Animals
-                .Where(a => a.Status != AnimalStatus.Deceased && a.Status != AnimalStatus.Sold)
-                .Select(a => new
-                {
-                    Status = a.HealthRecords
-                        .Where(hr => !hr.FollowUpCompleted)
-                        .OrderByDescending(hr => hr.FollowUpDate)
-                        .FirstOrDefault() == null ? "Healthy" :
-                        (a.HealthRecords
+            try
+            {
+                var data = await _context.Animals
+                    .Where(a => a.Status != AnimalStatus.Deceased && a.Status != AnimalStatus.Sold)
+                    .Select(a => new
+                    {
+                        Status = a.HealthRecords
                             .Where(hr => !hr.FollowUpCompleted)
                             .OrderByDescending(hr => hr.FollowUpDate)
-                            .First().FollowUpDate < today ? "Critical" : "Under Treatment")
-                })
-                .GroupBy(x => x.Status)
-                .Select(g => new { Status = g.Key, Count = g.Count() })
-                .ToListAsync();
+                            .FirstOrDefault() == null ? "Healthy" :
+                            (a.HealthRecords
+                                .Where(hr => !hr.FollowUpCompleted)
+                                .OrderByDescending(hr => hr.FollowUpDate)
+                                .First().FollowUpDate < today ? "Critical" : "Under Treatment")
+                    })
+                    .GroupBy(x => x.Status)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .ToListAsync();
 
-            return Json(data);
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                return Json(new { error = "Failed to retrieve health data", message = ex.Message });
+            }
         }
 
         public IActionResult Reports()

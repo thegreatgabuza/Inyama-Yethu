@@ -1,3 +1,4 @@
+@using Inyama_Yethu.Models
 @{
     ViewData["Title"] = "Employee Dashboard";
     Layout = "_EmployeeLayout";
@@ -239,7 +240,8 @@
                             }
                             @foreach (var task in overdueTasks)
                             {
-                                var daysOverdue = (today - task.DueDate.Date).Days;
+                                var timeSpan = today - task.DueDate.Date;
+                                var daysOverdue = timeSpan.Days;
                                 
                                 <tr>
                                     <td>@task.Title</td>

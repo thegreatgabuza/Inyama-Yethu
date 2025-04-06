@@ -1,0 +1,1 @@
+// This file is no longer needed as enums are defined in their respective model classes 

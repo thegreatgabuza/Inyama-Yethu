@@ -1,4 +1,5 @@
 using Inyama_Yethu.Data;
+using Inyama_Yethu.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,7 @@ namespace Inyama_Yethu.Controllers
             var todaysTasks = await _context.TaskAssignments
                 .Include(t => t.Employee)
                 .Include(t => t.Animal)
-                .Where(t => t.DueDate.Date == today && t.Status != Models.FarmTaskStatus.Completed)
+                .Where(t => t.DueDate.Date == today && t.Status != FarmTaskStatus.Completed)
                 .OrderBy(t => t.Priority)
                 .ToListAsync();
 
@@ -49,7 +50,7 @@ namespace Inyama_Yethu.Controllers
                 .Include(t => t.Animal)
                 .Where(t => t.DueDate.Date > today && 
                           t.DueDate.Date <= today.AddDays(7) && 
-                          t.Status != Models.FarmTaskStatus.Completed)
+                          t.Status != FarmTaskStatus.Completed)
                 .OrderBy(t => t.DueDate)
                 .ThenBy(t => t.Priority)
                 .ToListAsync();
@@ -58,13 +59,13 @@ namespace Inyama_Yethu.Controllers
             var overdueTasks = await _context.TaskAssignments
                 .Include(t => t.Employee)
                 .Include(t => t.Animal)
-                .Where(t => t.DueDate.Date < today && t.Status != Models.FarmTaskStatus.Completed)
+                .Where(t => t.DueDate.Date < today && t.Status != FarmTaskStatus.Completed)
                 .OrderBy(t => t.DueDate)
                 .ToListAsync();
 
             // Get livestock statistics
             var livestockStats = await _context.Animals
-                .Where(a => a.Status != Models.AnimalStatus.Deceased && a.Status != Models.AnimalStatus.Sold)
+                .Where(a => a.Status != AnimalStatus.Deceased && a.Status != AnimalStatus.Sold)
                 .GroupBy(a => a.Type)
                 .Select(g => new { Type = g.Key, Count = g.Count() })
                 .ToListAsync();
@@ -73,7 +74,7 @@ namespace Inyama_Yethu.Controllers
             var upcomingMatings = await _context.Matings
                 .Include(m => m.Mother)
                 .Include(m => m.Father)
-                .Where(m => m.Status == Models.MatingStatus.Scheduled && m.MatingDate.Date >= today)
+                .Where(m => m.Status == MatingStatus.Scheduled && m.MatingDate.Date >= today)
                 .OrderBy(m => m.MatingDate)
                 .Take(5)
                 .ToListAsync();
@@ -81,15 +82,15 @@ namespace Inyama_Yethu.Controllers
             // Get upcoming farrowings
             var upcomingFarrowings = await _context.Matings
                 .Include(m => m.Mother)
-                .Where(m => m.Status == Models.MatingStatus.PregnancyConfirmed && 
-                          m.ExpectedFarrowingDate.Date >= today)
+                .Where(m => m.Status == MatingStatus.PregnancyConfirmed && 
+                          m.ExpectedFarrowingDate.Date() >= today)
                 .OrderBy(m => m.ExpectedFarrowingDate)
                 .Take(5)
                 .ToListAsync();
 
             // Get upcoming abattoir shipments
             var upcomingShipments = await _context.AbattoirShipments
-                .Where(s => s.ShipmentDate.Date >= today && s.Status != Models.ShipmentStatus.Cancelled)
+                .Where(s => s.ShipmentDate.Date >= today && s.Status != ShipmentStatus.Cancelled)
                 .OrderBy(s => s.ShipmentDate)
                 .Take(3)
                 .ToListAsync();
@@ -97,7 +98,7 @@ namespace Inyama_Yethu.Controllers
             // Get recent orders
             var recentOrders = await _context.Orders
                 .Include(o => o.Customer)
-                .Where(o => o.Status != Models.OrderStatus.Delivered && o.Status != Models.OrderStatus.Cancelled)
+                .Where(o => o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Cancelled)
                 .OrderByDescending(o => o.OrderDate)
                 .Take(5)
                 .ToListAsync();
@@ -122,7 +123,7 @@ namespace Inyama_Yethu.Controllers
         {
             // Get livestock statistics by type
             var livestockByType = await _context.Animals
-                .Where(a => a.Status != Models.AnimalStatus.Deceased && a.Status != Models.AnimalStatus.Sold)
+                .Where(a => a.Status != AnimalStatus.Deceased && a.Status != AnimalStatus.Sold)
                 .GroupBy(a => a.Type)
                 .Select(g => new { Type = g.Key, Count = g.Count() })
                 .ToListAsync();
@@ -136,7 +137,7 @@ namespace Inyama_Yethu.Controllers
             // Get recent farrowings
             var recentFarrowings = await _context.Matings
                 .Include(m => m.Mother)
-                .Where(m => m.Status == Models.MatingStatus.Farrowed && 
+                .Where(m => m.Status == MatingStatus.Farrowed && 
                           m.ActualFarrowingDate.HasValue)
                 .OrderByDescending(m => m.ActualFarrowingDate)
                 .Take(5)
@@ -145,7 +146,7 @@ namespace Inyama_Yethu.Controllers
             // Get pregnant sows
             var pregnantSows = await _context.Matings
                 .Include(m => m.Mother)
-                .Where(m => m.Status == Models.MatingStatus.PregnancyConfirmed && 
+                .Where(m => m.Status == MatingStatus.PregnancyConfirmed && 
                           !m.ActualFarrowingDate.HasValue)
                 .OrderBy(m => m.ExpectedFarrowingDate)
                 .ToListAsync();
@@ -180,7 +181,7 @@ namespace Inyama_Yethu.Controllers
             var allTasks = await _context.TaskAssignments
                 .Include(t => t.Employee)
                 .Include(t => t.Animal)
-                .Where(t => t.Status != Models.FarmTaskStatus.Completed)
+                .Where(t => t.Status != FarmTaskStatus.Completed)
                 .OrderBy(t => t.DueDate)
                 .ThenBy(t => t.Priority)
                 .ToListAsync();

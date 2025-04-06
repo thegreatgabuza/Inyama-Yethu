@@ -35,29 +35,33 @@
                                 <td>
                                     @if (item.LastVaccinationDate.HasValue)
                                     {
-                                        @item.LastVaccinationDate.Value.ToShortDateString()
+                                        @item.LastVaccinationDate.Value.ToString("MM/dd/yyyy")
                                     }
                                     else
                                     {
-                                        <span class="text-muted">Never</span>
+                                        <span class="text-muted">None</span>
                                     }
                                 </td>
-                                <td>@item.NextVaccinationDue.ToShortDateString()</td>
+                                <td>@item.NextVaccinationDue.ToString("MM/dd/yyyy")</td>
                                 <td>
-                                    @if (item.IsOverdue)
-                                    {
-                                        <span class="badge bg-danger">Overdue</span>
-                                    }
-                                    else
-                                    {
+                                    @{
                                         var daysUntilDue = (item.NextVaccinationDue - DateTime.Today).Days;
-                                        if (daysUntilDue <= 7)
+                                        
+                                        if (daysUntilDue < 0)
                                         {
-                                            <span class="badge bg-warning">Due Soon</span>
+                                            <span class="badge bg-danger">Overdue (@Math.Abs(daysUntilDue) days)</span>
+                                        }
+                                        else if (daysUntilDue == 0)
+                                        {
+                                            <span class="badge bg-warning">Today</span>
+                                        }
+                                        else if (daysUntilDue <= 7)
+                                        {
+                                            <span class="badge bg-info">@daysUntilDue days</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-success">On Schedule</span>
+                                            <span class="badge bg-secondary">@daysUntilDue days</span>
                                         }
                                     }
                                 </td>

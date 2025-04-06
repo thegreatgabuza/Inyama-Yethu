@@ -160,7 +160,7 @@
                                             <td>@mating.FatherAnimalId</td>
                                             <td>@mating.Father.TagNumber</td>
                                             <td>@mating.MatingDate.ToString("MMM dd, yyyy")</td>
-                                            <td>@mating.ExpectedPregnancyCheck1.ToString("MMM dd, yyyy")</td>
+                                            <td>@(mating.ExpectedPregnancyCheck1.HasValue ? mating.ExpectedPregnancyCheck1.Value.ToString("MMM dd, yyyy") : "Not set")</td>
                                             <td>
                                                 <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-info btn-sm">
                                                     <i class="fas fa-info-circle mr-1"></i> Details
@@ -199,7 +199,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var mating in pregnantSows.OrderBy(m => m.ExpectedFarrowingDate))
+                                    @foreach (var mating in pregnantSows.OrderBy(m => m.MatingDate))
                                     {
                                         int daysPregant = (today - mating.MatingDate).Days;
                                         
@@ -228,10 +228,10 @@
                                             <td>@mating.MotherAnimalId</td>
                                             <td>@mating.Mother.TagNumber</td>
                                             <td>@mating.MatingDate.ToString("MMM dd, yyyy")</td>
-                                            <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@(mating.ExpectedFarrowingDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
                                             <td>@daysPregant days</td>
                                             <td>
-                                                @mating.ExpectedVaccinationDate1.ToString("MMM dd, yyyy")
+                                                @(mating.ExpectedVaccinationDate1.HasValue ? mating.ExpectedVaccinationDate1.Value.ToString("MMM dd, yyyy") : "Not set")
                                                 @if (mating.Vaccination1Completed)
                                                 {
                                                     <span class="badge badge-success">Done</span>
@@ -242,7 +242,7 @@
                                                 }
                                             </td>
                                             <td>
-                                                @mating.ExpectedVaccinationDate2.ToString("MMM dd, yyyy")
+                                                @(mating.ExpectedVaccinationDate2.HasValue ? mating.ExpectedVaccinationDate2.Value.ToString("MMM dd, yyyy") : "Not set")
                                                 @if (mating.Vaccination2Completed)
                                                 {
                                                     <span class="badge badge-success">Done</span>
@@ -292,7 +292,7 @@
                                 <tbody>
                                     @foreach (var mating in upcomingFarrowings.OrderBy(m => m.ExpectedFarrowingDate))
                                     {
-                                        int daysUntilFarrowing = (mating.ExpectedFarrowingDate - today).Days;
+                                        int daysUntilFarrowing = mating.ExpectedFarrowingDate.HasValue ? (mating.ExpectedFarrowingDate.Value - today).Days : 0;
                                         int daysPregant = (today - mating.MatingDate).Days;
                                         
                                         // Get housing/pen info for mother
@@ -319,7 +319,7 @@
                                         <tr>
                                             <td>@mating.MotherAnimalId</td>
                                             <td>@mating.Mother.TagNumber</td>
-                                            <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@(mating.ExpectedFarrowingDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
                                             <td>
                                                 @if (daysUntilFarrowing <= 0)
                                                 {

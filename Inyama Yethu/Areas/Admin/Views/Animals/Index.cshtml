@@ -45,7 +45,7 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            var age = (DateTime.Now - item.BirthDate).Days;
+                            var age = item.BirthDate.HasValue ? (DateTime.Now - item.BirthDate.Value).Days : 0;
                             var ageDisplay = age > 365 ? $"{age / 365} years" : 
                                            age > 30 ? $"{age / 30} months" : 
                                            $"{age} days";
@@ -54,7 +54,7 @@
                                 <td>@Html.DisplayFor(modelItem => item.TagNumber)</td>
                                 <td>@Html.DisplayFor(modelItem => item.Type)</td>
                                 <td>@Html.DisplayFor(modelItem => item.Gender)</td>
-                                <td>@item.BirthDate.ToString("yyyy-MM-dd")</td>
+                                <td>@(item.BirthDate.HasValue ? item.BirthDate.Value.ToString("yyyy-MM-dd") : "Unknown")</td>
                                 <td>@ageDisplay</td>
                                 <td>
                                     @if (item.Weight.HasValue)

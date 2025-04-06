@@ -32,30 +32,40 @@ namespace Inyama_Yethu.Models
         [Required]
         public MatingStatus Status { get; set; } = MatingStatus.Scheduled;
         
+        // Pregnancy check 1 (21 days)
         [Display(Name = "Expected Pregnancy Check 1")]
-        public DateTime ExpectedPregnancyCheck1 { get; set; } // Day 18-21
-        
+        public DateTime? ExpectedPregnancyCheck1 { get; set; }
+        [Display(Name = "Pregnancy Check 1 Date")]
+        public DateTime? PregnancyCheck1Date { get; set; }
         [Display(Name = "Pregnancy Check 1 Result")]
         public bool? PregnancyCheck1Result { get; set; }
         
+        // Pregnancy check 2 (42 days)
         [Display(Name = "Expected Pregnancy Check 2")]
-        public DateTime ExpectedPregnancyCheck2 { get; set; } // Day 42
-        
+        public DateTime? ExpectedPregnancyCheck2 { get; set; }
+        [Display(Name = "Pregnancy Check 2 Date")]
+        public DateTime? PregnancyCheck2Date { get; set; }
         [Display(Name = "Pregnancy Check 2 Result")]
         public bool? PregnancyCheck2Result { get; set; }
         
+        // Pregnancy check details
+        [StringLength(500)]
+        [Display(Name = "Pregnancy Check Notes")]
+        public string PregnancyCheckNotes { get; set; }
+        [StringLength(50)]
+        [Display(Name = "Pregnancy Checked By")]
+        public string PregnancyCheckBy { get; set; }
+        
         [Display(Name = "Expected Farrowing Date")]
-        public DateTime ExpectedFarrowingDate { get; set; } // Day 114-116
+        public DateTime? ExpectedFarrowingDate { get; set; }
         
         [Display(Name = "Expected Vaccination Date 1")]
-        public DateTime ExpectedVaccinationDate1 { get; set; } // Day 100
-        
+        public DateTime? ExpectedVaccinationDate1 { get; set; }
         [Display(Name = "Vaccination 1 Completed")]
         public bool Vaccination1Completed { get; set; } = false;
         
         [Display(Name = "Expected Vaccination Date 2")]
-        public DateTime ExpectedVaccinationDate2 { get; set; } // Day 107
-        
+        public DateTime? ExpectedVaccinationDate2 { get; set; }
         [Display(Name = "Vaccination 2 Completed")]
         public bool Vaccination2Completed { get; set; } = false;
         

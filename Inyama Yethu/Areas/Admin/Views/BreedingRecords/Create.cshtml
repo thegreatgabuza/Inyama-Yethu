@@ -1,0 +1,230 @@
+@model Inyama_Yethu.Models.Mating
+
+@{
+    ViewData["Title"] = "Record Mating";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Record Mating</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Breeding Records</a></li>
+        <li class="breadcrumb-item active">Record Mating</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-venus-mars me-1"></i>
+                    Mating Record Form
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="MotherAnimalId" class="control-label fw-bold">Sow (Female)</label>
+                                    <select asp-for="MotherAnimalId" class="form-control animal-select" 
+                                            asp-items="@(ViewData["MotherAnimalId"] != null ? (SelectList)ViewData["MotherAnimalId"] : new SelectList(new List<SelectListItem>()))" required>
+                                        <option value="">-- Select Sow --</option>
+                                    </select>
+                                    <span asp-validation-for="MotherAnimalId" class="text-danger"></span>
+                                    <div id="motherDetails" class="small text-muted mt-1"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="FatherAnimalId" class="control-label fw-bold">Boar (Male)</label>
+                                    <select asp-for="FatherAnimalId" class="form-control animal-select" 
+                                            asp-items="@(ViewData["FatherAnimalId"] != null ? (SelectList)ViewData["FatherAnimalId"] : new SelectList(new List<SelectListItem>()))" required>
+                                        <option value="">-- Select Boar --</option>
+                                    </select>
+                                    <span asp-validation-for="FatherAnimalId" class="text-danger"></span>
+                                    <div id="fatherDetails" class="small text-muted mt-1"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="MatingDate" class="control-label fw-bold">Service Date</label>
+                                    <input asp-for="MatingDate" class="form-control" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                    <span asp-validation-for="MatingDate" class="text-danger"></span>
+                                    <small class="form-text text-muted">Date when the mating occurred</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Status" class="control-label fw-bold">Status</label>
+                                    <select asp-for="Status" class="form-control" required>
+                                        <option value="Scheduled">Scheduled</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Failed">Failed</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                    <small class="form-text text-muted">Initial status is usually "Scheduled" or "Pending" until pregnancy is confirmed</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Notes" class="control-label fw-bold">Notes</label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any relevant notes about this mating..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Important Dates (Calculated Automatically)
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="control-label small">First Pregnancy Check</label>
+                                            <input type="text" class="form-control-plaintext" id="pregnancyCheck1" readonly />
+                                            <small class="form-text text-muted">~21 days</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="control-label small">Second Pregnancy Check</label>
+                                            <input type="text" class="form-control-plaintext" id="pregnancyCheck2" readonly />
+                                            <small class="form-text text-muted">~42 days</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="control-label small">Expected Farrowing</label>
+                                            <input type="text" class="form-control-plaintext" id="farrowingDate" readonly />
+                                            <small class="form-text text-muted">~114 days</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="control-label small">Expected Weaning</label>
+                                            <input type="text" class="form-control-plaintext" id="weaningDate" readonly />
+                                            <small class="form-text text-muted">~28 days after farrowing</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4 d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Record Mating
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Calculate expected dates when mating date changes
+            $('#MatingDate').change(function() {
+                calculateDates();
+            });
+            
+            calculateDates(); // Calculate on initial load
+            
+            function calculateDates() {
+                var matingDateValue = $('#MatingDate').val();
+                if (!matingDateValue) return;
+                
+                var matingDate = new Date(matingDateValue);
+                if (!isNaN(matingDate.getTime())) {
+                    // First pregnancy check (21 days)
+                    var check1 = addDays(matingDate, 21);
+                    $('#pregnancyCheck1').val(formatDate(check1));
+                    
+                    // Second pregnancy check (42 days)
+                    var check2 = addDays(matingDate, 42);
+                    $('#pregnancyCheck2').val(formatDate(check2));
+                    
+                    // Expected farrowing (114 days)
+                    var farrowing = addDays(matingDate, 114);
+                    $('#farrowingDate').val(formatDate(farrowing));
+                    
+                    // Expected weaning (142 days = 114 + 28)
+                    var weaning = addDays(matingDate, 142);
+                    $('#weaningDate').val(formatDate(weaning));
+                }
+            }
+            
+            // Helper function to add days to a date
+            function addDays(date, days) {
+                var result = new Date(date);
+                result.setDate(result.getDate() + days);
+                return result;
+            }
+            
+            // Helper function to format date
+            function formatDate(date) {
+                return date.toLocaleDateString();
+            }
+            
+            // Initialize Select2 for better dropdown experience if available
+            if ($.fn.select2) {
+                $('.animal-select').select2({
+                    theme: 'bootstrap4',
+                    placeholder: 'Select animal',
+                    allowClear: true
+                });
+            }
+            
+            // Load animal details when selection changes
+            $("#MotherAnimalId").on("change", function() {
+                var motherId = $(this).val();
+                if (motherId) {
+                    // This would typically be an AJAX call to get animal details
+                    // For demonstration, we'll just show a placeholder
+                    $("#motherDetails").html("Loading sow details...");
+                    
+                    // Simulated AJAX response
+                    setTimeout(function() {
+                        $("#motherDetails").html("Sow ID: " + motherId + " - Parity: 2 - Last farrowing: 120 days ago");
+                    }, 500);
+                } else {
+                    $("#motherDetails").html("");
+                }
+            });
+            
+            $("#FatherAnimalId").on("change", function() {
+                var fatherId = $(this).val();
+                if (fatherId) {
+                    // This would typically be an AJAX call to get animal details
+                    $("#fatherDetails").html("Loading boar details...");
+                    
+                    // Simulated AJAX response
+                    setTimeout(function() {
+                        $("#fatherDetails").html("Boar ID: " + fatherId + " - Age: 18 months - Last service: 14 days ago");
+                    }, 500);
+                } else {
+                    $("#fatherDetails").html("");
+                }
+            });
+        });
+    </script>
+}
+}

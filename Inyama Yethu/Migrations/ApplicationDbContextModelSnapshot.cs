@@ -80,7 +80,7 @@ namespace Inyama_Yethu.Migrations
                     b.Property<int?>("AbattoirShipmentId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("BirthDate")
+                    b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
@@ -484,19 +484,19 @@ namespace Inyama_Yethu.Migrations
                     b.Property<DateTime?>("ActualFarrowingDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpectedFarrowingDate")
+                    b.Property<DateTime?>("ExpectedFarrowingDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpectedPregnancyCheck1")
+                    b.Property<DateTime?>("ExpectedPregnancyCheck1")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpectedPregnancyCheck2")
+                    b.Property<DateTime?>("ExpectedPregnancyCheck2")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpectedVaccinationDate1")
+                    b.Property<DateTime?>("ExpectedVaccinationDate1")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpectedVaccinationDate2")
+                    b.Property<DateTime?>("ExpectedVaccinationDate2")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("FatherAnimalId")
@@ -519,11 +519,27 @@ namespace Inyama_Yethu.Migrations
                     b.Property<int?>("NumberOfPigletsBornAlive")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("PregnancyCheck1Date")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool?>("PregnancyCheck1Result")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("PregnancyCheck2Date")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool?>("PregnancyCheck2Result")
                         .HasColumnType("bit");
+
+                    b.Property<string>("PregnancyCheckBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PregnancyCheckNotes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

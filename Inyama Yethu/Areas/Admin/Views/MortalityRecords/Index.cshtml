@@ -1,0 +1,314 @@
+@model IEnumerable<Inyama_Yethu.Models.Animal>
+
+@{
+    ViewData["Title"] = "Mortality Records";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var totalMortality = ViewBag.TotalMortality ?? 0;
+    var mortalityRate = ViewBag.MortalityRate ?? 0.0;
+    var mortalityByType = ViewBag.MortalityByType as List<dynamic> ?? new List<dynamic>();
+    var monthlyMortality = ViewBag.MonthlyMortality as List<dynamic> ?? new List<dynamic>();
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Mortality Records</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item active">Mortality Records</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Total Mortality</div>
+                            <div class="h3">@totalMortality</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-skull fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="#mortalityTable" class="small text-white stretched-link">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Mortality Rate</div>
+                            <div class="h3">@mortalityRate.ToString("F1")%</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-percentage fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a asp-action="Report" class="small text-white stretched-link">View Report</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Primary Cause</div>
+                            <div class="h3">
+                                @{
+                                    var topCause = mortalityByType.OrderByDescending(m => m.Count).FirstOrDefault();
+                                    @(topCause != null ? topCause.Cause : "None")
+                                }
+                            </div>
+                        </div>
+                        <div>
+                            <i class="fas fa-viruses fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a asp-action="Report" class="small text-white stretched-link">View Analytics</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Record Mortality</div>
+                            <div class="h3">New Death</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-plus-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a asp-action="Record" class="small text-white stretched-link">Record New Death</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Monthly Mortality
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyMortalityChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Mortality by Type
+                </div>
+                <div class="card-body">
+                    <canvas id="mortalityByTypeChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4" id="mortalityTable">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i>
+                Mortality Records
+            </div>
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search records..." aria-label="Search">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="mortalityTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tag Number</th>
+                            <th>Type</th>
+                            <th>Death Date</th>
+                            <th>Cause</th>
+                            <th>Age</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var animal in Model)
+                        {
+                            var deathRecord = animal.HealthRecords
+                                .Where(hr => hr.Treatment == "Deceased")
+                                .OrderByDescending(hr => hr.RecordDate)
+                                .FirstOrDefault();
+                                
+                            if (deathRecord == null) continue;
+                            
+                            <tr>
+                                <td>@animal.TagNumber</td>
+                                <td>@animal.Type</td>
+                                <td>@deathRecord.RecordDate.ToString("dd MMM yyyy")</td>
+                                <td>@deathRecord.Description</td>
+                                <td>
+                                    @{
+                                        if (animal.BirthDate.HasValue)
+                                        {
+                                            var deathDate = deathRecord.RecordDate;
+                                            var age = deathDate - animal.BirthDate.Value;
+                                            var months = (int)(age.TotalDays / 30.436875);
+                                            
+                                            if (months < 1)
+                                            {
+                                                @($"{age.Days} days")
+                                            }
+                                            else if (months < 12)
+                                            {
+                                                @($"{months} months")
+                                            }
+                                            else
+                                            {
+                                                @($"{months / 12} years, {months % 12} months")
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Unknown</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@animal.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        No mortality records found
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#mortalityTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+            
+            // Monthly Mortality Chart
+            var monthlyLabels = [];
+            var monthlyData = [];
+            
+            @foreach (var item in monthlyMortality.OrderBy(m => m.YearMonth?.Year).ThenBy(m => m.YearMonth?.Month))
+            {
+                <text>
+                monthlyLabels.push('@(item.YearMonth != null ? $"{new DateTime(item.YearMonth.Year, item.YearMonth.Month, 1).ToString("MMM yyyy")}" : "Unknown")');
+                monthlyData.push(@item.Count);
+                </text>
+            }
+            
+            var monthlyCtx = document.getElementById('monthlyMortalityChart');
+            new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Deaths',
+                        data: monthlyData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Mortality by Type Chart
+            var typeLabels = [];
+            var typeData = [];
+            var backgroundColors = [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)',
+                'rgba(201, 203, 207, 0.7)'
+            ];
+            
+            @foreach (var item in mortalityByType)
+            {
+                <text>
+                typeLabels.push('@(string.IsNullOrEmpty(item.Cause?.ToString()) ? "Unknown" : item.Cause)');
+                typeData.push(@item.Count);
+                </text>
+            }
+            
+            var typeCtx = document.getElementById('mortalityByTypeChart');
+            new Chart(typeCtx, {
+                type: 'pie',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        data: typeData,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+} 

@@ -1,0 +1,401 @@
+@model IEnumerable<Inyama_Yethu.Models.Feeding>
+
+@{
+    ViewData["Title"] = "Feed Management";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var thisMonthConsumption = ViewData["ThisMonthConsumption"] as List<dynamic>;
+    var totalFeedThisMonth = (double)ViewData["TotalFeedThisMonth"];
+    var totalCostThisMonth = (double)ViewData["TotalCostThisMonth"];
+    var quantityChange = (double)ViewData["QuantityChange"];
+    var costChange = (double)ViewData["CostChange"];
+    var feedByAnimalType = ViewData["FeedByAnimalType"] as List<dynamic>;
+    var monthlyData = ViewData["MonthlyData"] as List<dynamic>;
+    
+    string[] monthNames = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Feed Management Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item active">Feed Management</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Total Feed This Month</div>
+                            <div class="h3">@totalFeedThisMonth.ToString("F1") kg</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-utensils fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small text-white">
+                        @if (quantityChange > 0)
+                        {
+                            <i class="fas fa-arrow-up me-1"></i>
+                            <span>@(quantityChange.ToString("F1"))% from last month</span>
+                        }
+                        else if (quantityChange < 0)
+                        {
+                            <i class="fas fa-arrow-down me-1"></i>
+                            <span>@(Math.Abs(quantityChange).ToString("F1"))% from last month</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-equals me-1"></i>
+                            <span>No change from last month</span>
+                        }
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Total Cost This Month</div>
+                            <div class="h3">R @totalCostThisMonth.ToString("N2")</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small text-white">
+                        @if (costChange > 0)
+                        {
+                            <i class="fas fa-arrow-up me-1"></i>
+                            <span>@(costChange.ToString("F1"))% from last month</span>
+                        }
+                        else if (costChange < 0)
+                        {
+                            <i class="fas fa-arrow-down me-1"></i>
+                            <span>@(Math.Abs(costChange).ToString("F1"))% from last month</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-equals me-1"></i>
+                            <span>No change from last month</span>
+                        }
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Feed Management</div>
+                            <div class="h3"><i class="fas fa-calendar-check"></i></div>
+                        </div>
+                        <div>
+                            <i class="fas fa-warehouse fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a asp-action="Inventory" class="small text-white stretched-link">View Inventory</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Record Keeping</div>
+                            <div class="h3"><i class="fas fa-clipboard-list"></i></div>
+                        </div>
+                        <div>
+                            <i class="fas fa-tasks fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a asp-action="Report" class="small text-white stretched-link">Generate Report</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-area me-1"></i>
+                    Monthly Feed Consumption by Type
+                </div>
+                <div class="card-body">
+                    <canvas id="feedConsumptionChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Feed Distribution by Animal Type
+                </div>
+                <div class="card-body">
+                    <canvas id="feedDistributionChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-utensils me-1"></i>
+                            Current Month Feed Consumption
+                        </div>
+                        <div>
+                            <a asp-action="Record" class="btn btn-primary btn-sm me-2">
+                                <i class="fas fa-plus"></i> Record Feeding
+                            </a>
+                            <a asp-action="BatchRecord" class="btn btn-success btn-sm">
+                                <i class="fas fa-list"></i> Batch Record
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Feed Type</th>
+                                    <th>Quantity (kg)</th>
+                                    <th>Cost (ZAR)</th>
+                                    <th>% of Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (thisMonthConsumption != null)
+                                {
+                                    @foreach (var item in thisMonthConsumption)
+                                    {
+                                        var percentOfTotal = totalFeedThisMonth > 0 
+                                            ? (item.TotalQuantity * 100 / totalFeedThisMonth) 
+                                            : 0;
+                                        
+                                        <tr>
+                                            <td>@item.FeedType</td>
+                                            <td>@item.TotalQuantity.ToString("F1") kg</td>
+                                            <td>R @item.TotalCost.ToString("N2")</td>
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                                         style="width: @(percentOfTotal.ToString("F1"))%;" 
+                                                         aria-valuenow="@percentOfTotal" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                        @(percentOfTotal.ToString("F1"))%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center">No consumption data available for this month.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-dark">
+                                    <th>Total</th>
+                                    <th>@totalFeedThisMonth.ToString("F1") kg</th>
+                                    <th>R @totalCostThisMonth.ToString("N2")</th>
+                                    <th>100%</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-history me-1"></i>
+                    Recent Feeding Records
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="feedingRecordsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Animal</th>
+                                    <th>Feed Type</th>
+                                    <th>Quantity (kg)</th>
+                                    <th>Cost Per kg</th>
+                                    <th>Total Cost</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Take(50))
+                                {
+                                    <tr>
+                                        <td>@item.FeedDate.ToString("dd MMM yyyy")</td>
+                                        <td>@item.Animal.TagNumber</td>
+                                        <td>@item.FeedType</td>
+                                        <td>@item.Quantity.ToString("F1")</td>
+                                        <td>R @item.CostPerKg.ToString("F2")</td>
+                                        <td>R @((item.CostPerKg * (decimal)item.Quantity).ToString("F2"))</td>
+                                        <td>@item.Notes</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Feed consumption chart
+        var feedConsumptionCtx = document.getElementById('feedConsumptionChart');
+        var monthlyData = @Html.Raw(Json.Serialize(monthlyData));
+        
+        // Process data for chart
+        var months = [];
+        var monthNames = @Html.Raw(Json.Serialize(monthNames));
+        for (var i = 1; i <= 12; i++) {
+            months.push(monthNames[i]);
+        }
+        
+        // Create dataset for each feed type
+        var feedTypes = [...new Set(monthlyData.map(item => item.FeedType))];
+        var datasets = [];
+        
+        var colors = [
+            { bg: 'rgba(255, 99, 132, 0.5)', border: 'rgba(255, 99, 132, 1)' },
+            { bg: 'rgba(54, 162, 235, 0.5)', border: 'rgba(54, 162, 235, 1)' },
+            { bg: 'rgba(255, 206, 86, 0.5)', border: 'rgba(255, 206, 86, 1)' },
+            { bg: 'rgba(75, 192, 192, 0.5)', border: 'rgba(75, 192, 192, 1)' },
+            { bg: 'rgba(153, 102, 255, 0.5)', border: 'rgba(153, 102, 255, 1)' }
+        ];
+        
+        feedTypes.forEach((type, index) => {
+            var data = new Array(12).fill(0);
+            
+            monthlyData.filter(item => item.FeedType === type).forEach(item => {
+                data[item.Month - 1] = item.TotalQuantity;
+            });
+            
+            datasets.push({
+                label: type,
+                data: data,
+                backgroundColor: colors[index % colors.length].bg,
+                borderColor: colors[index % colors.length].border,
+                borderWidth: 1
+            });
+        });
+        
+        new Chart(feedConsumptionCtx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Kilograms'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Feed distribution by animal type
+        var feedDistributionCtx = document.getElementById('feedDistributionChart');
+        var animalTypeData = @Html.Raw(Json.Serialize(feedByAnimalType));
+        
+        var animalTypes = animalTypeData.map(item => item.AnimalType);
+        var quantities = animalTypeData.map(item => item.TotalQuantity);
+        var backgroundColors = [
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)',
+            'rgba(75, 192, 192, 0.5)',
+            'rgba(153, 102, 255, 0.5)',
+            'rgba(255, 159, 64, 0.5)'
+        ];
+        
+        new Chart(feedDistributionCtx, {
+            type: 'pie',
+            data: {
+                labels: animalTypes,
+                datasets: [{
+                    data: quantities,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(color => color.replace('0.5', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.label || '';
+                                var value = context.raw || 0;
+                                var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                var percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return label + ': ' + value.toFixed(1) + 'kg (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Initialize the data table
+        $(document).ready(function() {
+            $('#feedingRecordsTable').DataTable({
+                order: [[0, 'desc']],
+                pageLength: 10
+            });
+        });
+    </script>
+} 

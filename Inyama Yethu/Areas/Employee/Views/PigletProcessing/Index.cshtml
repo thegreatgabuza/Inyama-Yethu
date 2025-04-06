@@ -1,3 +1,4 @@
+@using Inyama_Yethu.Models
 @{
     ViewData["Title"] = "Piglet Processing";
     Layout = "_EmployeeLayout";
@@ -349,7 +350,7 @@
                                             int ageAtProcessing = 0;
                                             if (processingDate.HasValue)
                                             {
-                                                ageAtProcessing = (processingDate.Value - record.Animal.BirthDate).Days;
+                                                ageAtProcessing = (processingDate.Value - record.Animal.BirthDate).Days();
                                             }
                                             
                                             // Get procedures

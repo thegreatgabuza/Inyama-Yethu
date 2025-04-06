@@ -134,7 +134,7 @@
                                     <tbody>
                                         @foreach (var mating in farrowingsDueThisWeek.OrderBy(m => m.ExpectedFarrowingDate))
                                         {
-                                            int daysUntil = (mating.ExpectedFarrowingDate - today).Days;
+                                            int daysUntil = mating.ExpectedFarrowingDate.HasValue ? (mating.ExpectedFarrowingDate.Value - today).Days : 0;
                                             
                                             // Get housing/pen info for mother
                                             string penText = "Not assigned";
@@ -160,7 +160,7 @@
                                             <tr class="@(daysUntil <= 2 ? "table-danger" : "")">
                                                 <td>#@mating.MotherAnimalId</td>
                                                 <td>@mating.Mother.TagNumber</td>
-                                                <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@(mating.ExpectedFarrowingDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
                                                 <td>
                                                     @if (daysUntil <= 0)
                                                     {
@@ -249,7 +249,7 @@
                                     <tbody>
                                         @foreach (var mating in upcomingFarrowings.OrderBy(m => m.ExpectedFarrowingDate))
                                         {
-                                            int daysUntil = (mating.ExpectedFarrowingDate - today).Days;
+                                            int daysUntil = mating.ExpectedFarrowingDate.HasValue ? (mating.ExpectedFarrowingDate.Value - today).Days : 0;
                                             
                                             // Get housing/pen info for mother
                                             string penText = "Not assigned";
@@ -275,7 +275,7 @@
                                             <tr>
                                                 <td>#@mating.MotherAnimalId</td>
                                                 <td>@mating.Mother.TagNumber</td>
-                                                <td>@mating.ExpectedFarrowingDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@(mating.ExpectedFarrowingDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
                                                 <td>@daysUntil days</td>
                                                 <td>@penText</td>
                                                 <td>

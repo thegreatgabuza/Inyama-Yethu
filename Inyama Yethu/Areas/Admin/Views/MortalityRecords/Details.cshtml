@@ -1,0 +1,351 @@
+@model Inyama_Yethu.Models.Animal
+
+@{
+    ViewData["Title"] = "Mortality Details";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var healthRecords = ViewData["HealthRecords"] as IEnumerable<Inyama_Yethu.Models.HealthRecord>;
+    var weightRecords = ViewData["WeightRecords"] as IEnumerable<Inyama_Yethu.Models.WeightRecord>;
+    var deathRecord = healthRecords?.OrderByDescending(h => h.RecordDate)
+                                  .FirstOrDefault(h => h.Treatment == "Deceased");
+    
+    int ageInDays = 0;
+    int ageInMonths = 0;
+    string ageDisplay = "Unknown";
+    
+    if (Model.BirthDate.HasValue)
+    {
+        ageInDays = (Model.UpdatedAt - Model.BirthDate.Value).Days;
+        ageInMonths = ageInDays / 30;
+        ageDisplay = ageInMonths > 0 ? $"{ageInMonths} months" : $"{ageInDays} days";
+    }
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Mortality Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Mortality Records</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-clipboard-list me-1"></i>
+                Details for Animal: @Model.TagNumber
+            </div>
+            <button class="btn btn-outline-secondary btn-sm" id="printDetails">
+                <i class="fas fa-print me-1"></i> Print
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Basic Information
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th style="width: 40%">Tag Number</th>
+                                    <td>@Model.TagNumber</td>
+                                </tr>
+                                <tr>
+                                    <th>Type</th>
+                                    <td>@Model.Type</td>
+                                </tr>
+                                <tr>
+                                    <th>Gender</th>
+                                    <td>@Model.Gender</td>
+                                </tr>
+                                <tr>
+                                    <th>Birth Date</th>
+                                    <td>
+                                        @(Model.BirthDate.HasValue ? Model.BirthDate.Value.ToString("dd MMM yyyy") : "Unknown")
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Age at Death</th>
+                                    <td>@ageDisplay</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Death</th>
+                                    <td>@Model.UpdatedAt.ToString("dd MMM yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <th>Weight at Death</th>
+                                    <td>@(Model.Weight?.ToString("0.00") ?? "N/A") kg</td>
+                                </tr>
+                                <tr>
+                                    <th>Notes</th>
+                                    <td>@Model.Notes</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-danger text-white">
+                            <i class="fas fa-skull-crossbones me-1"></i>
+                            Death Record
+                        </div>
+                        <div class="card-body">
+                            @if (deathRecord != null)
+                            {
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th style="width: 40%">Record Date</th>
+                                        <td>@deathRecord.RecordDate.ToString("dd MMM yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cause</th>
+                                        <td>
+                                            <span class="badge bg-danger">
+                                                @deathRecord.RecordType
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Diagnosis/Details</th>
+                                        <td>@deathRecord.Description</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Treatment</th>
+                                        <td>@(string.IsNullOrEmpty(deathRecord.Treatment) ? "N/A" : deathRecord.Treatment)</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Notes</th>
+                                        <td>@deathRecord.Notes</td>
+                                    </tr>
+                                </table>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    No specific death record found in health records.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Health History -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-heartbeat me-1"></i>
+                    Health History
+                </div>
+                <div class="card-body">
+                    @if (healthRecords != null && healthRecords.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Diagnosis</th>
+                                        <th>Treatment</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in healthRecords.OrderByDescending(r => r.RecordDate))
+                                    {
+                                        <tr class="@(record.Treatment == "Deceased" ? "table-danger" : "")">
+                                            <td>@record.RecordDate.ToString("dd MMM yyyy")</td>
+                                            <td>
+                                                <span class="badge @(record.RecordType == HealthRecordType.Vaccination ? "bg-success" : 
+                                                                record.RecordType == HealthRecordType.Illness ? "bg-danger" : 
+                                                                record.RecordType == HealthRecordType.Injury ? "bg-warning" : 
+                                                                "bg-secondary")">
+                                                    @record.RecordType
+                                                </span>
+                                            </td>
+                                            <td>@record.Description</td>
+                                            <td>@(string.IsNullOrEmpty(record.Treatment) ? "N/A" : record.Treatment)</td>
+                                            <td>@record.Notes</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No health records available for this animal.
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Weight History -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-weight me-1"></i>
+                    Weight History
+                </div>
+                <div class="card-body">
+                    @if (weightRecords != null && weightRecords.Any())
+                    {
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Weight (kg)</th>
+                                                <th>Change</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                var sortedRecords = weightRecords.OrderByDescending(r => r.RecordDate).ToList();
+                                                double? previousWeight = null;
+                                            }
+                                            
+                                            @foreach (var record in sortedRecords)
+                                            {
+                                                var change = previousWeight != null ? 
+                                                    record.Weight - previousWeight.Value : 
+                                                    (double?)null;
+                                                    
+                                                <tr>
+                                                    <td>@record.RecordDate.ToString("dd MMM yyyy")</td>
+                                                    <td>@record.Weight.ToString("0.00")</td>
+                                                    <td>
+                                                        @if (change.HasValue)
+                                                        {
+                                                            var changeClass = change.Value > 0 ? "text-success" : (change.Value < 0 ? "text-danger" : "");
+                                                            var changeIcon = change.Value > 0 ? "fa-arrow-up" : (change.Value < 0 ? "fa-arrow-down" : "fa-equals");
+                                                            
+                                                            <span class="@changeClass">
+                                                                <i class="fas @changeIcon me-1"></i>
+                                                                @Math.Abs(change.Value).ToString("0.00") kg
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>Initial</span>
+                                                        }
+                                                    </td>
+                                                    <td>@record.Notes</td>
+                                                </tr>
+                                                
+                                                previousWeight = record.Weight;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <canvas id="weightChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No weight records available for this animal.
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="mt-4 d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Print functionality
+            $("#printDetails").click(function() {
+                window.print();
+            });
+            
+            // Weight chart
+            @if (weightRecords != null && weightRecords.Any())
+            {
+                <text>
+                var ctx = document.getElementById('weightChart').getContext('2d');
+                var weightData = [
+                    @foreach (var record in weightRecords.OrderBy(r => r.RecordDate))
+                    {
+                        <text>
+                        {
+                            x: '@record.RecordDate.ToString("yyyy-MM-dd")',
+                            y: @record.Weight.ToString("0.00")
+                        },
+                        </text>
+                    }
+                ];
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Weight (kg)',
+                            data: weightData,
+                            fill: false,
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            tension: 0.2,
+                            pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    displayFormats: {
+                                        day: 'MMM dd'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: 'Weight (kg)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Weight Progression'
+                            }
+                        }
+                    }
+                });
+                </text>
+            }
+        });
+    </script>
+} 

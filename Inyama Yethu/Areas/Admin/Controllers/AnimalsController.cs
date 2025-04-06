@@ -73,8 +73,8 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 .OrderBy(a => a.TagNumber)
                 .ToListAsync();
 
-            ViewBag.MotherAnimalId = new SelectList(potentialMothers, "Id", "TagNumber");
-            ViewBag.FatherAnimalId = new SelectList(potentialFathers, "Id", "TagNumber");
+            ViewData["MotherAnimalId"] = new SelectList(potentialMothers, "Id", "TagNumber");
+            ViewData["FatherAnimalId"] = new SelectList(potentialFathers, "Id", "TagNumber");
 
             return View();
         }
@@ -102,8 +102,8 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 .OrderBy(a => a.TagNumber)
                 .ToListAsync();
 
-            ViewBag.MotherAnimalId = new SelectList(potentialMothers, "Id", "TagNumber", animal.MotherAnimalId);
-            ViewBag.FatherAnimalId = new SelectList(potentialFathers, "Id", "TagNumber", animal.FatherAnimalId);
+            ViewData["MotherAnimalId"] = new SelectList(potentialMothers, "Id", "TagNumber", animal.MotherAnimalId);
+            ViewData["FatherAnimalId"] = new SelectList(potentialFathers, "Id", "TagNumber", animal.FatherAnimalId);
 
             return View(animal);
         }
@@ -136,8 +136,8 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 .OrderBy(a => a.TagNumber)
                 .ToListAsync();
 
-            ViewBag.MotherAnimalId = new SelectList(potentialMothers, "Id", "TagNumber", animal.MotherAnimalId);
-            ViewBag.FatherAnimalId = new SelectList(potentialFathers, "Id", "TagNumber", animal.FatherAnimalId);
+            ViewData["MotherAnimalId"] = new SelectList(potentialMothers, "Id", "TagNumber", animal.MotherAnimalId);
+            ViewData["FatherAnimalId"] = new SelectList(potentialFathers, "Id", "TagNumber", animal.FatherAnimalId);
 
             return View(animal);
         }
@@ -152,7 +152,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
@@ -187,8 +187,8 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 .OrderBy(a => a.TagNumber)
                 .ToListAsync();
 
-            ViewBag.MotherAnimalId = new SelectList(potentialMothers, "Id", "TagNumber", animal.MotherAnimalId);
-            ViewBag.FatherAnimalId = new SelectList(potentialFathers, "Id", "TagNumber", animal.FatherAnimalId);
+            ViewData["MotherAnimalId"] = new SelectList(potentialMothers, "Id", "TagNumber", animal.MotherAnimalId);
+            ViewData["FatherAnimalId"] = new SelectList(potentialFathers, "Id", "TagNumber", animal.FatherAnimalId);
 
             return View(animal);
         }

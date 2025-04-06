@@ -1,0 +1,163 @@
+@model Inyama_Yethu.Models.Mating
+
+@{
+    ViewData["Title"] = "Record Farrowing";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Record Farrowing</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Breeding Records</a></li>
+        <li class="breadcrumb-item active">Record Farrowing</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-baby me-1"></i>
+                    Farrowing Details
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="alert-heading">Mating Information</h5>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <small class="d-block text-muted">Sow</small>
+                                        <strong>@Model.Mother.TagNumber</strong>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="d-block text-muted">Boar</small>
+                                        <strong>@Model.Father.TagNumber</strong>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="d-block text-muted">Mating Date</small>
+                                        <strong>@Model.MatingDate.ToString("dd MMM yyyy")</strong>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="d-block text-muted">Expected Farrowing</small>
+                                        <strong>@(Model.ExpectedFarrowingDate.HasValue ? Model.ExpectedFarrowingDate.Value.ToString("dd MMM yyyy") : "Not set")</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="RecordFarrowing" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Farrowing Date</label>
+                                    <input type="date" name="ActualFarrowingDate" class="form-control" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Total Born</label>
+                                    <input type="number" name="NumberOfPigletsBorn" id="totalBorn" class="form-control" min="0" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Born Alive</label>
+                                    <input type="number" name="NumberOfPigletsBornAlive" id="bornAlive" class="form-control" min="0" required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Stillborn</label>
+                                    <input type="number" id="stillborn" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Mummified</label>
+                                    <input type="number" name="Mummified" class="form-control" min="0" value="0" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Average Birth Weight (kg)</label>
+                                    <input type="number" name="AverageBirthWeight" class="form-control" step="0.01" min="0" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Farrowing Duration (hours)</label>
+                                    <input type="number" name="FarrowingDuration" class="form-control" min="0" step="0.5" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="FarrowingNotes" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-piggy-bank me-1"></i>
+                                Individual Piglet Registration
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">After saving the farrowing record, you will be able to register details of individual piglets.</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Record Farrowing
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Calculate stillborn count (Total Born - Born Alive)
+        $(document).ready(function() {
+            // Set default date to today
+            var today = new Date().toISOString().split('T')[0];
+            $('input[name="ActualFarrowingDate"]').val(today);
+            
+            // Calculate stillborn
+            $("#totalBorn, #bornAlive").on("input", function() {
+                var total = parseInt($("#totalBorn").val()) || 0;
+                var alive = parseInt($("#bornAlive").val()) || 0;
+                var stillborn = total - alive;
+                
+                if (stillborn < 0) {
+                    alert("Born alive cannot be greater than total born");
+                    $("#bornAlive").val(total);
+                    stillborn = 0;
+                }
+                
+                $("#stillborn").val(stillborn);
+            });
+        });
+    </script>
+} 

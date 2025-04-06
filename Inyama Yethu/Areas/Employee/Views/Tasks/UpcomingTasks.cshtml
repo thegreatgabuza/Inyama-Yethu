@@ -1,3 +1,6 @@
+@using Inyama_Yethu.Models
+@model dynamic
+
 @{
     ViewData["Title"] = "Upcoming Tasks";
     Layout = "_EmployeeLayout";
@@ -60,7 +63,8 @@
                         <tbody>
                             @foreach (var task in upcomingTasks.OrderBy(t => t.DueDate))
                             {
-                                int daysUntilDue = (task.DueDate.Date - today.Date).Days;
+                                var timeSpan = task.DueDate.Date - today.Date;
+                                int daysUntilDue = timeSpan.Days;
                                 
                                 <tr>
                                     <td>

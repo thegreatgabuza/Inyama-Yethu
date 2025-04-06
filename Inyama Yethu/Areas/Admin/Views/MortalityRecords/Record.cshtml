@@ -1,0 +1,133 @@
+@model Inyama_Yethu.Models.MortalityRecordViewModel
+
+@{
+    ViewData["Title"] = "Record Mortality";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Record Mortality</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Mortality Records</a></li>
+        <li class="breadcrumb-item active">Record Mortality</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-list me-1"></i>
+                    Mortality Record Form
+                </div>
+                <div class="card-body">
+                    <form asp-action="Record" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Animal</label>
+                                    <select name="AnimalId" class="form-control" required>
+                                        <option value="">-- Select Animal --</option>
+                                        @foreach (var item in ViewBag.Animals)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    </select>
+                                    <div class="form-text">Select the animal that has died</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Death Date</label>
+                                    <input type="date" name="DeathDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                    <div class="form-text">Date when the animal died</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Cause of Death</label>
+                                    <select name="Cause" class="form-control" required>
+                                        <option value="">-- Select Cause --</option>
+                                        <option value="Disease">Disease</option>
+                                        <option value="Injury">Injury</option>
+                                        <option value="Birthing Complications">Birthing Complications</option>
+                                        <option value="Natural Causes">Natural Causes</option>
+                                        <option value="Sudden Death">Sudden Death</option>
+                                        <option value="Culling">Culling</option>
+                                        <option value="Euthanasia">Euthanasia</option>
+                                        <option value="Unknown">Unknown</option>
+                                        <option value="Other">Other - Specify in Notes</option>
+                                    </select>
+                                    <div class="form-text">Select the cause of death</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Weight at Death (kg)</label>
+                                    <input type="number" name="Weight" class="form-control" step="0.1" min="0" />
+                                    <div class="form-text">Optional: Animal's weight at time of death</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-control" rows="4" placeholder="Enter any additional details about the cause of death, symptoms observed, or circumstances..."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> Recording a mortality will permanently mark this animal as deceased in the system.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-save me-1"></i> Record Death
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function() {
+            // Animal select enhancement
+            $('select[name="AnimalId"]').select2({
+                theme: 'bootstrap4',
+                placeholder: '-- Select Animal --',
+                allowClear: true
+            });
+            
+            // Cause select enhancement
+            $('select[name="Cause"]').select2({
+                theme: 'bootstrap4',
+                placeholder: '-- Select Cause --'
+            });
+            
+            // Show additional fields if cause is "Disease"
+            $('select[name="Cause"]').on('change', function() {
+                var selectedCause = $(this).val();
+                if (selectedCause === 'Disease') {
+                    // Could add additional fields here in the future
+                    $('#Notes').attr('placeholder', 'Please describe the disease symptoms, diagnosis (if known), and any treatments that were attempted...');
+                } else if (selectedCause === 'Injury') {
+                    $('#Notes').attr('placeholder', 'Please describe the nature of the injury, how it occurred, and any treatments that were attempted...');
+                } else if (selectedCause === 'Other') {
+                    $('#Notes').attr('placeholder', 'Please specify the cause of death in detail...');
+                } else {
+                    $('#Notes').attr('placeholder', 'Enter detailed description of the cause of death and circumstances...');
+                }
+            });
+        });
+    </script>
+} 

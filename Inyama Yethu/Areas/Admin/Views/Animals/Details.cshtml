@@ -32,10 +32,10 @@
                         <dd class="col-sm-8">@Model.Gender</dd>
 
                         <dt class="col-sm-4">Birth Date</dt>
-                        <dd class="col-sm-8">@Model.BirthDate.ToShortDateString()</dd>
+                        <dd class="col-sm-8">@(Model.BirthDate?.ToShortDateString() ?? "Not recorded")</dd>
 
                         <dt class="col-sm-4">Age</dt>
-                        <dd class="col-sm-8">@((DateTime.Now - Model.BirthDate).Days / 365) years, @(((DateTime.Now - Model.BirthDate).Days % 365) / 30) months</dd>
+                        <dd class="col-sm-8">@(Model.BirthDate.HasValue ? ((DateTime.Now - Model.BirthDate.Value).Days / 365) + " years, " + (((DateTime.Now - Model.BirthDate.Value).Days % 365) / 30) + " months" : "Unknown")</dd>
 
                         <dt class="col-sm-4">Weight</dt>
                         <dd class="col-sm-8">@Model.Weight kg</dd>
@@ -229,7 +229,7 @@
                                                 {
                                                     <tr>
                                                         <td>@offspring.TagNumber</td>
-                                                        <td>@offspring.BirthDate.ToShortDateString()</td>
+                                                        <td>@(offspring.BirthDate?.ToShortDateString() ?? "Unknown")</td>
                                                         <td>@offspring.Gender</td>
                                                         <td>
                                                             <span class="badge bg-@(offspring.Status == AnimalStatus.Active ? "success" : offspring.Status == AnimalStatus.Sold ? "warning" : "danger")">

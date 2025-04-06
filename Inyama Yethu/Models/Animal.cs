@@ -45,8 +45,7 @@ namespace Inyama_Yethu.Models
         [Required]
         public Gender Gender { get; set; }
         
-        [Required]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         
         [Required]
         public AnimalStatus Status { get; set; } = AnimalStatus.Active;

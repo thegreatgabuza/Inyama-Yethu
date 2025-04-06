@@ -4,12 +4,12 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Pig Farm Dashboard</h1>
+    <h1 class="mt-4">Pig Farm Management Dashboard</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item active">Dashboard</li>
     </ol>
     
-    <!-- Cards Row -->
+    <!-- Cards Row - Key Metrics -->
     <div class="row">
         <div class="col-xl-3 col-md-6">
             <div class="card bg-primary text-white mb-4">
@@ -37,18 +37,18 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="small text-white-50">Healthy Pigs</div>
-                            <div class="large">235</div>
+                            <div class="small text-white-50">Active Breeding Stock</div>
+                            <div class="large">35</div>
                         </div>
                         <div class="small">
-                            <i class="fas fa-heart fa-2x"></i>
+                            <i class="fas fa-venus-mars fa-2x"></i>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
                     <div class="small text-white">
-                        <i class="fas fa-check me-1"></i>
-                        95% health rate
+                        <i class="fas fa-info-circle me-1"></i>
+                        15 sows, 20 boars
                     </div>
                 </div>
             </div>
@@ -58,18 +58,18 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="small text-white-50">Pending Health Checks</div>
+                            <div class="small text-white-50">Current Matings</div>
                             <div class="large">18</div>
                         </div>
                         <div class="small">
-                            <i class="fas fa-stethoscope fa-2x"></i>
+                            <i class="fas fa-calendar-check fa-2x"></i>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
                     <div class="small text-white">
                         <i class="fas fa-clock me-1"></i>
-                        5 due today
+                        5 due for pregnancy check
                     </div>
                 </div>
             </div>
@@ -79,8 +79,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="small text-white-50">Pregnant Sows</div>
-                            <div class="large">15</div>
+                            <div class="small text-white-50">Expected Farrowings</div>
+                            <div class="large">7</div>
                         </div>
                         <div class="small">
                             <i class="fas fa-baby fa-2x"></i>
@@ -97,6 +97,94 @@
         </div>
     </div>
 
+    <!-- Second Row of Cards - Additional Metrics -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-secondary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Feed Consumption</div>
+                            <div class="large">650 kg</div>
+                        </div>
+                        <div class="small">
+                            <i class="fas fa-utensils fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Weekly average
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Mortality Rate</div>
+                            <div class="large">2.4%</div>
+                        </div>
+                        <div class="small">
+                            <i class="fas fa-heartbeat fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-arrow-down me-1"></i>
+                        0.5% decrease from last month
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Health Records</div>
+                            <div class="large">42</div>
+                        </div>
+                        <div class="small">
+                            <i class="fas fa-stethoscope fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-syringe me-1"></i>
+                        12 vaccinations due
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-white-50">Production Efficiency</div>
+                            <div class="large">24.2</div>
+                        </div>
+                        <div class="small">
+                            <i class="fas fa-chart-bar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <div class="small text-white">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Piglets weaned per sow/year
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts Row -->
     <div class="row">
         <div class="col-xl-6">
@@ -106,7 +194,7 @@
                     Pig Population Growth
                 </div>
                 <div class="card-body">
-                    <canvas id="revenueChart" width="100%" height="40"></canvas>
+                    <canvas id="populationChart" width="100%" height="40"></canvas>
                 </div>
             </div>
         </div>
@@ -114,46 +202,146 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-chart-bar me-1"></i>
-                    Pig Age Distribution
+                    Pig Distribution by Type
                 </div>
                 <div class="card-body">
-                    <canvas id="livestockChart" width="100%" height="40"></canvas>
+                    <canvas id="distributionChart" width="100%" height="40"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activities and Tasks -->
+    <!-- Breeding Records Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-clipboard-list me-1"></i>
+                            Breeding Records
+                        </div>
+                        <a href="/Admin/Matings" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sow ID</th>
+                                    <th>Boar ID</th>
+                                    <th>Service Date</th>
+                                    <th>Pregnancy Check</th>
+                                    <th>Status</th>
+                                    <th>Expected Farrowing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S103</td>
+                                    <td>B045</td>
+                                    <td>15 Mar 2023</td>
+                                    <td><span class="badge bg-success">Confirmed</span></td>
+                                    <td>Pregnant</td>
+                                    <td>07 Jul 2023</td>
+                                </tr>
+                                <tr>
+                                    <td>S118</td>
+                                    <td>B052</td>
+                                    <td>22 Mar 2023</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>Mated</td>
+                                    <td>14 Jul 2023</td>
+                                </tr>
+                                <tr>
+                                    <td>S095</td>
+                                    <td>B045</td>
+                                    <td>05 Mar 2023</td>
+                                    <td><span class="badge bg-success">Confirmed</span></td>
+                                    <td>Pregnant</td>
+                                    <td>28 Jun 2023</td>
+                                </tr>
+                                <tr>
+                                    <td>S122</td>
+                                    <td>B061</td>
+                                    <td>01 Apr 2023</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>Mated</td>
+                                    <td>24 Jul 2023</td>
+                                </tr>
+                                <tr>
+                                    <td>S087</td>
+                                    <td>B038</td>
+                                    <td>18 Mar 2023</td>
+                                    <td><span class="badge bg-danger">Negative</span></td>
+                                    <td>Not Pregnant</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Farrowing Records and Tasks Section -->
     <div class="row">
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-list me-1"></i>
-                    Recent Activities
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-baby-carriage me-1"></i>
+                            Recent Farrowing Records
+                        </div>
+                        <a href="/Admin/Births" class="btn btn-sm btn-primary">View All</a>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="list-group">
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">New Piglets Born</h6>
-                                <small>3 hours ago</small>
-                            </div>
-                            <p class="mb-1">8 healthy piglets from Sow #A123</p>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Vaccination Completed</h6>
-                                <small>Yesterday</small>
-                            </div>
-                            <p class="mb-1">Batch #P45 received scheduled vaccines</p>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Health Check Completed</h6>
-                                <small>2 days ago</small>
-                            </div>
-                            <p class="mb-1">All pigs in Section B passed inspection</p>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Sow ID</th>
+                                    <th>Date</th>
+                                    <th>Total Born</th>
+                                    <th>Born Alive</th>
+                                    <th>Weaned</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S092</td>
+                                    <td>18 Apr 2023</td>
+                                    <td>12</td>
+                                    <td>11</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>S076</td>
+                                    <td>15 Apr 2023</td>
+                                    <td>14</td>
+                                    <td>13</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>S081</td>
+                                    <td>08 Apr 2023</td>
+                                    <td>10</td>
+                                    <td>9</td>
+                                    <td>9</td>
+                                </tr>
+                                <tr>
+                                    <td>S065</td>
+                                    <td>02 Apr 2023</td>
+                                    <td>11</td>
+                                    <td>10</td>
+                                    <td>8</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -168,25 +356,146 @@
                     <div class="list-group">
                         <div class="list-group-item">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Piglet Vaccination Due</h6>
+                                <h6 class="mb-1">Pregnancy Check - 5 Sows</h6>
                                 <small class="text-danger">Today</small>
+                            </div>
+                            <p class="mb-1">21-day pregnancy check for recent matings</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Piglet Vaccination</h6>
+                                <small class="text-warning">Tomorrow</small>
                             </div>
                             <p class="mb-1">15 piglets scheduled for first vaccination</p>
                         </div>
                         <div class="list-group-item">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Feed Stock Check</h6>
-                                <small class="text-warning">Tomorrow</small>
+                                <h6 class="mb-1">Feed Inventory Check</h6>
+                                <small>In 2 days</small>
                             </div>
                             <p class="mb-1">Monthly inventory check of pig feed</p>
                         </div>
                         <div class="list-group-item">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Sow Health Check</h6>
+                                <h6 class="mb-1">Weaning - Litter #L42</h6>
                                 <small>In 3 days</small>
                             </div>
-                            <p class="mb-1">Routine check-up for pregnant sows</p>
+                            <p class="mb-1">9 piglets from Sow S081 ready for weaning</p>
                         </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Expected Farrowing - Sow S103</h6>
+                                <small>In 5 days</small>
+                            </div>
+                            <p class="mb-1">Prepare farrowing pen and supplies</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feed and Mortality Records -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-utensils me-1"></i>
+                            Feed Consumption Summary
+                        </div>
+                        <a href="/Admin/Feedings" class="btn btn-sm btn-primary">Details</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="feedingChart" width="100%" height="40"></canvas>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Feed Type</th>
+                                    <th>Weekly Usage (kg)</th>
+                                    <th>Monthly Usage (kg)</th>
+                                    <th>Cost (ZAR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sow Feed</td>
+                                    <td>180</td>
+                                    <td>720</td>
+                                    <td>R 5,760</td>
+                                </tr>
+                                <tr>
+                                    <td>Boar Feed</td>
+                                    <td>120</td>
+                                    <td>480</td>
+                                    <td>R 3,840</td>
+                                </tr>
+                                <tr>
+                                    <td>Weaner Feed</td>
+                                    <td>200</td>
+                                    <td>800</td>
+                                    <td>R 7,200</td>
+                                </tr>
+                                <tr>
+                                    <td>Grower Feed</td>
+                                    <td>150</td>
+                                    <td>600</td>
+                                    <td>R 5,400</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-heartbeat me-1"></i>
+                            Mortality Records
+                        </div>
+                        <a href="/Admin/MortalityRecords" class="btn btn-sm btn-primary">Details</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="mortalityChart" width="100%" height="40"></canvas>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Animal Type</th>
+                                    <th>Count</th>
+                                    <th>Primary Cause</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Piglets (0-4 weeks)</td>
+                                    <td>5</td>
+                                    <td>Crushing (3), Disease (2)</td>
+                                </tr>
+                                <tr>
+                                    <td>Weaners (4-12 weeks)</td>
+                                    <td>2</td>
+                                    <td>Respiratory disease (2)</td>
+                                </tr>
+                                <tr>
+                                    <td>Growers (3-6 months)</td>
+                                    <td>1</td>
+                                    <td>Intestinal issues (1)</td>
+                                </tr>
+                                <tr>
+                                    <td>Adult Stock</td>
+                                    <td>0</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -198,8 +507,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Population Growth Chart
-        var revenueCtx = document.getElementById('revenueChart');
-        new Chart(revenueCtx, {
+        var populationCtx = document.getElementById('populationChart');
+        new Chart(populationCtx, {
             type: 'line',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -226,28 +535,30 @@
             }
         });
 
-        // Age Distribution Chart
-        var livestockCtx = document.getElementById('livestockChart');
-        new Chart(livestockCtx, {
+        // Distribution Chart
+        var distributionCtx = document.getElementById('distributionChart');
+        new Chart(distributionCtx, {
             type: 'bar',
             data: {
-                labels: ['Piglets (0-2m)', 'Weaners (2-4m)', 'Growers (4-6m)', 'Finishers (6m+)', 'Breeding Stock'],
+                labels: ['Boars', 'Sows', 'Piglets', 'Weaners', 'Growers', 'Finishers'],
                 datasets: [{
                     label: 'Number of Pigs',
-                    data: [45, 65, 58, 60, 20],
+                    data: [20, 15, 45, 65, 58, 45],
                     backgroundColor: [
-                        'rgba(255, 99, 132, 0.5)',
                         'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
                         'rgba(255, 206, 86, 0.5)',
                         'rgba(75, 192, 192, 0.5)',
-                        'rgba(153, 102, 255, 0.5)'
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)'
                     ],
                     borderColor: [
-                        'rgba(255, 99, 132, 1)',
                         'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
                         'rgba(255, 206, 86, 1)',
                         'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)'
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
                     ],
                     borderWidth: 1
                 }]
@@ -257,6 +568,112 @@
                 scales: {
                     y: {
                         beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Feeding Chart
+        var feedingCtx = document.getElementById('feedingChart');
+        new Chart(feedingCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [
+                    {
+                        label: 'Sow Feed',
+                        data: [175, 180, 178, 180],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Boar Feed',
+                        data: [115, 120, 122, 120],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Weaner Feed',
+                        data: [190, 195, 205, 200],
+                        backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Grower Feed',
+                        data: [145, 150, 155, 150],
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: false,
+                    },
+                    y: {
+                        stacked: false,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Kilograms'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Mortality Chart
+        var mortalityCtx = document.getElementById('mortalityChart');
+        new Chart(mortalityCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+                datasets: [
+                    {
+                        label: 'Piglets',
+                        data: [6, 5, 4, 5],
+                        fill: false,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Weaners',
+                        data: [3, 2, 3, 2],
+                        fill: false,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Growers/Finishers',
+                        data: [1, 2, 0, 1],
+                        fill: false,
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Adult Stock',
+                        data: [0, 1, 0, 0],
+                        fill: false,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Deaths'
+                        }
                     }
                 }
             }

@@ -1,0 +1,101 @@
+@model Inyama_Yethu.Models.Feeding
+
+@{
+    ViewData["Title"] = "Record Feeding";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Record Feeding</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/Admin/FeedManagement">Feed Management</a></li>
+        <li class="breadcrumb-item active">Record Feeding</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-utensils me-1"></i>
+            New Feeding Record
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <form asp-action="Record">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="AnimalId" class="control-label">Animal</label>
+                            <select asp-for="AnimalId" class="form-control" asp-items="ViewBag.AnimalId"></select>
+                            <span asp-validation-for="AnimalId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="FeedDate" class="control-label">Feed Date</label>
+                            <input asp-for="FeedDate" type="datetime-local" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="FeedDate" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="FeedType" class="control-label">Feed Type</label>
+                            <select asp-for="FeedType" class="form-control" asp-items="Html.GetEnumSelectList<Inyama_Yethu.Models.FeedType>()"></select>
+                            <span asp-validation-for="FeedType" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Quantity" class="control-label">Quantity (kg)</label>
+                            <input asp-for="Quantity" class="form-control" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="CostPerKg" class="control-label">Cost per kg (ZAR)</label>
+                            <input asp-for="CostPerKg" class="form-control" />
+                            <span asp-validation-for="CostPerKg" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Notes" class="control-label">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-1"></i> Information
+                        </div>
+                        <div class="card-body">
+                            <p>Use this form to record a new feeding for an individual animal.</p>
+                            <p>For batch feeding of multiple animals of the same type, use the 
+                               <a asp-action="BatchRecord">Batch Record</a> feature instead.</p>
+                            <hr />
+                            <h6>Feed Type Guide:</h6>
+                            <ul>
+                                <li><strong>Starter Feed</strong>: For piglets after weaning (2-8 weeks)</li>
+                                <li><strong>Grower Feed</strong>: For growing pigs (8-18 weeks)</li>
+                                <li><strong>Finisher Feed</strong>: For market-ready pigs (18+ weeks)</li>
+                                <li><strong>Sow Feed</strong>: For pregnant and lactating sows</li>
+                                <li><strong>Boar Feed</strong>: For breeding boars</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

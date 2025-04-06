@@ -1,0 +1,371 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Feed Inventory";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Feed Inventory Management</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/Admin/FeedManagement">Feed Management</a></li>
+        <li class="breadcrumb-item active">Feed Inventory</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Current Stock Levels
+                </div>
+                <div class="card-body">
+                    <canvas id="stockLevelChart" width="100%" height="30"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-cubes me-1"></i>
+                Feed Inventory
+            </div>
+            <div>
+                <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                    <i class="fas fa-plus"></i> Add Stock
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="inventoryTable" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Feed Type</th>
+                            <th>Stock on Hand (kg)</th>
+                            <th>Reorder Level (kg)</th>
+                            <th>Status</th>
+                            <th>Last Purchase</th>
+                            <th>Last Price</th>
+                            <th>Daily Usage</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var stockStatus = "bg-success";
+                            var statusText = "Adequate";
+                            
+                            if (item.StockOnHand <= item.ReorderLevel * 0.5)
+                            {
+                                stockStatus = "bg-danger";
+                                statusText = "Critical";
+                            }
+                            else if (item.StockOnHand <= item.ReorderLevel)
+                            {
+                                stockStatus = "bg-warning";
+                                statusText = "Low";
+                            }
+                            
+                            <tr>
+                                <td>@item.Type</td>
+                                <td>@item.StockOnHand.ToString("F1") kg</td>
+                                <td>@item.ReorderLevel.ToString("F1") kg</td>
+                                <td>
+                                    <span class="badge @stockStatus">@statusText</span>
+                                </td>
+                                <td>@item.LastPurchaseDate.ToString("yyyy-MM-dd")</td>
+                                <td>R @item.LastPurchasePrice.ToString("F2")</td>
+                                <td>@item.AverageDailyUsage.ToString("F1") kg</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#adjustStockModal" 
+                                                data-feed-type="@item.Type" data-stock="@item.StockOnHand">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#historyModal" 
+                                                data-feed-type="@item.Type">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Stock Modal -->
+    <div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStockModalLabel">Add Feed Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- In a real implementation, this would be a form that posts to a controller action -->
+                    <form id="addStockForm">
+                        <div class="mb-3">
+                            <label for="feedType" class="form-label">Feed Type</label>
+                            <select id="feedType" class="form-select">
+                                @foreach (var feedType in Enum.GetValues(typeof(Inyama_Yethu.Models.FeedType)))
+                                {
+                                    <option value="@feedType">@feedType</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity (kg)</label>
+                            <input type="number" step="0.1" class="form-control" id="quantity" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="unitPrice" class="form-label">Unit Price (ZAR per kg)</label>
+                            <input type="number" step="0.01" class="form-control" id="unitPrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplier" class="form-label">Supplier</label>
+                            <input type="text" class="form-control" id="supplier">
+                        </div>
+                        <div class="mb-3">
+                            <label for="deliveryDate" class="form-label">Delivery Date</label>
+                            <input type="date" class="form-control" id="deliveryDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="invoiceNumber" class="form-label">Invoice Number</label>
+                            <input type="text" class="form-control" id="invoiceNumber">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveAddStock">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adjust Stock Modal -->
+    <div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adjustStockModalLabel">Adjust Feed Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjustStockForm">
+                        <input type="hidden" id="adjustFeedType">
+                        <div class="mb-3">
+                            <label for="currentStock" class="form-label">Current Stock (kg)</label>
+                            <input type="number" step="0.1" class="form-control" id="currentStock" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentType" class="form-label">Adjustment Type</label>
+                            <select id="adjustmentType" class="form-select">
+                                <option value="add">Add Stock</option>
+                                <option value="remove">Remove Stock</option>
+                                <option value="set">Set Stock Level</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentQuantity" class="form-label">Quantity (kg)</label>
+                            <input type="number" step="0.1" class="form-control" id="adjustmentQuantity" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentReason" class="form-label">Reason</label>
+                            <select id="adjustmentReason" class="form-select">
+                                <option value="Purchase">New Purchase</option>
+                                <option value="Consumption">Feed Consumption</option>
+                                <option value="Wastage">Wastage/Spoilage</option>
+                                <option value="Inventory">Inventory Correction</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustmentNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="adjustmentNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveAdjustment">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock History Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel">Feed Stock History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Stock history for <span id="historyFeedType"></span></p>
+                    
+                    <!-- This would be populated via AJAX in a real implementation -->
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Action</th>
+                                <th>Quantity (kg)</th>
+                                <th>Price</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Sample data that would be replaced by real data -->
+                            <tr>
+                                <td colspan="5" class="text-center">No history data available yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set new default font family and font color to mimic Bootstrap's default styling
+        Chart.defaults.font.family = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.color = '#212529';
+        
+        // Stock Level Chart
+        var ctx = document.getElementById("stockLevelChart");
+        
+        // Extract data from the model for the chart
+        var feedTypes = [];
+        var stockLevels = [];
+        var reorderLevels = [];
+        var backgroundColors = [];
+        
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <text>
+                feedTypes.push('@item.Type');
+                stockLevels.push(@item.StockOnHand);
+                reorderLevels.push(@item.ReorderLevel);
+                
+                // Set color based on stock level
+                if (@item.StockOnHand @Html.Raw("<=") @item.ReorderLevel * 0.5) {
+                    backgroundColors.push('#dc3545'); // Danger/red for critical
+                } else if (@item.StockOnHand @Html.Raw("<=") @item.ReorderLevel) {
+                    backgroundColors.push('#ffc107'); // Warning/yellow for low
+                } else {
+                    backgroundColors.push('#28a745'); // Success/green for adequate
+                }
+                </text>
+            }
+        }
+        
+        var stockChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: feedTypes,
+                datasets: [
+                    {
+                        label: "Current Stock (kg)",
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors,
+                        data: stockLevels,
+                    },
+                    {
+                        label: "Reorder Level (kg)",
+                        backgroundColor: "rgba(0, 0, 0, 0.1)",
+                        borderColor: "rgba(0, 0, 0, 0.1)",
+                        data: reorderLevels,
+                        type: 'line',
+                        order: 1
+                    }
+                ],
+            },
+            options: {
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantity (kg)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+        
+        // Initialize DataTable
+        $(document).ready(function () {
+            $('#inventoryTable').DataTable({
+                order: [[0, 'asc']],
+                pageLength: 10
+            });
+            
+            // Handle Adjust Stock Modal
+            $('#adjustStockModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var feedType = button.data('feed-type');
+                var stock = button.data('stock');
+                
+                var modal = $(this);
+                modal.find('#adjustFeedType').val(feedType);
+                modal.find('#currentStock').val(stock);
+                modal.find('#adjustStockModalLabel').text('Adjust Stock: ' + feedType);
+            });
+            
+            // Handle History Modal
+            $('#historyModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var feedType = button.data('feed-type');
+                
+                var modal = $(this);
+                modal.find('#historyFeedType').text(feedType);
+                
+                // In a real implementation, you would load history via AJAX here
+                // For now, we'll just show a message indicating this is a placeholder
+                modal.find('#historyTableBody').html('<tr><td colspan="5" class="text-center">Stock history would be loaded via AJAX in a real implementation.</td></tr>');
+            });
+            
+            // Save buttons are just placeholders for now
+            $('#saveAddStock').click(function() {
+                alert('In a real implementation, this would save the new stock to the database.');
+                $('#addStockModal').modal('hide');
+            });
+            
+            $('#saveAdjustment').click(function() {
+                alert('In a real implementation, this would save the stock adjustment to the database.');
+                $('#adjustStockModal').modal('hide');
+            });
+        });
+    </script>
+} 

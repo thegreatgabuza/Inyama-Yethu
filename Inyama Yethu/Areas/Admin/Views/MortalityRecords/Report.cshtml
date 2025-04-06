@@ -1,0 +1,293 @@
+@model IEnumerable<Inyama_Yethu.Models.HealthRecord>
+
+@{
+    ViewData["Title"] = "Mortality Report";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var startDate = ViewBag.StartDate ?? DateTime.Today.AddDays(-30);
+    var endDate = ViewBag.EndDate ?? DateTime.Today;
+    var totalMortality = ViewBag.TotalMortality ?? 0;
+    var mortalityRate = ViewBag.MortalityRate ?? 0.0;
+    
+    var mortalityByCause = ViewBag.MortalityByCause as List<dynamic> ?? new List<dynamic>();
+    var mortalityByAge = ViewBag.MortalityByAge as List<dynamic> ?? new List<dynamic>();
+    
+    var primaryCause = ViewBag.PrimaryCause ?? "None";
+    var highestAgeGroup = ViewBag.HighestAgeGroup ?? "None";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Mortality Report</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Mortality Records</a></li>
+        <li class="breadcrumb-item active">Report</li>
+    </ol>
+    
+    <div class="row mb-4">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-calendar-alt me-1"></i> Date Range</div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i> Print Report
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Report" method="get" class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="startDate" class="form-control" value="@startDate.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="endDate" class="form-control" value="@endDate.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Generate Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i> Mortality Summary
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="h1 text-danger mb-0">@totalMortality</div>
+                                <div class="text-muted">Total Deaths</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="h1 text-warning mb-0">@mortalityRate.ToString("F1")%</div>
+                                <div class="text-muted">Mortality Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="h1 text-info mb-0">@Model.Select(m => m.Animal.Type).Distinct().Count()</div>
+                                <div class="text-muted">Impacted Categories</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h5>Primary Cause</h5>
+                                <div class="h3">@primaryCause</div>
+                                <div class="text-muted">
+                                    @{
+                                        var primaryCauseCount = mortalityByCause.FirstOrDefault(c => c.Cause == primaryCause)?.Count ?? 0;
+                                        var primaryCausePercent = totalMortality > 0 ? (100.0 * primaryCauseCount / totalMortality) : 0;
+                                    }
+                                    @primaryCauseCount deaths (@primaryCausePercent.ToString("F1")% of total)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h5>Highest Age Group</h5>
+                                <div class="h3">@highestAgeGroup</div>
+                                <div class="text-muted">
+                                    @{
+                                        var highestAgeCount = mortalityByAge.FirstOrDefault(a => a.AgeGroup == highestAgeGroup)?.Count ?? 0;
+                                        var highestAgePercent = totalMortality > 0 ? (100.0 * highestAgeCount / totalMortality) : 0;
+                                    }
+                                    @highestAgeCount deaths (@highestAgePercent.ToString("F1")% of total)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i> Deaths by Cause
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cause</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in mortalityByCause)
+                                {
+                                    var percent = totalMortality > 0 ? (100.0 * item.Count / totalMortality) : 0;
+                                    <tr>
+                                        <td>@(string.IsNullOrEmpty(item.Cause) ? "Unknown" : item.Cause)</td>
+                                        <td>@item.Count</td>
+                                        <td>@percent.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i> Deaths by Age Group
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Age Group</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in mortalityByAge)
+                                {
+                                    var percent = totalMortality > 0 ? (100.0 * item.Count / totalMortality) : 0;
+                                    <tr>
+                                        <td>@item.AgeGroup</td>
+                                        <td>@item.Count</td>
+                                        <td>@percent.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i> Mortality Details
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Tag Number</th>
+                                    <th>Type</th>
+                                    <th>Cause</th>
+                                    <th>Age at Death</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var record in Model.OrderByDescending(r => r.RecordDate))
+                                {
+                                    <tr>
+                                        <td>@record.RecordDate.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            <a asp-action="Details" asp-route-id="@record.AnimalId" class="text-decoration-none">
+                                                @record.Animal.TagNumber
+                                            </a>
+                                        </td>
+                                        <td>@record.Animal.Type</td>
+                                        <td>@record.Description</td>
+                                        <td>
+                                            @{
+                                                if (record.Animal.BirthDate.HasValue)
+                                                {
+                                                    var age = record.RecordDate - record.Animal.BirthDate.Value;
+                                                    var months = (int)(age.TotalDays / 30.436875);
+                                                    
+                                                    if (months < 1)
+                                                    {
+                                                        @($"{age.Days} days")
+                                                    }
+                                                    else
+                                                    {
+                                                        @($"{months} months")
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @("Unknown")
+                                                }
+                                            }
+                                        </td>
+                                        <td>@(string.IsNullOrEmpty(record.Notes) ? "-" : record.Notes)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        @@media print {
+            .breadcrumb, .btn, footer, nav, form {
+                display: none !important;
+            }
+            
+            .container-fluid {
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .card {
+                border: 1px solid #ddd !important;
+                margin-bottom: 20px !important;
+                break-inside: avoid;
+            }
+            
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            h1 {
+                font-size: 20pt !important;
+                margin-top: 20px !important;
+            }
+            
+            table {
+                font-size: 10pt !important;
+            }
+        }
+    </style>
+}

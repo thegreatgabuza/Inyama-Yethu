@@ -1,0 +1,442 @@
+@model Inyama_Yethu.Models.Animal
+
+@{
+    ViewData["Title"] = "Sow Card";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var matingsAsMother = ViewBag.MatingsAsMother as List<Inyama_Yethu.Models.Mating> ?? new List<Inyama_Yethu.Models.Mating>();
+    var latestMating = matingsAsMother.OrderByDescending(m => m.MatingDate).FirstOrDefault();
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Sow Card</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Breeding Records</a></li>
+        <li class="breadcrumb-item active">Sow Card</li>
+    </ol>
+    
+    <div class="row mb-4">
+        <div class="col-xl-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-venus me-1"></i> Sow Information</div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i> Print Card
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="text-muted small mb-1">Tag Number</div>
+                            <div class="h3">@Model.TagNumber</div>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="text-muted small mb-1">Status</div>
+                            @{
+                                var statusClass = Model.Status switch {
+                                    AnimalStatus.Active => "bg-success",
+                                    AnimalStatus.Deceased => "bg-danger",
+                                    AnimalStatus.Sold => "bg-secondary",
+                                    _ => "bg-info"
+                                };
+                            }
+                            <div><span class="badge @statusClass">@Model.Status</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="text-muted small">Birth Date</div>
+                            <div>@(Model.BirthDate.HasValue ? Model.BirthDate.Value.ToString("dd MMM yyyy") : "Unknown")</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Age</div>
+                            <div>
+                                @{
+                                    if (Model.BirthDate.HasValue)
+                                    {
+                                        var age = DateTime.Today - Model.BirthDate.Value;
+                                        var months = (int)(age.TotalDays / 30.436875);
+                                        @($"{months} months")
+                                    }
+                                    else
+                                    {
+                                        @("Unknown")
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Weight</div>
+                            <div>@(Model.Weight?.ToString("F1") ?? "Not recorded") kg</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Total Parities</div>
+                            <div>@matingsAsMother.Count(m => m.Status == MatingStatus.Farrowed)</div>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i> @Model.Notes
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-1"></i> Reproductive Performance
+                </div>
+                <div class="card-body">
+                    @if (matingsAsMother.Any())
+                    {
+                        var farrowedMatings = matingsAsMother.Where(m => m.Status == MatingStatus.Farrowed).ToList();
+                        var totalPigletsBorn = farrowedMatings.Sum(m => m.NumberOfPigletsBorn ?? 0);
+                        var totalPigletsAlive = farrowedMatings.Sum(m => m.NumberOfPigletsBornAlive ?? 0);
+                        var avgLitterSize = farrowedMatings.Any() ? Math.Round((double)totalPigletsBorn / farrowedMatings.Count(), 1) : 0;
+                    
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="h1 mb-0">@(matingsAsMother.Count())</div>
+                                <div class="text-muted">Total Services</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="h1 mb-0">@totalPigletsBorn</div>
+                                <div class="text-muted">Total Piglets Born</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="h1 mb-0">@avgLitterSize</div>
+                                <div class="text-muted">Avg. Litter Size</div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="h3 mb-0">@(farrowedMatings.Count())</div>
+                                <div class="text-muted">Farrowings</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="h3 mb-0">@totalPigletsAlive</div>
+                                <div class="text-muted">Born Alive</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="h3 mb-0">@(totalPigletsBorn > 0 ? Math.Round(100.0 * totalPigletsAlive / totalPigletsBorn, 1) : 0)%</div>
+                                <div class="text-muted">Live Birth Rate</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <div class="text-muted mb-3">No breeding records found for this sow</div>
+                            <a asp-action="Create" asp-route-motherId="@Model.Id" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-1"></i> Record New Mating
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-history me-1"></i> Reproductive History
+                </div>
+                <div class="card-body">
+                    @if (matingsAsMother.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Parity</th>
+                                        <th>Service Date</th>
+                                        <th>Boar</th>
+                                        <th>Status</th>
+                                        <th>Farrowing Date</th>
+                                        <th>Piglets (Born/Alive)</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var orderedMatings = matingsAsMother.OrderByDescending(m => m.MatingDate).ToList();
+                                        int parity = orderedMatings.Count(m => m.Status == MatingStatus.Farrowed);
+                                        
+                                        foreach (var mating in orderedMatings)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @{
+                                                        if (mating.Status == MatingStatus.Farrowed)
+                                                        {
+                                                            @parity
+                                                            parity--;
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td>@mating.MatingDate.ToString("dd MMM yyyy")</td>
+                                                <td>@mating.Father.TagNumber</td>
+                                                <td>
+                                                    @{
+                                                        var statusBadgeClass = mating.Status switch
+                                                        {
+                                                            MatingStatus.Scheduled => "bg-secondary",
+                                                            MatingStatus.Completed => "bg-info",
+                                                            MatingStatus.PregnancyConfirmed => "bg-success",
+                                                            MatingStatus.NotPregnant => "bg-danger",
+                                                            MatingStatus.Farrowed => "bg-primary",
+                                                            MatingStatus.Aborted => "bg-warning",
+                                                            _ => "bg-secondary"
+                                                        };
+                                                    }
+                                                    <span class="badge @statusBadgeClass">@mating.Status</span>
+                                                </td>
+                                                <td>
+                                                    @(mating.ActualFarrowingDate.HasValue ? 
+                                                        mating.ActualFarrowingDate.Value.ToString("dd MMM yyyy") : 
+                                                        (mating.Status == MatingStatus.PregnancyConfirmed ? 
+                                                            "Expected: " + (mating.ExpectedFarrowingDate.HasValue ? mating.ExpectedFarrowingDate.Value.ToString("dd MMM yyyy") : "Not set") : 
+                                                            "-"))
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        if (mating.NumberOfPigletsBorn.HasValue && mating.NumberOfPigletsBornAlive.HasValue)
+                                                        {
+                                                            @($"{mating.NumberOfPigletsBorn} / {mating.NumberOfPigletsBornAlive}")
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i> No breeding records found for this sow.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @if (latestMating != null)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-calendar-alt me-1"></i> Sow Service Card
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-primary h-100">
+                                    <div class="card-header bg-primary text-white">Service Details</div>
+                                    <div class="card-body">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-6">Service Date:</dt>
+                                            <dd class="col-sm-6">@latestMating.MatingDate.ToString("dd MMM yyyy")</dd>
+                                            
+                                            <dt class="col-sm-6">Boar Used:</dt>
+                                            <dd class="col-sm-6">@latestMating.Father.TagNumber</dd>
+                                            
+                                            <dt class="col-sm-6">Mating Type:</dt>
+                                            <dd class="col-sm-6">Natural</dd>
+                                            
+                                            <dt class="col-sm-6">Current Status:</dt>
+                                            <dd class="col-sm-6">
+                                                <span class="badge @(latestMating.Status switch {
+                                                    MatingStatus.Scheduled => "bg-secondary",
+                                                    MatingStatus.Completed => "bg-info",
+                                                    MatingStatus.PregnancyConfirmed => "bg-success",
+                                                    MatingStatus.NotPregnant => "bg-danger",
+                                                    MatingStatus.Farrowed => "bg-primary",
+                                                    MatingStatus.Aborted => "bg-warning",
+                                                    _ => "bg-secondary"
+                                                })">@latestMating.Status</span>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-info h-100">
+                                    <div class="card-header bg-info text-white">Pregnancy Checks</div>
+                                    <div class="card-body">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-6">21-Day Check:</dt>
+                                            <dd class="col-sm-6">
+                                                @{
+                                                    if (latestMating.PregnancyCheck1Date.HasValue)
+                                                    {
+                                                        var resultClass = latestMating.PregnancyCheck1Result.Value ? "text-success" : "text-danger";
+                                                        var resultIcon = latestMating.PregnancyCheck1Result.Value ? "fa-check" : "fa-times";
+                                                        <span class="@resultClass"><i class="fas @resultIcon"></i> @latestMating.PregnancyCheck1Date.Value.ToString("dd MMM")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Due: @(latestMating.ExpectedPregnancyCheck1.HasValue ? latestMating.ExpectedPregnancyCheck1.Value.ToString("dd MMM") : "Not set")</span>
+                                                    }
+                                                }
+                                            </dd>
+                                            
+                                            <dt class="col-sm-6">42-Day Check:</dt>
+                                            <dd class="col-sm-6">
+                                                @{
+                                                    if (latestMating.PregnancyCheck2Date.HasValue)
+                                                    {
+                                                        var resultClass = latestMating.PregnancyCheck2Result.Value ? "text-success" : "text-danger";
+                                                        var resultIcon = latestMating.PregnancyCheck2Result.Value ? "fa-check" : "fa-times";
+                                                        <span class="@resultClass"><i class="fas @resultIcon"></i> @latestMating.PregnancyCheck2Date.Value.ToString("dd MMM")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Due: @(latestMating.ExpectedPregnancyCheck2.HasValue ? latestMating.ExpectedPregnancyCheck2.Value.ToString("dd MMM") : "Not set")</span>
+                                                    }
+                                                }
+                                            </dd>
+                                            
+                                            <dt class="col-sm-6">Performed By:</dt>
+                                            <dd class="col-sm-6">@(latestMating.PregnancyCheckBy ?? "Not recorded")</dd>
+                                            
+                                            <dt class="col-sm-6">Notes:</dt>
+                                            <dd class="col-sm-6">@(latestMating.PregnancyCheckNotes ?? "None")</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-success h-100">
+                                    <div class="card-header bg-success text-white">Vaccinations & Farrowing</div>
+                                    <div class="card-body">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-6">Vaccination 1:</dt>
+                                            <dd class="col-sm-6">
+                                                @{
+                                                    if (latestMating.Vaccination1Completed)
+                                                    {
+                                                        <span class="text-success"><i class="fas fa-check"></i> Completed</span>
+                                                    }
+                                                    else if (latestMating.Status == MatingStatus.PregnancyConfirmed)
+                                                    {
+                                                        <span>Due: @(latestMating.ExpectedVaccinationDate1.HasValue ? latestMating.ExpectedVaccinationDate1.Value.ToString("dd MMM") : "Not set")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">N/A</span>
+                                                    }
+                                                }
+                                            </dd>
+                                            
+                                            <dt class="col-sm-6">Vaccination 2:</dt>
+                                            <dd class="col-sm-6">
+                                                @{
+                                                    if (latestMating.Vaccination2Completed)
+                                                    {
+                                                        <span class="text-success"><i class="fas fa-check"></i> Completed</span>
+                                                    }
+                                                    else if (latestMating.Status == MatingStatus.PregnancyConfirmed)
+                                                    {
+                                                        <span>Due: @(latestMating.ExpectedVaccinationDate2.HasValue ? latestMating.ExpectedVaccinationDate2.Value.ToString("dd MMM") : "Not set")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">N/A</span>
+                                                    }
+                                                }
+                                            </dd>
+                                            
+                                            <dt class="col-sm-6">Expected Farrowing:</dt>
+                                            <dd class="col-sm-6">
+                                                @(latestMating.ExpectedFarrowingDate.HasValue ? 
+                                                  latestMating.ExpectedFarrowingDate.Value.ToString("dd MMM yyyy") : 
+                                                  "Not set")
+                                            </dd>
+                                            
+                                            <dt class="col-sm-6">Actual Farrowing:</dt>
+                                            <dd class="col-sm-6">
+                                                @(latestMating.ActualFarrowingDate.HasValue ? 
+                                                  latestMating.ActualFarrowingDate.Value.ToString("dd MMM yyyy") : 
+                                                  "Not yet")
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        @@media print {
+            .breadcrumb, .btn, footer, nav {
+                display: none !important;
+            }
+            
+            .container-fluid {
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .card {
+                border: 1px solid #ddd !important;
+                margin-bottom: 20px !important;
+            }
+            
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            h1 {
+                font-size: 20pt !important;
+                margin-top: 20px !important;
+            }
+        }
+    </style>
+} 

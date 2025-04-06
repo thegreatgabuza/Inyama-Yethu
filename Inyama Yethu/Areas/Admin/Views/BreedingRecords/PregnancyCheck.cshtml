@@ -1,0 +1,197 @@
+@model Inyama_Yethu.Models.Mating
+
+@{
+    ViewData["Title"] = "Pregnancy Check";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var daysSinceMating = (DateTime.Today - Model.MatingDate).Days;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Pregnancy Check</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Breeding Records</a></li>
+        <li class="breadcrumb-item active">Pregnancy Check</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Mating Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6 class="mb-2">Sow</h6>
+                            <p>@Model.Mother.TagNumber</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="mb-2">Boar</h6>
+                            <p>@Model.Father.TagNumber</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="mb-2">Mating Date</h6>
+                            <p>@Model.MatingDate.ToString("dd MMM yyyy")</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="mb-2">Days Since Mating</h6>
+                            <p><span class="badge bg-info">@daysSinceMating days</span></p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h6 class="mb-2">Expected Farrowing Date</h6>
+                            <p>@(Model.ExpectedFarrowingDate.HasValue ? Model.ExpectedFarrowingDate.Value.ToString("dd MMM yyyy") : "Not set")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Pregnancy Check Guide
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border-primary h-100">
+                                <div class="card-header bg-primary text-white">21-Day Check</div>
+                                <div class="card-body">
+                                    <p>This is a heat-no-return check. If the sow is not pregnant, she will return to heat approximately 21 days after mating.</p>
+                                    <ul>
+                                        <li>Observe for signs of heat/estrus</li>
+                                        <li>Reddened vulva</li>
+                                        <li>Mounting behavior</li>
+                                        <li>Responsiveness to pressure</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success h-100">
+                                <div class="card-header bg-success text-white">42-Day Check</div>
+                                <div class="card-body">
+                                    <p>This is a more reliable test performed around 42 days after service. Several methods can be used:</p>
+                                    <ul>
+                                        <li>Ultrasound scanning</li>
+                                        <li>Doppler detection</li>
+                                        <li>Physical examination</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-warning h-100">
+                                <div class="card-header bg-warning text-dark">Late Check</div>
+                                <div class="card-body">
+                                    <p>This check is performed in later gestation (70+ days).</p>
+                                    <ul>
+                                        <li>Physical changes become more evident</li>
+                                        <li>Enlarged abdomen</li>
+                                        <li>Enlarged mammary glands</li>
+                                        <li>Usually confirms earlier tests</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-list me-1"></i>
+                    Record Pregnancy Check Results
+                </div>
+                <div class="card-body">
+                    <form asp-action="PregnancyCheck" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" name="CheckNumber" value="@ViewBag.CheckNumber" />
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Check Date</label>
+                                    <input type="date" name="CheckDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Check Type</label>
+                                    <select name="CheckType" id="checkType" class="form-control" required>
+                                        <option value="21-Day">21-Day (Return Check)</option>
+                                        <option value="42-Day">42-Day (Ultrasound)</option>
+                                        <option value="Late">Late Gestation Check</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Result</label>
+                                    <select name="Result" id="checkResult" class="form-control" required>
+                                        <option value="true">Positive (Pregnant)</option>
+                                        <option value="false">Negative (Not Pregnant)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Performed By</label>
+                                    <input type="text" name="PerformedBy" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-danger mt-3 mb-3" id="negativeWarning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> A negative result will mark this mating record as failed. The sow will be available for re-mating.
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-control" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Record Check Results
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Show warning if "Negative" is selected
+            $("#checkResult").change(function() {
+                if ($(this).val() === "false") {
+                    $("#negativeWarning").slideDown();
+                } else {
+                    $("#negativeWarning").slideUp();
+                }
+            });
+            
+            // Auto-select check type based on days since mating
+            var daysSinceMating = @daysSinceMating;
+            if (daysSinceMating <= 28) {
+                $("#checkType").val("21-Day");
+            } else if (daysSinceMating <= 56) {
+                $("#checkType").val("42-Day");
+            } else {
+                $("#checkType").val("Late");
+            }
+        });
+    </script>
+} 
