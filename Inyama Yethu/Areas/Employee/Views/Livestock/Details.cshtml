@@ -1,0 +1,223 @@
+@model Inyama_Yethu.Models.Animal
+
+@{
+    ViewData["Title"] = "Animal Details";
+    Layout = "~/Areas/Employee/Views/Shared/_EmployeeLayout.cshtml";
+    
+    var healthRecords = ViewData["HealthRecords"] as List<Inyama_Yethu.Models.HealthRecord>;
+    var weightRecords = ViewData["WeightRecords"] as List<Inyama_Yethu.Models.WeightRecord>;
+    var animalTasks = ViewData["AnimalTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Animal Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Employee" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Employee" asp-controller="Livestock" asp-action="Index">Livestock</a></li>
+        <li class="breadcrumb-item active">Animal Details</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-piggy-bank me-1"></i>
+                    Animal: @Model.TagNumber
+                </div>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash me-1"></i> Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 30%">Tag Number</th>
+                            <td>@Model.TagNumber</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>@Model.Type</td>
+                        </tr>
+                        <tr>
+                            <th>Gender</th>
+                            <td>@Model.Gender</td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                @{
+                                    var statusClass = "badge bg-";
+                                    switch (Model.Status)
+                                    {
+                                        case AnimalStatus.Active:
+                                            statusClass += "success";
+                                            break;
+                                        case AnimalStatus.Mating:
+                                        case AnimalStatus.Pregnant:
+                                            statusClass += "info";
+                                            break;
+                                        case AnimalStatus.Farrowing:
+                                            statusClass += "warning";
+                                            break;
+                                        case AnimalStatus.Sold:
+                                            statusClass += "primary";
+                                            break;
+                                        case AnimalStatus.Deceased:
+                                            statusClass += "danger";
+                                            break;
+                                        default:
+                                            statusClass += "secondary";
+                                            break;
+                                    }
+                                }
+                                <span class="@statusClass">@Model.Status</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Physical Attributes</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 30%">Birth Date</th>
+                            <td>@(Model.BirthDate?.ToString("yyyy-MM-dd") ?? "Not recorded")</td>
+                        </tr>
+                        <tr>
+                            <th>Weight</th>
+                            <td>@(Model.Weight != null ? $"{Model.Weight:F1} kg" : "Not recorded")</td>
+                        </tr>
+                        <tr>
+                            <th>Mother</th>
+                            <td>@(Model.Mother != null ? Model.Mother.TagNumber : "Unknown")</td>
+                        </tr>
+                        <tr>
+                            <th>Father</th>
+                            <td>@(Model.Father != null ? Model.Father.TagNumber : "Unknown")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5>Notes</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            @(string.IsNullOrEmpty(Model.Notes) ? "No notes available" : Model.Notes)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (healthRecords != null && healthRecords.Any())
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>Health Records</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Treatment</th>
+                                        <th>Description</th>
+                                        <th>Performed By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in healthRecords.OrderByDescending(r => r.RecordDate))
+                                    {
+                                        <tr>
+                                            <td>@record.RecordDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@record.RecordType</td>
+                                            <td>@record.Treatment</td>
+                                            <td>@record.Description</td>
+                                            <td>@(record.PerformedBy?.FirstName ?? "Not recorded")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (weightRecords != null && weightRecords.Any())
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>Weight Records</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Weight (kg)</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in weightRecords.OrderByDescending(r => r.RecordDate))
+                                    {
+                                        <tr>
+                                            <td>@record.RecordDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@record.Weight.ToString("F1")</td>
+                                            <td>@(string.IsNullOrEmpty(record.Notes) ? "-" : record.Notes)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (animalTasks != null && animalTasks.Any())
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>Assigned Tasks</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in animalTasks.OrderBy(t => t.DueDate))
+                                    {
+                                        <tr>
+                                            <td>@task.Title</td>
+                                            <td>@task.DueDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@task.Status</td>
+                                            <td>@task.Priority</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="text-center mt-4">
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+    </div>
+</div> 

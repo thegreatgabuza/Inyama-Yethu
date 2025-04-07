@@ -3,6 +3,7 @@ using Inyama_Yethu.Areas.Customer;
 using Inyama_Yethu.Areas.Employee;
 using Inyama_Yethu.Conventions;
 using Inyama_Yethu.Data;
+using Inyama_Yethu.Middleware;
 using Inyama_Yethu.Models;
 using Inyama_Yethu.Services;
 using Microsoft.AspNetCore.Identity;
@@ -76,6 +77,8 @@ builder.Services.AddHostedService<TaskSchedulerService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaskNotificationService, TaskNotificationService>();
 builder.Services.AddHostedService<TaskReminderService>();
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -99,6 +102,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Add our custom middleware for role-based redirection
+app.UseRoleBasedRedirection();
+
 // Map Identity endpoints
 app.MapRazorPages();
 
@@ -107,6 +113,12 @@ app.MapControllerRoute(
     name: "admin",
     pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}",
     defaults: new { area = "Admin" });
+
+// Add a specific route for the Employee area
+app.MapControllerRoute(
+    name: "employee",
+    pattern: "Employee/{controller=Home}/{action=Index}/{id?}",
+    defaults: new { area = "Employee" });
 
 // Map area routes
 app.MapControllerRoute(

@@ -75,6 +75,9 @@
                         <a asp-action="Index" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Back to List
                         </a>
+                        <a asp-area="Admin" asp-controller="ActivityLogs" asp-action="AnimalHistory" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="fas fa-history me-1"></i> View Activity History
+                        </a>
                     </div>
                 </div>
             </div>

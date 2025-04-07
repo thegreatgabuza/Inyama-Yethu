@@ -1,0 +1,279 @@
+@model Inyama_Yethu.Models.ActivityLog
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
+
+@{
+    ViewData["Title"] = "Activity Log Details";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    string userDisplay = "";
+    if (Model.Employee != null)
+    {
+        userDisplay = $"{Model.Employee.FirstName} {Model.Employee.LastName} (Employee)";
+    }
+    else if (!string.IsNullOrEmpty(Model.UserName))
+    {
+        userDisplay = Model.UserName;
+    }
+    else
+    {
+        userDisplay = "System";
+    }
+    
+    // Parse old and new values if present
+    JObject oldValues = null;
+    JObject newValues = null;
+    
+    if (!string.IsNullOrEmpty(Model.OldValues))
+    {
+        try
+        {
+            oldValues = JObject.Parse(Model.OldValues);
+        }
+        catch { /* Ignore parsing errors */ }
+    }
+    
+    if (!string.IsNullOrEmpty(Model.NewValues))
+    {
+        try
+        {
+            newValues = JObject.Parse(Model.NewValues);
+        }
+        catch { /* Ignore parsing errors */ }
+    }
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Activity Log Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ActivityLogs" asp-action="Index">Activity Logs</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Activity Log #@Model.Id
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th class="bg-light" style="width: 30%">ID</th>
+                            <td>@Model.Id</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Entity</th>
+                            <td>@Model.EntityName</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Entity ID</th>
+                            <td>@Model.EntityId</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Activity Type</th>
+                            <td>
+                                @{
+                                    var badgeClass = "badge bg-";
+                                    switch (Model.ActivityType)
+                                    {
+                                        case ActivityType.Create:
+                                            badgeClass += "success";
+                                            break;
+                                        case ActivityType.Read:
+                                            badgeClass += "info";
+                                            break;
+                                        case ActivityType.Update:
+                                            badgeClass += "warning";
+                                            break;
+                                        case ActivityType.Delete:
+                                            badgeClass += "danger";
+                                            break;
+                                        default:
+                                            badgeClass += "secondary";
+                                            break;
+                                    }
+                                }
+                                <span class="@badgeClass">@Model.ActivityType</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>User Information</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th class="bg-light" style="width: 30%">User</th>
+                            <td>@userDisplay</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Timestamp</th>
+                            <td>@Model.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Description</th>
+                            <td>@Model.Description</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            @if (Model.ActivityType == ActivityType.Update && oldValues != null && newValues != null)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Changes</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-light" style="width: 20%">Property</th>
+                                        <th class="bg-light" style="width: 40%">Old Value</th>
+                                        <th class="bg-light" style="width: 40%">New Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        // Gather all property names from both objects
+                                        var allProperties = new HashSet<string>();
+                                        
+                                        foreach (var prop in oldValues.Properties())
+                                        {
+                                            allProperties.Add(prop.Name);
+                                        }
+                                        
+                                        foreach (var prop in newValues.Properties())
+                                        {
+                                            allProperties.Add(prop.Name);
+                                        }
+                                        
+                                        // Skip certain properties that aren't relevant or sensitive
+                                        var propertiesToSkip = new HashSet<string> { "Id" };
+                                        
+                                        foreach (var propName in allProperties.OrderBy(p => p))
+                                        {
+                                            if (propertiesToSkip.Contains(propName))
+                                            {
+                                                continue;
+                                            }
+                                            
+                                            string oldVal = "null";
+                                            string newVal = "null";
+                                            bool hasChanged = false;
+                                            
+                                            if (oldValues.TryGetValue(propName, out var oldToken))
+                                            {
+                                                oldVal = oldToken.ToString();
+                                            }
+                                            
+                                            if (newValues.TryGetValue(propName, out var newToken))
+                                            {
+                                                newVal = newToken.ToString();
+                                            }
+                                            
+                                            hasChanged = oldVal != newVal;
+                                            
+                                            <tr class="@(hasChanged ? "table-warning" : "")">
+                                                <td>@propName</td>
+                                                <td>@oldVal</td>
+                                                <td>@newVal</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.ActivityType == ActivityType.Create && newValues != null)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Created Values</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-light" style="width: 30%">Property</th>
+                                        <th class="bg-light" style="width: 70%">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        // Skip certain properties that aren't relevant or sensitive
+                                        var propertiesToSkip = new HashSet<string> { "Id" };
+                                        
+                                        foreach (var property in newValues.Properties().OrderBy(p => p.Name))
+                                        {
+                                            if (propertiesToSkip.Contains(property.Name))
+                                            {
+                                                continue;
+                                            }
+                                            
+                                            <tr>
+                                                <td>@property.Name</td>
+                                                <td>@property.Value.ToString()</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.ActivityType == ActivityType.Delete && oldValues != null)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Deleted Values</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-light" style="width: 30%">Property</th>
+                                        <th class="bg-light" style="width: 70%">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        // Skip certain properties that aren't relevant or sensitive
+                                        var propertiesToSkip = new HashSet<string> { "Id" };
+                                        
+                                        foreach (var property in oldValues.Properties().OrderBy(p => p.Name))
+                                        {
+                                            if (propertiesToSkip.Contains(property.Name))
+                                            {
+                                                continue;
+                                            }
+                                            
+                                            <tr>
+                                                <td>@property.Name</td>
+                                                <td>@property.Value.ToString()</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            <div class="mt-4 text-center">
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                
+                @if (Model.EntityName == "Animal")
+                {
+                    <a asp-action="AnimalHistory" asp-route-id="@Model.EntityId" class="btn btn-primary">
+                        <i class="fas fa-history me-1"></i> View All Activity for This Animal
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

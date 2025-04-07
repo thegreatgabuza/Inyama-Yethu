@@ -14,6 +14,9 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Livestock Management</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Add New Animal
+        </a>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -108,7 +111,7 @@
                                             <th>Gender</th>
                                             <th>Birth Date</th>
                                             <th>Age</th>
-                                            <th>Housing</th>
+                                            <th>Weight</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -116,76 +119,72 @@
                                     <tbody>
                                         @foreach (var animal in animals)
                                         {
-                                            // Calculate age safely
-                                            int ageDays = 0;
-                                            string birthDateStr = "Unknown";
-                                            
-                                            // Safe age calculation
-                                            try 
+                                            var ageText = "Unknown";
+                                            if (animal.BirthDate.HasValue)
                                             {
-                                                // Use reflection to get BirthDate safely
-                                                var birthDateProperty = animal.GetType().GetProperty("BirthDate");
-                                                if (birthDateProperty != null)
+                                                var age = today - animal.BirthDate.Value;
+                                                if (age.TotalDays < 30)
                                                 {
-                                                    var birthDateValue = birthDateProperty.GetValue(animal);
-                                                    if (birthDateValue != null && birthDateValue is DateTime)
-                                                    {
-                                                        DateTime birthDate = (DateTime)birthDateValue;
-                                                        ageDays = (today - birthDate).Days;
-                                                        birthDateStr = birthDate.ToString("MMM dd, yyyy");
-                                                    }
+                                                    ageText = $"{Math.Floor(age.TotalDays)} days";
+                                                }
+                                                else if (age.TotalDays < 365)
+                                                {
+                                                    ageText = $"{Math.Floor(age.TotalDays / 30)} months";
+                                                }
+                                                else
+                                                {
+                                                    ageText = $"{Math.Floor(age.TotalDays / 365)} years";
                                                 }
                                             }
-                                            catch { /* Safely ignore any errors */ }
-                                            
-                                            string ageDisplay = ageDays > 365 ? $"{ageDays / 365} years" : 
-                                                              ageDays > 30 ? $"{ageDays / 30} months" : 
-                                                              $"{ageDays} days";
-                                            
-                                            // Get housing location (try all possible property names)
-                                            string housingText = "Not assigned";
-                                            try
-                                            {
-                                                string[] possiblePropertyNames = new string[] { "Location", "HousingLocation", "Pen", "PenNumber", "Housing" };
-                                                foreach (string propName in possiblePropertyNames)
-                                                {
-                                                    var prop = animal.GetType().GetProperty(propName);
-                                                    if (prop != null)
-                                                    {
-                                                        var value = prop.GetValue(animal);
-                                                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
-                                                        {
-                                                            housingText = value.ToString();
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            catch { /* Safely ignore any errors */ }
-                                            
-                                            // Get status text and class
-                                            string statusText = animal.Status.ToString();
-                                            string statusClass = statusText.Contains("Active") ? "badge-success" :
-                                                               statusText.Contains("Sick") ? "badge-warning" :
-                                                               statusText.Contains("Sold") ? "badge-info" :
-                                                               statusText.Contains("Deceased") ? "badge-danger" :
-                                                               "badge-secondary";
-                                            
+
                                             <tr>
-                                                <td>#@animal.Id</td>
+                                                <td>@animal.Id</td>
                                                 <td>@animal.TagNumber</td>
                                                 <td>@animal.Type</td>
                                                 <td>@animal.Gender</td>
-                                                <td>@birthDateStr</td>
-                                                <td>@ageDisplay</td>
-                                                <td>@housingText</td>
+                                                <td>@(animal.BirthDate?.ToString("yyyy-MM-dd") ?? "Unknown")</td>
+                                                <td>@ageText</td>
+                                                <td>@(animal.Weight != null ? $"{animal.Weight:F1} kg" : "N/A")</td>
                                                 <td>
-                                                    <span class="badge @statusClass">@statusText</span>
+                                                    @{
+                                                        var statusClass = "badge badge-";
+                                                        switch (animal.Status)
+                                                        {
+                                                            case AnimalStatus.Active:
+                                                                statusClass += "success";
+                                                                break;
+                                                            case AnimalStatus.Mating:
+                                                            case AnimalStatus.Pregnant:
+                                                                statusClass += "info";
+                                                                break;
+                                                            case AnimalStatus.Farrowing:
+                                                                statusClass += "warning";
+                                                                break;
+                                                            case AnimalStatus.Sold:
+                                                                statusClass += "primary";
+                                                                break;
+                                                            case AnimalStatus.Deceased:
+                                                                statusClass += "danger";
+                                                                break;
+                                                            default:
+                                                                statusClass += "secondary";
+                                                                break;
+                                                        }
+                                                    }
+                                                    <span class="@statusClass">@animal.Status</span>
                                                 </td>
                                                 <td>
-                                                    <a asp-action="Details" asp-route-id="@animal.Id" class="btn btn-info btn-sm">
-                                                        <i class="fas fa-info-circle mr-1"></i> Details
-                                                    </a>
+                                                    <div class="btn-group">
+                                                        <a asp-action="Details" asp-route-id="@animal.Id" class="btn btn-info btn-sm">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a asp-action="Edit" asp-route-id="@animal.Id" class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a asp-action="Delete" asp-route-id="@animal.Id" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         }
@@ -196,7 +195,7 @@
                         else
                         {
                             <div class="alert alert-info">
-                                <i class="fas fa-info-circle mr-2"></i> No animals found.
+                                No animals found in the system. <a asp-action="Create" class="alert-link">Add your first animal</a>.
                             </div>
                         }
                     </div>

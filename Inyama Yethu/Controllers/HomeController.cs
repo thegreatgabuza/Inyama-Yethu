@@ -54,8 +54,30 @@ namespace Inyama_Yethu.Controllers
         }
         
         [Authorize]
-        public IActionResult About()
+        public async Task<IActionResult> About()
         {
+            // If user is authenticated, redirect based on role (for any authenticated action)
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                
+                if (user != null)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Administrator"))
+                    {
+                        return RedirectToAction("About", "Home", new { area = "Admin" });
+                    }
+                    else if (await _userManager.IsInRoleAsync(user, "Employee"))
+                    {
+                        return RedirectToAction("About", "Home", new { area = "Employee" });
+                    }
+                    else if (await _userManager.IsInRoleAsync(user, "Customer"))
+                    {
+                        return RedirectToAction("About", "Home", new { area = "Customer" });
+                    }
+                }
+            }
+            
             ViewData["Message"] = "Inyama Yethu: Farm Management System";
             ViewData["Description"] = "A comprehensive system to manage pig farm operations, workforce, livestock breeding cycles, and business operations.";
             

@@ -1,0 +1,142 @@
+@model Inyama_Yethu.Models.Employee
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Areas/Employee/Views/Shared/_EmployeeLayout.cshtml";
+    
+    var recentAttendance = ViewData["RecentAttendance"] as List<Inyama_Yethu.Models.Attendance>;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">My Profile</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Employee" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item active">My Profile</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user me-1"></i>
+                    Employee Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="avatar-placeholder mb-3">
+                                <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                            </div>
+                            <h5>@Model.FirstName @Model.LastName</h5>
+                            <p class="text-muted">@Model.JobTitle</p>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <td>@Model.Id</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>@Model.Email</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone</th>
+                                    <td>@Model.PhoneNumber</td>
+                                </tr>
+                                <tr>
+                                    <th>Hire Date</th>
+                                    <td>@Model.HireDate.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td>
+                                        <span class="badge bg-success">@(Model.IsActive ? "Active" : "Inactive")</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-clock me-1"></i>
+                    Recent Attendance
+                </div>
+                <div class="card-body">
+                    @if (recentAttendance != null && recentAttendance.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Check In</th>
+                                        <th>Check Out</th>
+                                        <th>Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendance in recentAttendance)
+                                    {
+                                        var hours = attendance.CheckOutTime.HasValue
+                                            ? Math.Round((attendance.CheckOutTime.Value - attendance.CheckInTime).TotalHours, 1)
+                                            : 0;
+                                        
+                                        <tr>
+                                            <td>@attendance.CheckInTime.ToString("yyyy-MM-dd")</td>
+                                            <td>@attendance.CheckInTime.ToString("HH:mm")</td>
+                                            <td>@(attendance.CheckOutTime?.ToString("HH:mm") ?? "Not checked out")</td>
+                                            <td>@(attendance.CheckOutTime.HasValue ? $"{hours:F1} hrs" : "-")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-area="Employee" asp-controller="Attendance" asp-action="History" class="btn btn-outline-primary">
+                                View Complete Attendance History
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">No recent attendance records found.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-key me-1"></i>
+                    Account Settings
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Profile Settings</h5>
+                                <small><i class="fas fa-chevron-right"></i></small>
+                            </div>
+                            <p class="mb-1">Update your profile information and contact details</p>
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Manage/ChangePassword" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Change Password</h5>
+                                <small><i class="fas fa-chevron-right"></i></small>
+                            </div>
+                            <p class="mb-1">Update your password to keep your account secure</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
