@@ -19,90 +19,105 @@
             Farrowing Details
         </div>
         <div class="card-body">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="MotherAnimalId" class="control-label">Sow</label>
-                            <select asp-for="MotherAnimalId" class="form-select" asp-items="ViewBag.MotherAnimalId">
-                                <option value="">-- Select Sow --</option>
-                            </select>
-                            <span asp-validation-for="MotherAnimalId" class="text-danger"></span>
-                            <small class="form-text text-muted">Select a pregnant sow</small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="FatherAnimalId" class="control-label">Boar</label>
-                            <select asp-for="FatherAnimalId" class="form-select" asp-items="ViewBag.FatherAnimalId">
-                                <option value="">-- Select Boar --</option>
-                            </select>
-                            <span asp-validation-for="FatherAnimalId" class="text-danger"></span>
-                            <small class="form-text text-muted">Select the father boar</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="MatingDate" class="control-label">Mating Date</label>
-                            <input asp-for="MatingDate" class="form-control" type="date" />
-                            <span asp-validation-for="MatingDate" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="ExpectedFarrowingDate" class="control-label">Expected Farrowing Date</label>
-                            <input asp-for="ExpectedFarrowingDate" class="form-control" type="date" />
-                            <span asp-validation-for="ExpectedFarrowingDate" class="text-danger"></span>
-                            <small class="form-text text-muted">Typically 114 days after mating</small>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="ActualFarrowingDate" class="control-label">Actual Farrowing Date</label>
-                            <input asp-for="ActualFarrowingDate" class="form-control" type="date" />
-                            <span asp-validation-for="ActualFarrowingDate" class="text-danger"></span>
-                            <small class="form-text text-muted">Leave blank if not yet farrowed</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="NumberOfPigletsBorn" class="control-label">Total Piglets Born</label>
-                            <input asp-for="NumberOfPigletsBorn" class="form-control" type="number" min="0" />
-                            <span asp-validation-for="NumberOfPigletsBorn" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="NumberOfPigletsBornAlive" class="control-label">Piglets Born Alive</label>
-                            <input asp-for="NumberOfPigletsBornAlive" class="form-control" type="number" min="0" />
-                            <span asp-validation-for="NumberOfPigletsBornAlive" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="Notes" class="control-label">Notes</label>
-                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any observations, complications or additional information"></textarea>
-                    <span asp-validation-for="Notes" class="text-danger"></span>
-                </div>
-                
-                <div class="form-group d-flex justify-content-between">
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-1"></i> Back to List
+            @if (ViewData["NoPregnantSows"] != null)
+            {
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @ViewData["NoPregnantSows"]
+                    <hr>
+                    <p class="mb-0">Please ensure there are pregnant sows in the system before recording farrowing.</p>
+                    <a asp-area="Admin" asp-controller="Animals" asp-action="Index" class="btn btn-outline-primary mt-2">
+                        <i class="fas fa-pig me-1"></i> Manage Animals
                     </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Save Record
-                    </button>
                 </div>
-            </form>
+            }
+            else
+            {
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="MotherAnimalId" class="control-label">Sow</label>
+                                <select asp-for="MotherAnimalId" class="form-select" asp-items="ViewBag.MotherAnimalId">
+                                    <option value="">-- Select Sow --</option>
+                                </select>
+                                <span asp-validation-for="MotherAnimalId" class="text-danger"></span>
+                                <small class="form-text text-muted">Select a pregnant or mating sow</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="FatherAnimalId" class="control-label">Boar</label>
+                                <select asp-for="FatherAnimalId" class="form-select" asp-items="ViewBag.FatherAnimalId">
+                                    <option value="">-- Select Boar --</option>
+                                </select>
+                                <span asp-validation-for="FatherAnimalId" class="text-danger"></span>
+                                <small class="form-text text-muted">Select the father boar</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="MatingDate" class="control-label">Mating Date</label>
+                                <input asp-for="MatingDate" class="form-control" type="date" required />
+                                <span asp-validation-for="MatingDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="ExpectedFarrowingDate" class="control-label">Expected Farrowing Date</label>
+                                <input asp-for="ExpectedFarrowingDate" class="form-control" type="date" readonly />
+                                <span asp-validation-for="ExpectedFarrowingDate" class="text-danger"></span>
+                                <small class="form-text text-muted">Auto-calculated: 114 days after mating</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="ActualFarrowingDate" class="control-label">Actual Farrowing Date</label>
+                                <input asp-for="ActualFarrowingDate" class="form-control" type="date" />
+                                <span asp-validation-for="ActualFarrowingDate" class="text-danger"></span>
+                                <small class="form-text text-muted">Leave blank if not yet farrowed</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="NumberOfPigletsBorn" class="control-label">Total Piglets Born</label>
+                                <input asp-for="NumberOfPigletsBorn" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="NumberOfPigletsBorn" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="NumberOfPigletsBornAlive" class="control-label">Piglets Born Alive</label>
+                                <input asp-for="NumberOfPigletsBornAlive" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="NumberOfPigletsBornAlive" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Notes" class="control-label">Notes</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any observations, complications or additional information"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save Record
+                        </button>
+                    </div>
+                </form>
+            }
         </div>
     </div>
 </div>
@@ -137,6 +152,12 @@
                     alert('Number of piglets born alive cannot exceed the total number of piglets born.');
                     $('#NumberOfPigletsBornAlive').val(totalBorn);
                 }
+            });
+
+            // Style the select elements with Select2 for better UX
+            $('.form-select').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
             });
         });
     </script>

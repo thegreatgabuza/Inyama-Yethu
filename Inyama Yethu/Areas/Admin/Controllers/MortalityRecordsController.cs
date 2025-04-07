@@ -134,7 +134,8 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 RecordType = HealthRecordType.Other,
                 Treatment = "Deceased",
                 Description = Cause,
-                Notes = Notes
+                Notes = Notes,
+                AdministeredBy = User.Identity?.Name ?? "System"
             };
 
             _context.Update(animal);

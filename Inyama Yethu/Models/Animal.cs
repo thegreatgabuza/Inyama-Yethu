@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Inyama_Yethu.Models
 {
@@ -82,6 +83,11 @@ namespace Inyama_Yethu.Models
         // Navigate to child animals
         public virtual ICollection<Animal> Offspring { get; set; }
         
+        // Navigation properties
+        [ForeignKey("Sale")]
+        public int? SaleId { get; set; }
+        public virtual AnimalSale Sale { get; set; }
+        
         public Animal()
         {
             HealthRecords = new HashSet<HealthRecord>();
@@ -91,6 +97,7 @@ namespace Inyama_Yethu.Models
             Tasks = new HashSet<TaskAssignment>();
             WeightRecords = new HashSet<WeightRecord>();
             Offspring = new HashSet<Animal>();
+            Births = new HashSet<Birth>();
         }
     }
 } 

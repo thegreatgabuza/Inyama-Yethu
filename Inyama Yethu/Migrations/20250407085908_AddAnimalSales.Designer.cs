@@ -4,6 +4,7 @@ using Inyama_Yethu.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407085908_AddAnimalSales")]
+    partial class AddAnimalSales
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,9 +106,6 @@ namespace Inyama_Yethu.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("SaleId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -154,8 +154,8 @@ namespace Inyama_Yethu.Migrations
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
                         .IsRequired()
@@ -185,8 +185,7 @@ namespace Inyama_Yethu.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnimalId")
-                        .IsUnique();
+                    b.HasIndex("AnimalId");
 
                     b.ToTable("AnimalSales");
                 });
@@ -1177,8 +1176,8 @@ namespace Inyama_Yethu.Migrations
             modelBuilder.Entity("Inyama_Yethu.Models.AnimalSale", b =>
                 {
                     b.HasOne("Inyama_Yethu.Models.Animal", "Animal")
-                        .WithOne("Sale")
-                        .HasForeignKey("Inyama_Yethu.Models.AnimalSale", "AnimalId")
+                        .WithMany("Sales")
+                        .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1415,8 +1414,7 @@ namespace Inyama_Yethu.Migrations
 
                     b.Navigation("Offspring");
 
-                    b.Navigation("Sale")
-                        .IsRequired();
+                    b.Navigation("Sales");
 
                     b.Navigation("Tasks");
 

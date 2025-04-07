@@ -4,6 +4,7 @@ using Inyama_Yethu.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407084143_UpdateMortalityIdentity")]
+    partial class UpdateMortalityIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,9 +106,6 @@ namespace Inyama_Yethu.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("SaleId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -134,61 +134,6 @@ namespace Inyama_Yethu.Migrations
                     b.HasIndex("MotherAnimalId");
 
                     b.ToTable("Animals");
-                });
-
-            modelBuilder.Entity("Inyama_Yethu.Models.AnimalSale", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AnimalId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("BuyerName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("InvoiceNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("PaymentReceived")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("PricePerKg")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("SaleDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("SaleType")
-                        .HasColumnType("int");
-
-                    b.Property<double?>("WeightAtSale")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnimalId")
-                        .IsUnique();
-
-                    b.ToTable("AnimalSales");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.Attendance", b =>
@@ -1174,17 +1119,6 @@ namespace Inyama_Yethu.Migrations
                     b.Navigation("Mother");
                 });
 
-            modelBuilder.Entity("Inyama_Yethu.Models.AnimalSale", b =>
-                {
-                    b.HasOne("Inyama_Yethu.Models.Animal", "Animal")
-                        .WithOne("Sale")
-                        .HasForeignKey("Inyama_Yethu.Models.AnimalSale", "AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Animal");
-                });
-
             modelBuilder.Entity("Inyama_Yethu.Models.Attendance", b =>
                 {
                     b.HasOne("Inyama_Yethu.Models.Employee", "Employee")
@@ -1414,9 +1348,6 @@ namespace Inyama_Yethu.Migrations
                     b.Navigation("MatingsAsMother");
 
                     b.Navigation("Offspring");
-
-                    b.Navigation("Sale")
-                        .IsRequired();
 
                     b.Navigation("Tasks");
 

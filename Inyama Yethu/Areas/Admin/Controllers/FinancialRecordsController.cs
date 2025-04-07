@@ -1,5 +1,6 @@
 using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
+using Inyama_Yethu.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Inyama_Yethu.Areas.Admin.Controllers
 {
@@ -443,72 +445,62 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         // GET: Admin/FinancialRecords/AnimalSales
         public async Task<IActionResult> AnimalSales(DateTime? startDate, DateTime? endDate)
         {
-            var today = DateTime.Now.Date;
-            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
-            
-            // Default to current month if no dates provided
-            var reportStartDate = startDate ?? firstDayOfMonth;
-            var reportEndDate = endDate ?? today;
-            
+            // Set default date range if not provided
+            startDate ??= DateTime.Today.AddMonths(-1);
+            endDate ??= DateTime.Today;
+
             // Get abattoir shipments
             var abattoirShipments = await _context.AbattoirShipments
-                .Where(s => s.ShipmentDate >= reportStartDate && s.ShipmentDate <= reportEndDate)
+                .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate <= endDate)
                 .OrderByDescending(s => s.ShipmentDate)
                 .ToListAsync();
-                
-            // Calculate abattoir statistics
+
+            // Get animal sales
+            var animalSales = await _context.AnimalSales
+                .Include(s => s.Animal)
+                .Where(s => s.SaleDate >= startDate && s.SaleDate <= endDate)
+                .OrderByDescending(s => s.SaleDate)
+                .ToListAsync();
+
+            // Calculate summary statistics
             var totalPigsShipped = abattoirShipments.Sum(s => s.NumberOfPigs);
             var totalAbattoirRevenue = abattoirShipments
-                .Where(s => s.Status == ShipmentStatus.Processed)
                 .Sum(s => (double)(s.ActualPayment ?? s.EstimatedValue));
-                
-            var averagePricePerPig = totalPigsShipped > 0
-                ? totalAbattoirRevenue / totalPigsShipped
+            var averagePricePerPig = totalPigsShipped > 0 
+                ? totalAbattoirRevenue / totalPigsShipped 
                 : 0;
-                
-            // Get direct sales of animal products - assuming all products are animal products for now
-            var animalProductSales = await _context.OrderItems
-                .Include(i => i.Order)
-                .Include(i => i.Product)
-                .Where(i => i.Order.OrderDate >= reportStartDate && 
-                          i.Order.OrderDate <= reportEndDate &&
-                          i.Order.PaymentReceived)
-                .GroupBy(i => i.ProductId)
-                .Select(g => new {
-                    ProductId = g.Key,
-                    ProductName = g.First().Product.Name,
-                    Quantity = g.Sum(i => i.Quantity),
-                    Revenue = g.Sum(i => (double)(i.UnitPrice * i.Quantity)),
-                    Orders = g.Count()
+
+            var totalDirectSalesRevenue = animalSales
+                .Where(s => s.SaleType == SaleType.DirectSale)
+                .Sum(s => (double)s.SalePrice);
+
+            // Group sales by product type
+            var animalProductSales = animalSales
+                .GroupBy(s => s.Animal.Type)
+                .Select(g => new
+                {
+                    ProductName = g.Key.ToString(),
+                    Quantity = g.Count(),
+                    Revenue = g.Sum(s => (double)s.SalePrice)
                 })
                 .OrderByDescending(x => x.Revenue)
-                .ToListAsync();
-                
-            var totalDirectSalesRevenue = animalProductSales.Sum(p => p.Revenue);
-            
-            // Monthly trend data
-            var monthlyTrendData = new List<object>();
-            
-            var groupedShipments = abattoirShipments
-                .GroupBy(s => new { Month = s.ShipmentDate.Month, Year = s.ShipmentDate.Year })
                 .ToList();
-                
-            foreach (var group in groupedShipments)
-            {
-                var monthYear = $"{group.Key.Year}-{group.Key.Month}";
-                var monthName = new DateTime(group.Key.Year, group.Key.Month, 1).ToString("MMM yyyy");
-                var pigsShipped = group.Sum(s => s.NumberOfPigs);
-                var revenue = group.Where(s => s.Status == ShipmentStatus.Processed)
-                                  .Sum(s => (double)(s.ActualPayment ?? s.EstimatedValue));
-                                  
-                monthlyTrendData.Add(new {
-                    MonthYear = monthYear,
-                    MonthName = monthName,
-                    PigsShipped = pigsShipped,
-                    Revenue = revenue
-                });
-            }
-                
+
+            // Calculate monthly trend data
+            var monthlyTrendData = animalSales
+                .GroupBy(s => new { s.SaleDate.Year, s.SaleDate.Month })
+                .Select(g => new
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM yyyy"),
+                    Revenue = g.Sum(s => (double)s.SalePrice),
+                    Count = g.Count()
+                })
+                .OrderBy(x => x.Month)
+                .ToList();
+
+            // Set ViewData
+            ViewData["StartDate"] = startDate;
+            ViewData["EndDate"] = endDate;
             ViewData["AbattoirShipments"] = abattoirShipments;
             ViewData["AnimalProductSales"] = animalProductSales;
             ViewData["TotalPigsShipped"] = totalPigsShipped;
@@ -516,10 +508,235 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             ViewData["AveragePricePerPig"] = averagePricePerPig;
             ViewData["TotalDirectSalesRevenue"] = totalDirectSalesRevenue;
             ViewData["MonthlyTrendData"] = monthlyTrendData;
-            ViewData["StartDate"] = reportStartDate;
-            ViewData["EndDate"] = reportEndDate;
-            
+
             return View();
+        }
+
+        // GET: Admin/FinancialRecords/RecordAnimalSale
+        public IActionResult RecordAnimalSale()
+        {
+            var activeAnimals = _context.Animals
+                .Where(a => a.Status == AnimalStatus.Active)
+                .OrderBy(a => a.TagNumber)
+                .Select(a => new
+                {
+                    Id = a.Id,
+                    DisplayText = $"{a.TagNumber} - {a.Type} ({a.Weight:F1} kg)"
+                })
+                .ToList();
+
+            ViewBag.Animals = new SelectList(activeAnimals, "Id", "DisplayText");
+            return View(new AnimalSaleViewModel());
+        }
+
+        // POST: Admin/FinancialRecords/RecordAnimalSale
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RecordAnimalSale(AnimalSaleViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var animal = await _context.Animals.FindAsync(model.AnimalId);
+                if (animal == null)
+                {
+                    ModelState.AddModelError("", "Selected animal not found.");
+                    await PopulateAnimalDropdowns();
+                    return View(model);
+                }
+
+                if (animal.Status == AnimalStatus.Sold)
+                {
+                    ModelState.AddModelError("", "This animal has already been sold.");
+                    await PopulateAnimalDropdowns();
+                    return View(model);
+                }
+
+                // Generate invoice number if not provided
+                if (string.IsNullOrEmpty(model.InvoiceNumber))
+                {
+                    model.InvoiceNumber = $"INV{DateTime.Now:yyyyMMdd}-{await GetNextInvoiceNumber():D4}";
+                }
+
+                var sale = new AnimalSale
+                {
+                    AnimalId = model.AnimalId,
+                    SaleDate = model.SaleDate,
+                    SaleType = model.SaleType,
+                    SalePrice = model.SalePrice,
+                    WeightAtSale = model.WeightAtSale,
+                    PricePerKg = model.WeightAtSale.HasValue ? 
+                        Math.Round(model.SalePrice / (decimal)model.WeightAtSale.Value, 2) : null,
+                    BuyerName = model.BuyerName,
+                    InvoiceNumber = model.InvoiceNumber,
+                    PaymentReceived = model.PaymentReceived,
+                    PaymentDate = model.PaymentDate,
+                    Notes = model.Notes ?? string.Empty
+                };
+
+                _context.AnimalSales.Add(sale);
+                
+                // Update animal status
+                animal.Status = AnimalStatus.Sold;
+                _context.Animals.Update(animal);
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(AnimalSales));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Failed to save the sale. Please try again.");
+                    Console.WriteLine($"Error saving sale: {ex.Message}");
+                }
+            }
+
+            // If we got this far, something failed; redisplay form
+            await PopulateAnimalDropdowns();
+            return View(model);
+        }
+
+        private async Task PopulateAnimalDropdowns()
+        {
+            var animals = await _context.Animals
+                .Where(a => a.Status != AnimalStatus.Deceased)
+                .OrderBy(a => a.TagNumber)
+                .Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = $"{a.TagNumber} - {a.Type} ({a.Status}) - {a.Weight:F1} kg"
+                })
+                .ToListAsync();
+
+            ViewBag.Animals = new SelectList(animals, "Value", "Text");
+        }
+
+        // GET: Admin/FinancialRecords/EditAnimalSale
+        public async Task<IActionResult> EditAnimalSale(int animalId)
+        {
+            var animal = await _context.Animals
+                .Include(a => a.Sale)
+                .FirstOrDefaultAsync(a => a.Id == animalId);
+
+            if (animal == null)
+            {
+                return NotFound();
+            }
+
+            var model = new AnimalSaleViewModel
+            {
+                AnimalId = animal.Id,
+            };
+
+            if (animal.Sale != null)
+            {
+                // Populate model with existing sale data
+                model.SaleDate = animal.Sale.SaleDate;
+                model.SaleType = animal.Sale.SaleType;
+                model.SalePrice = animal.Sale.SalePrice;
+                model.WeightAtSale = animal.Sale.WeightAtSale;
+                model.BuyerName = animal.Sale.BuyerName;
+                model.InvoiceNumber = animal.Sale.InvoiceNumber;
+                model.PaymentReceived = animal.Sale.PaymentReceived;
+                model.PaymentDate = animal.Sale.PaymentDate;
+                model.Notes = animal.Sale.Notes;
+            }
+            else
+            {
+                // Set default values for new sale
+                model.SaleDate = DateTime.Today;
+                model.WeightAtSale = animal.Weight;
+                model.PaymentReceived = false;
+            }
+
+            await PopulateAnimalDropdowns();
+            return View("RecordAnimalSale", model);
+        }
+
+        // POST: Admin/FinancialRecords/EditAnimalSale
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAnimalSale(int animalId, AnimalSaleViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var animal = await _context.Animals
+                    .Include(a => a.Sale)
+                    .FirstOrDefaultAsync(a => a.Id == animalId);
+
+                if (animal == null)
+                {
+                    return NotFound();
+                }
+
+                if (animal.Sale == null)
+                {
+                    // Create new sale record
+                    var sale = new AnimalSale
+                    {
+                        AnimalId = animal.Id,
+                        SaleDate = model.SaleDate,
+                        SaleType = model.SaleType,
+                        SalePrice = model.SalePrice,
+                        WeightAtSale = model.WeightAtSale,
+                        PricePerKg = model.WeightAtSale.HasValue ? 
+                            Math.Round(model.SalePrice / (decimal)model.WeightAtSale.Value, 2) : null,
+                        BuyerName = model.BuyerName,
+                        InvoiceNumber = model.InvoiceNumber ?? $"INV{DateTime.Now:yyyyMMdd}-{await GetNextInvoiceNumber():D4}",
+                        PaymentReceived = model.PaymentReceived,
+                        PaymentDate = model.PaymentDate,
+                        Notes = model.Notes
+                    };
+
+                    _context.AnimalSales.Add(sale);
+                    animal.Status = AnimalStatus.Sold;
+                }
+                else
+                {
+                    // Update existing sale record
+                    animal.Sale.SaleDate = model.SaleDate;
+                    animal.Sale.SaleType = model.SaleType;
+                    animal.Sale.SalePrice = model.SalePrice;
+                    animal.Sale.WeightAtSale = model.WeightAtSale;
+                    animal.Sale.PricePerKg = model.WeightAtSale.HasValue ? 
+                        Math.Round(model.SalePrice / (decimal)model.WeightAtSale.Value, 2) : null;
+                    animal.Sale.BuyerName = model.BuyerName;
+                    animal.Sale.InvoiceNumber = model.InvoiceNumber;
+                    animal.Sale.PaymentReceived = model.PaymentReceived;
+                    animal.Sale.PaymentDate = model.PaymentDate;
+                    animal.Sale.Notes = model.Notes;
+
+                    _context.AnimalSales.Update(animal.Sale);
+                }
+
+                _context.Animals.Update(animal);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(AnimalSales));
+            }
+
+            await PopulateAnimalDropdowns();
+            return View("RecordAnimalSale", model);
+        }
+
+        private async Task<int> GetNextInvoiceNumber()
+        {
+            var lastInvoice = await _context.AnimalSales
+                .OrderByDescending(s => s.Id)
+                .FirstOrDefaultAsync();
+            
+            if (lastInvoice == null)
+                return 1;
+
+            try
+            {
+                var lastNumber = int.Parse(lastInvoice.InvoiceNumber.Substring(lastInvoice.InvoiceNumber.LastIndexOf('-') + 1));
+                return lastNumber + 1;
+            }
+            catch
+            {
+                return 1;
+            }
         }
     }
 } 

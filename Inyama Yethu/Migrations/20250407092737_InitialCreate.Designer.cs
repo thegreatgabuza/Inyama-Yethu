@@ -4,6 +4,7 @@ using Inyama_Yethu.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407092737_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,9 +106,6 @@ namespace Inyama_Yethu.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("SaleId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -145,6 +145,9 @@ namespace Inyama_Yethu.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AnimalId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AnimalId1")
                         .HasColumnType("int");
 
                     b.Property<string>("BuyerName")
@@ -187,6 +190,8 @@ namespace Inyama_Yethu.Migrations
 
                     b.HasIndex("AnimalId")
                         .IsUnique();
+
+                    b.HasIndex("AnimalId1");
 
                     b.ToTable("AnimalSales");
                 });
@@ -1182,6 +1187,10 @@ namespace Inyama_Yethu.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Inyama_Yethu.Models.Animal", null)
+                        .WithMany("Sales")
+                        .HasForeignKey("AnimalId1");
+
                     b.Navigation("Animal");
                 });
 
@@ -1417,6 +1426,8 @@ namespace Inyama_Yethu.Migrations
 
                     b.Navigation("Sale")
                         .IsRequired();
+
+                    b.Navigation("Sales");
 
                     b.Navigation("Tasks");
 

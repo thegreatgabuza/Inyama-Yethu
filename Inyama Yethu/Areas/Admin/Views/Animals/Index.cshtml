@@ -76,6 +76,13 @@
                                         };
                                     }
                                     <span class="badge @statusClass">@item.Status</span>
+                                    @if (item.Status == AnimalStatus.Sold)
+                                    {
+                                        <a asp-controller="FinancialRecords" asp-action="EditAnimalSale" asp-route-animalId="@item.Id" 
+                                           class="btn btn-sm btn-outline-secondary ms-2" title="Edit Sale Details">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    }
                                 </td>
                                 <td>
                                     @if (item.Mother != null || item.Father != null)

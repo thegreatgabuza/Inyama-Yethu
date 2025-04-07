@@ -1,0 +1,176 @@
+@model Inyama_Yethu.Models.ViewModels.AnimalSaleViewModel
+
+@{
+    ViewData["Title"] = Model.AnimalId == 0 ? "Record Animal Sale" : "Edit Animal Sale";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var isEdit = Model.AnimalId > 0;
+    
+    // Get the selected animal text for edit mode
+    var selectedAnimalText = "";
+    if (isEdit && ViewBag.Animals != null)
+    {
+        var animals = ViewBag.Animals as SelectList;
+        var selectedItem = animals?.FirstOrDefault(x => x.Value == Model.AnimalId.ToString());
+        selectedAnimalText = selectedItem?.Text ?? "";
+    }
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Financial Records</a></li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-dollar-sign me-1"></i>
+                    Sale Details
+                </div>
+                <div class="card-body">
+                    <form asp-action="@(isEdit ? "EditAnimalSale" : "RecordAnimalSale")" asp-route-animalId="@Model.AnimalId" method="post">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="AnimalId" class="control-label"></label>
+                                    @if (isEdit)
+                                    {
+                                        <input type="hidden" asp-for="AnimalId" />
+                                        <select class="form-select" disabled>
+                                            <option>@selectedAnimalText</option>
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <select asp-for="AnimalId" class="form-select" asp-items="ViewBag.Animals">
+                                            <option value="">-- Select Animal --</option>
+                                        </select>
+                                    }
+                                    <span asp-validation-for="AnimalId" class="text-danger"></span>
+                                    <small class="form-text text-muted">Select an animal to record its sale details.</small>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="SaleDate" class="control-label"></label>
+                                    <input asp-for="SaleDate" class="form-control" type="date" />
+                                    <span asp-validation-for="SaleDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="SaleType" class="control-label"></label>
+                                    <select asp-for="SaleType" class="form-select" asp-items="Html.GetEnumSelectList<Inyama_Yethu.Models.SaleType>()">
+                                        <option value="">-- Select Type --</option>
+                                    </select>
+                                    <span asp-validation-for="SaleType" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="SalePrice" class="control-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R</span>
+                                        <input asp-for="SalePrice" class="form-control" type="number" step="0.01" min="0.01" />
+                                    </div>
+                                    <span asp-validation-for="SalePrice" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="WeightAtSale" class="control-label"></label>
+                                    <div class="input-group">
+                                        <input asp-for="WeightAtSale" class="form-control" type="number" step="0.1" min="0.1" />
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                    <span asp-validation-for="WeightAtSale" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="BuyerName" class="control-label"></label>
+                                    <input asp-for="BuyerName" class="form-control" maxlength="100" />
+                                    <span asp-validation-for="BuyerName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="InvoiceNumber" class="control-label"></label>
+                                    <input asp-for="InvoiceNumber" class="form-control" maxlength="50" readonly="@isEdit" />
+                                    <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="PaymentReceived" class="form-check-input" />
+                                        <label asp-for="PaymentReceived" class="form-check-label"></label>
+                                    </div>
+                                    <span asp-validation-for="PaymentReceived" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3 payment-date-group" style="display: none;">
+                                    <label asp-for="PaymentDate" class="control-label"></label>
+                                    <input asp-for="PaymentDate" class="form-control" type="date" />
+                                    <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Notes" class="control-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" maxlength="500"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> @(isEdit ? "Update Sale" : "Record Sale")
+                            </button>
+                            <a asp-action="AnimalSales" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Show/hide payment date based on payment received checkbox
+            $('#PaymentReceived').change(function() {
+                $('.payment-date-group').toggle(this.checked);
+            });
+
+            // Initialize payment date visibility
+            $('.payment-date-group').toggle($('#PaymentReceived').is(':checked'));
+
+            // Calculate price per kg when either weight or price changes
+            $('#WeightAtSale, #SalePrice').on('input', function() {
+                var weight = parseFloat($('#WeightAtSale').val());
+                var price = parseFloat($('#SalePrice').val());
+                
+                if (weight && price) {
+                    var pricePerKg = (price / weight).toFixed(2);
+                    $('#PricePerKg').text('R ' + pricePerKg + ' per kg');
+                } else {
+                    $('#PricePerKg').text('');
+                }
+            });
+
+            // Form validation
+            $('form').submit(function(e) {
+                if (!$('#AnimalId').val()) {
+                    e.preventDefault();
+                    alert('Please select an animal');
+                    return false;
+                }
+            });
+        });
+    </script>
+} 

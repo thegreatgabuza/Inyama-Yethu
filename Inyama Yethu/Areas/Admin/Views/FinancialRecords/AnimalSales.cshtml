@@ -292,118 +292,66 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Monthly Trend Chart
-        var trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-        var monthlyData = @Html.Raw(Json.Serialize(monthlyTrendData));
-        
-        if (monthlyData && monthlyData.length > 0) {
-            var monthNames = monthlyData.map(item => item.MonthName);
-            var pigsShipped = monthlyData.map(item => item.PigsShipped);
-            var revenues = monthlyData.map(item => item.Revenue);
-            
-            var monthlyTrendChart = new Chart(trendCtx, {
-                type: 'bar',
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#shipmentsTable').DataTable({
+                order: [[0, 'desc']],
+                pageLength: 10
+            });
+
+            // Monthly Trend Chart
+            var monthlyData = @Html.Raw(Json.Serialize(monthlyTrendData));
+            var monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+            new Chart(monthlyTrendCtx, {
+                type: 'line',
                 data: {
-                    labels: monthNames,
-                    datasets: [
-                        {
-                            label: 'Number of Pigs',
-                            data: pigsShipped,
-                            backgroundColor: 'rgba(78, 115, 223, 0.5)',
-                            borderColor: 'rgba(78, 115, 223, 1)',
-                            borderWidth: 1,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Revenue (ZAR)',
-                            data: revenues,
-                            backgroundColor: 'rgba(28, 200, 138, 0.5)',
-                            borderColor: 'rgba(28, 200, 138, 1)',
-                            borderWidth: 1,
-                            type: 'line',
-                            fill: false,
-                            tension: 0.4,
-                            yAxisID: 'y1'
-                        }
-                    ]
+                    labels: monthlyData.map(x => x.Month),
+                    datasets: [{
+                        label: 'Revenue (R)',
+                        data: monthlyData.map(x => x.Revenue),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }, {
+                        label: 'Number of Sales',
+                        data: monthlyData.map(x => x.Count),
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
                 },
                 options: {
                     responsive: true,
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Number of Pigs'
-                            }
-                        },
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            title: {
-                                display: true,
-                                text: 'Revenue (ZAR)'
-                            }
+                            beginAtZero: true
                         }
                     }
                 }
             });
-        }
-        
-        // Revenue Split Chart
-        var splitCtx = document.getElementById('revenueSplitChart').getContext('2d');
-        var abattoirRevenue = @totalAbattoirRevenue;
-        var directSalesRevenue = @totalDirectSalesRevenue;
-        
-        var revenueSplitChart = new Chart(splitCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Abattoir Sales', 'Direct Product Sales'],
-                datasets: [{
-                    data: [abattoirRevenue, directSalesRevenue],
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 159, 64, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                var label = context.label || '';
-                                var value = context.raw || 0;
-                                var total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                var percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                return label + ': R' + value.toFixed(2) + ' (' + percentage + '%)';
-                            }
+
+            // Revenue Split Chart
+            var revenueSplitCtx = document.getElementById('revenueSplitChart').getContext('2d');
+            new Chart(revenueSplitCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Abattoir Sales', 'Direct Sales'],
+                    datasets: [{
+                        data: [@totalAbattoirRevenue, @totalDirectSalesRevenue],
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
                 }
-            }
-        });
-        
-        // Initialize DataTables
-        $(document).ready(function() {
-            $('#shipmentsTable').DataTable({
-                responsive: true,
-                pageLength: 10,
-                order: [[0, 'desc']]
             });
         });
     </script>
