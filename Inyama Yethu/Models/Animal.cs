@@ -83,9 +83,7 @@ namespace Inyama_Yethu.Models
         // Navigate to child animals
         public virtual ICollection<Animal> Offspring { get; set; }
         
-        // Navigation properties
-        [ForeignKey("Sale")]
-        public int? SaleId { get; set; }
+        // Navigation property
         public virtual AnimalSale Sale { get; set; }
         
         public Animal()

@@ -1,0 +1,275 @@
+@{
+    ViewData["Title"] = "Sow Service Card";
+    var animal = (Inyama_Yethu.Models.Animal)ViewData["Animal"];
+    var matings = (List<Inyama_Yethu.Models.Mating>)ViewData["Matings"];
+    var births = (List<Inyama_Yethu.Models.Birth>)ViewData["Births"];
+    var employee = (Inyama_Yethu.Models.Employee)ViewData["Employee"];
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="text-primary"><i class="fas fa-venus me-2"></i>Sow Service Card</h2>
+            <p class="text-muted">Breeding and farrowing history for sow #@animal.TagNumber</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-action="RecordService" asp-route-id="@animal.Id" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Record New Service
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Sow Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">Tag Number</h6>
+                                <p class="h4">@animal.TagNumber</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">Current Status</h6>
+                                <p>
+                                    @switch (animal.Status)
+                                    {
+                                        case Inyama_Yethu.Models.AnimalStatus.Active:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case Inyama_Yethu.Models.AnimalStatus.Mating:
+                                            <span class="badge bg-info">Mating</span>
+                                            break;
+                                        case Inyama_Yethu.Models.AnimalStatus.Pregnant:
+                                            <span class="badge bg-primary">Pregnant</span>
+                                            break;
+                                        case Inyama_Yethu.Models.AnimalStatus.Farrowing:
+                                            <span class="badge bg-warning">Farrowing</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@animal.Status</span>
+                                            break;
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">Birth Date</h6>
+                                <p>@(animal.BirthDate.HasValue ? $"{animal.BirthDate.Value.Day}/{animal.BirthDate.Value.Month}/{animal.BirthDate.Value.Year}" : "Unknown")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">Age</h6>
+                                <p>
+                                    @if (animal.BirthDate.HasValue)
+                                    {
+                                        var age = DateTime.Now - animal.BirthDate.Value;
+                                        @($"{Math.Floor(age.TotalDays / 365.25):0} years, {Math.Floor((age.TotalDays % 365.25) / 30):0} months")
+                                    }
+                                    else
+                                    {
+                                        <span>Unknown</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">Weight</h6>
+                                <p>@(animal.Weight.HasValue ? $"{animal.Weight} kg" : "No weight recorded")</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6 class="fw-bold">Breeding Cycles</h6>
+                                <p>@(births?.Count ?? 0) farrowing events</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Service History</h5>
+                </div>
+                <div class="card-body">
+                    @if (matings != null && matings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Service Date</th>
+                                        <th>Boar</th>
+                                        <th>Status</th>
+                                        <th>Expected Farrowing</th>
+                                        <th>Actual Farrowing</th>
+                                        <th>Piglets</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mating in matings)
+                                    {
+                                        <tr>
+                                            <td>@mating.MatingDate.Day/@mating.MatingDate.Month/@mating.MatingDate.Year</td>
+                                            <td>@(mating.Father?.TagNumber ?? "Unknown")</td>
+                                            <td>
+                                                @switch (mating.Status)
+                                                {
+                                                    case Inyama_Yethu.Models.MatingStatus.Scheduled:
+                                                        <span class="badge bg-secondary">Scheduled</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.MatingStatus.PregnancyConfirmed:
+                                                        <span class="badge bg-primary">Pregnancy Confirmed</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.MatingStatus.Farrowed:
+                                                        <span class="badge bg-success">Farrowed</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.MatingStatus.NotPregnant:
+                                                        <span class="badge bg-danger">Not Pregnant</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-info">@mating.Status</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (mating.ExpectedFarrowingDate.HasValue)
+                                                {
+                                                    @($"{mating.ExpectedFarrowingDate.Value.Day}/{mating.ExpectedFarrowingDate.Value.Month}/{mating.ExpectedFarrowingDate.Value.Year}")
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (mating.ActualFarrowingDate.HasValue)
+                                                {
+                                                    @($"{mating.ActualFarrowingDate.Value.Day}/{mating.ActualFarrowingDate.Value.Month}/{mating.ActualFarrowingDate.Value.Year}")
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (mating.TotalPigletsBorn.HasValue)
+                                                {
+                                                    <span data-bs-toggle="tooltip" title="Born alive: @mating.PigletsLiveborn, Stillborn: @mating.PigletsStillborn, Mummified: @mating.PigletsMummified">
+                                                        @mating.TotalPigletsBorn.Value
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@mating.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <p class="text-muted">No service records found for this sow.</p>
+                            <a asp-action="RecordService" asp-route-id="@animal.Id" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Record First Service
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @if (births != null && births.Any())
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-baby me-2"></i>Farrowing History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Birth Date</th>
+                                        <th>Number Born</th>
+                                        <th>Born Alive</th>
+                                        <th>Stillborn</th>
+                                        <th>Average Weight</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var birth in births)
+                                    {
+                                        <tr>
+                                            <td>@birth.BirthDate.Day/@birth.BirthDate.Month/@birth.BirthDate.Year</td>
+                                            <td>@birth.NumberBorn</td>
+                                            <td>@birth.NumberAlive</td>
+                                            <td>@(birth.NumberBorn - birth.NumberAlive)</td>
+                                            <td>@(birth.AverageBirthWeight.HasValue ? $"{birth.AverageBirthWeight} kg" : "-")</td>
+                                            <td>@(string.IsNullOrEmpty(birth.Notes) ? "-" : birth.Notes)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+} 

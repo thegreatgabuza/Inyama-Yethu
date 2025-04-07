@@ -29,6 +29,12 @@ namespace Inyama_Yethu.Models
         [Display(Name = "Record Type")]
         public HealthRecordType RecordType { get; set; }
         
+        // Treatment Type for views
+        [Required]
+        [StringLength(100)]
+        [Display(Name = "Treatment Type")]
+        public string TreatmentType { get; set; }
+        
         [Required]
         [StringLength(100)]
         [Display(Name = "Treatment")]
@@ -53,6 +59,25 @@ namespace Inyama_Yethu.Models
         
         [StringLength(500)]
         public string Notes { get; set; }
+        
+        // Additional properties needed for views
+        [StringLength(100)]
+        [Display(Name = "Medication")]
+        public string Medication { get; set; }
+        
+        [StringLength(50)]
+        [Display(Name = "Dosage")]
+        public string Dosage { get; set; }
+        
+        [StringLength(100)]
+        [Display(Name = "Treatment Outcome")]
+        public string TreatmentOutcome { get; set; }
+        
+        // Record keeping fields
+        public int? PerformedById { get; set; }
+        
+        [ForeignKey("PerformedById")]
+        public virtual Employee PerformedBy { get; set; }
         
         // Navigation property
         [ForeignKey("AnimalId")]

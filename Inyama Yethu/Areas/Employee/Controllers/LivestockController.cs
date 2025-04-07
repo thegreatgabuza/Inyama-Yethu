@@ -37,6 +37,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             }
 
             var today = TimeZoneInfo.ConvertTime(DateTime.Now, _southAfricaTimeZone).Date;
+            var thirtyDaysAgo = today.AddDays(-30);
 
             // Get all animals
             var animals = await _context.Animals
@@ -47,14 +48,14 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             // Get recent health records
             var recentHealthRecords = await _context.HealthRecords
                 .Include(h => h.Animal)
-                .Where(h => (today - h.RecordDate).TotalDays <= 30)
+                .Where(h => h.RecordDate >= thirtyDaysAgo)
                 .OrderByDescending(h => h.RecordDate)
                 .ToListAsync();
 
             // Get recent weight records
             var recentWeightRecords = await _context.WeightRecords
                 .Include(w => w.Animal)
-                .Where(w => (today - w.RecordDate).TotalDays <= 30)
+                .Where(w => w.RecordDate >= thirtyDaysAgo)
                 .OrderByDescending(w => w.RecordDate)
                 .ToListAsync();
 

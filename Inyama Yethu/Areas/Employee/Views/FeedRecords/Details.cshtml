@@ -1,0 +1,125 @@
+@model Inyama_Yethu.Models.Feeding
+@{
+    ViewData["Title"] = "Feed Record Details";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-primary"><i class="fas fa-info-circle me-2"></i>Feed Record Details</h2>
+            <p class="text-muted">View the details of this feeding record</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Record Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Feeding Date</h6>
+                                <p>@Model.FeedingDate.Day @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(Model.FeedingDate.Month) @Model.FeedingDate.Year @Model.FeedingDate.Hour:@(Model.FeedingDate.Minute.ToString("D2"))</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Animal</h6>
+                                @if (Model.Animal != null)
+                                {
+                                    <p>
+                                        <span class="badge bg-secondary">ID: @Model.Animal.Id</span>
+                                        <span class="ms-2">@Model.Animal.TagNumber (@Model.Animal.Type)</span>
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p><span class="text-muted">Group feeding</span></p>
+                                }
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Recorded By</h6>
+                                @if (Model.RecordedBy != null)
+                                {
+                                    <p>@Model.RecordedBy.FirstName @Model.RecordedBy.LastName</p>
+                                }
+                                else
+                                {
+                                    <p><span class="text-muted">Not specified</span></p>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Feed Type</h6>
+                                <p>@Model.FeedType</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Amount</h6>
+                                <p>@Model.Amount kg</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Cost per kg</h6>
+                                @if (Model.CostPerKg.HasValue)
+                                {
+                                    var formattedCost = string.Format("{0:F2}", Model.CostPerKg.Value);
+                                    <p>R @formattedCost</p>
+                                }
+                                else
+                                {
+                                    <p><span class="text-muted">Not specified</span></p>
+                                }
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Total Cost</h6>
+                                @if (Model.CostPerKg.HasValue)
+                                {
+                                    decimal amount = (decimal)Model.Amount;
+                                    decimal cost = Model.CostPerKg.Value;
+                                    decimal total = amount * cost;
+                                    var formattedTotal = string.Format("{0:F2}", total);
+                                    <p>R @formattedTotal</p>
+                                }
+                                else
+                                {
+                                    <p><span class="text-muted">Not calculated</span></p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Notes</h6>
+                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                {
+                                    <p>@Model.Notes</p>
+                                }
+                                else
+                                {
+                                    <p><span class="text-muted">No additional notes</span></p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 text-end">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

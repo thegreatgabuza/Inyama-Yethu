@@ -260,12 +260,12 @@
                                 @foreach (var item in Model.Take(50))
                                 {
                                     <tr>
-                                        <td>@item.FeedDate.ToString("dd MMM yyyy")</td>
+                                        <td>@($"{item.FeedDate.Day}/{item.FeedDate.Month}/{item.FeedDate.Year}")</td>
                                         <td>@item.Animal.TagNumber</td>
                                         <td>@item.FeedType</td>
-                                        <td>@item.Quantity.ToString("F1")</td>
-                                        <td>R @item.CostPerKg.ToString("F2")</td>
-                                        <td>R @((item.CostPerKg * (decimal)item.Quantity).ToString("F2"))</td>
+                                        <td>@($"{item.Quantity:F1}")</td>
+                                        <td>R @($"{item.CostPerKg:F2}")</td>
+                                        <td>R @($"{(item.CostPerKg * (decimal)item.Quantity):F2}")</td>
                                         <td>@item.Notes</td>
                                     </tr>
                                 }

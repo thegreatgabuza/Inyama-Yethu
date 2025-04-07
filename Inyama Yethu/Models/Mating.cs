@@ -81,6 +81,28 @@ namespace Inyama_Yethu.Models
         [StringLength(500)]
         public string Notes { get; set; }
         
+        // New properties needed for views
+        [Display(Name = "Total Piglets Born")]
+        public int? TotalPigletsBorn => NumberOfPigletsBorn;
+        
+        [Display(Name = "Liveborn Piglets")]
+        public int? PigletsLiveborn => NumberOfPigletsBornAlive;
+        
+        [Display(Name = "Stillborn Piglets")]
+        public int? PigletsStillborn => NumberOfPigletsBorn.HasValue && NumberOfPigletsBornAlive.HasValue 
+            ? NumberOfPigletsBorn.Value - NumberOfPigletsBornAlive.Value 
+            : null;
+            
+        [Display(Name = "Mummified Piglets")]
+        public int? PigletsMummified { get; set; }
+        
+        // Record keeping fields
+        public int? RecordedById { get; set; }
+        public DateTime? RecordedDate { get; set; }
+        
+        [ForeignKey("RecordedById")]
+        public virtual Employee RecordedBy { get; set; }
+        
         // Navigation properties
         [ForeignKey("MotherAnimalId")]
         public virtual Animal Mother { get; set; }

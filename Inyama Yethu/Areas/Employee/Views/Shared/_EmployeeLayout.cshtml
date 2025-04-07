@@ -26,7 +26,17 @@
                             <a class="nav-link" style="color: var(--inyama-white);" asp-area="Employee" asp-controller="Tasks" asp-action="Index">My Tasks</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Employee" asp-controller="Animals" asp-action="Index">Livestock</a>
+                            <a class="nav-link" style="color: var(--inyama-white);" asp-area="Employee" asp-controller="Livestock" asp-action="Index">Livestock</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" style="color: var(--inyama-white);" href="#" id="recordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Records
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="recordsDropdown">
+                                <li><a class="dropdown-item" asp-area="Employee" asp-controller="FeedRecords" asp-action="Index">Feed Records</a></li>
+                                <li><a class="dropdown-item" asp-area="Employee" asp-controller="HealthRecords" asp-action="Index">Health Records</a></li>
+                                <li><a class="dropdown-item" asp-area="Employee" asp-controller="HealthRecords" asp-action="MortalityRecord">Record Mortality</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" style="color: var(--inyama-white);" asp-area="Employee" asp-controller="Attendance" asp-action="Index">My Attendance</a>
@@ -54,13 +64,19 @@
                     <a asp-area="Employee" asp-controller="Tasks" asp-action="Upcoming" class="list-group-item list-group-item-action">
                         Upcoming Tasks
                     </a>
-                    <a asp-area="Employee" asp-controller="Animals" asp-action="Matings" class="list-group-item list-group-item-action">
-                        Matings
+                    <a asp-area="Employee" asp-controller="Matings" asp-action="Index" class="list-group-item list-group-item-action">
+                        Breeding Records
                     </a>
-                    <a asp-area="Employee" asp-controller="Animals" asp-action="Farrowings" class="list-group-item list-group-item-action">
+                    <a asp-area="Employee" asp-controller="FeedRecords" asp-action="Index" class="list-group-item list-group-item-action">
+                        Feed Records
+                    </a>
+                    <a asp-area="Employee" asp-controller="HealthRecords" asp-action="Index" class="list-group-item list-group-item-action">
+                        Health Records
+                    </a>
+                    <a asp-area="Employee" asp-controller="Farrowings" asp-action="Index" class="list-group-item list-group-item-action">
                         Farrowings
                     </a>
-                    <a asp-area="Employee" asp-controller="Animals" asp-action="PigletProcessing" class="list-group-item list-group-item-action">
+                    <a asp-area="Employee" asp-controller="PigletProcessing" asp-action="Index" class="list-group-item list-group-item-action">
                         Piglet Processing
                     </a>
                 </div>

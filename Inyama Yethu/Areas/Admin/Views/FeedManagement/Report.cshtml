@@ -219,9 +219,9 @@
                                 <td>@item.FeedDate.ToString("yyyy-MM-dd HH:mm")</td>
                                 <td>@item.Animal.TagNumber</td>
                                 <td>@item.FeedType</td>
-                                <td>@item.Quantity.ToString("F1") kg</td>
-                                <td>R @item.CostPerKg.ToString("F2")</td>
-                                <td>R @((item.Quantity * (double)item.CostPerKg).ToString("F2"))</td>
+                                <td>@($"{item.Quantity:F1}") kg</td>
+                                <td>R @($"{item.CostPerKg:F2}")</td>
+                                <td>R @($"{(item.Quantity * (double)item.CostPerKg):F2}")</td>
                                 <td>@item.Notes</td>
                             </tr>
                         }

@@ -22,6 +22,16 @@ namespace Inyama_Yethu.Models
         [Required]
         public int? NumberOfOffspring { get; set; }
 
+        // Properties for view compatibility
+        [Display(Name = "Number Born")]
+        public int NumberBorn => NumberOfOffspring ?? 0;
+        
+        [Display(Name = "Number Born Alive")]
+        public int NumberAlive { get; set; }
+        
+        [Display(Name = "Average Birth Weight")]
+        public double? AverageBirthWeight { get; set; }
+
         public bool WasAssisted { get; set; }
 
         [Required]

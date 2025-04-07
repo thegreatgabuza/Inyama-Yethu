@@ -1,0 +1,124 @@
+@model Inyama_Yethu.Models.MortalityRecordViewModel
+@{
+    ViewData["Title"] = "Record Mortality";
+    var employee = (Inyama_Yethu.Models.Employee)ViewData["Employee"];
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-danger"><i class="fas fa-skull me-2"></i>Record Animal Mortality</h2>
+            <p class="text-muted">Document the death of an animal in the farm records</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Mortality Record Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Please note:</strong> Recording an animal mortality will permanently mark the animal as deceased in the system.
+                    </div>
+
+                    <form asp-action="MortalityRecord" method="post" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AnimalId" class="control-label">Animal</label>
+                                    <select asp-for="AnimalId" class="form-select" asp-items="ViewBag.AnimalId" required>
+                                        <option value="">-- Select Animal --</option>
+                                    </select>
+                                    <span asp-validation-for="AnimalId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="RecordDate" class="control-label">Date of Death</label>
+                                    <input asp-for="RecordDate" class="form-control" type="datetime-local" required />
+                                    <span asp-validation-for="RecordDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="CauseOfDeath" class="control-label">Cause of Death</label>
+                                    <select asp-for="CauseOfDeath" class="form-select" required>
+                                        <option value="">-- Select Cause of Death --</option>
+                                        <option value="Disease">Disease</option>
+                                        <option value="Injury">Injury</option>
+                                        <option value="Age-related">Age-related</option>
+                                        <option value="Post-birth complications">Post-birth complications</option>
+                                        <option value="Birth defect">Birth defect</option>
+                                        <option value="Infection">Infection</option>
+                                        <option value="Predator">Predator</option>
+                                        <option value="Accident">Accident</option>
+                                        <option value="Unknown">Unknown</option>
+                                        <option value="Other">Other (please specify in notes)</option>
+                                    </select>
+                                    <span asp-validation-for="CauseOfDeath" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Notes" class="control-label">Additional Notes</label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                    <small class="form-text text-muted">Please provide any additional details about the death, including symptoms observed, circumstances, or other relevant information.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-end">
+                                <a asp-action="Index" class="btn btn-secondary me-2">
+                                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                                </a>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to record this animal as deceased? This action cannot be undone.');">
+                                    <i class="fas fa-skull me-1"></i> Record Mortality
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+}

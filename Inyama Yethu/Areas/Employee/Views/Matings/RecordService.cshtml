@@ -1,0 +1,128 @@
+@model Inyama_Yethu.Models.Mating
+@{
+    ViewData["Title"] = "Record Service";
+    var animal = (Inyama_Yethu.Models.Animal)ViewData["Animal"];
+    var employee = (Inyama_Yethu.Models.Employee)ViewData["Employee"];
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-primary"><i class="fas fa-venus-mars me-2"></i>Record Service</h2>
+            <p class="text-muted">Record a mating service for sow #@animal.TagNumber</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Service Details</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="RecordService" method="post" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <input type="hidden" asp-for="MotherAnimalId" value="@animal.Id" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Sow</label>
+                                    <input class="form-control" value="@animal.TagNumber" disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="FatherAnimalId" class="control-label">Boar</label>
+                                    <select asp-for="FatherAnimalId" class="form-select" asp-items="ViewBag.FatherAnimalId" required>
+                                        <option value="">-- Select Boar --</option>
+                                    </select>
+                                    <span asp-validation-for="FatherAnimalId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="MatingDate" class="control-label">Service Date</label>
+                                    <input asp-for="MatingDate" class="form-control" type="datetime-local" required />
+                                    <span asp-validation-for="MatingDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Expected Farrowing Date</label>
+                                    <input id="expectedFarrowingDate" class="form-control" 
+                                           value="@(Model.MatingDate != default(DateTime) ? Model.MatingDate.AddDays(114).Year + "-" + Model.MatingDate.AddDays(114).Month.ToString("D2") + "-" + Model.MatingDate.AddDays(114).Day.ToString("D2") : DateTime.Now.AddDays(114).Year + "-" + DateTime.Now.AddDays(114).Month.ToString("D2") + "-" + DateTime.Now.AddDays(114).Day.ToString("D2"))" 
+                                           disabled />
+                                    <small class="form-text text-muted">Approximately 114 days after service date</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Notes" class="control-label">Notes</label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                    <small class="form-text text-muted">Enter any observations during mating or additional information</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-end">
+                                <a asp-action="SowServiceCard" asp-route-id="@animal.Id" class="btn btn-secondary me-2">
+                                    <i class="fas fa-arrow-left me-1"></i> Back to Service Card
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Record Service
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+        
+        // Update expected farrowing date based on mating date
+        document.getElementById('MatingDate').addEventListener('change', function() {
+            var matingDate = new Date(this.value);
+            var farrowingDate = new Date(matingDate);
+            farrowingDate.setDate(farrowingDate.getDate() + 114);
+            
+            var formattedDate = farrowingDate.toISOString().split('T')[0];
+            document.getElementById('expectedFarrowingDate').value = formattedDate;
+        });
+    </script>
+} 
