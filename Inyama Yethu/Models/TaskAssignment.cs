@@ -51,6 +51,9 @@ namespace Inyama_Yethu.Models
         [Required]
         public FarmTaskStatus Status { get; set; } = FarmTaskStatus.Pending;
         
+        [Display(Name = "Is Completed")]
+        public bool IsCompleted => Status == FarmTaskStatus.Completed;
+        
         [Required]
         public TaskPriority Priority { get; set; } = TaskPriority.Medium;
         

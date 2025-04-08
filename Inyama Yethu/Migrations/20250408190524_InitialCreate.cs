@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inyama_Yethu.Migrations
 {
     /// <inheritdoc />
-    public partial class IntialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -115,6 +115,22 @@ namespace Inyama_Yethu.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaskCategories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false),
+                    IsSystem = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaskCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -308,6 +324,39 @@ namespace Inyama_Yethu.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ActivityLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ActivityType = table.Column<int>(type: "int", nullable: false),
+                    EntityName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    EntityId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OldValues = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NewValues = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivityLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivityLogs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ActivityLogs_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Attendances",
                 columns: table => new
                 {
@@ -327,6 +376,29 @@ namespace Inyama_Yethu.Migrations
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FeedInventory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FeedType = table.Column<int>(type: "int", nullable: false),
+                    CurrentStock = table.Column<double>(type: "float", nullable: false),
+                    MinimumStockLevel = table.Column<double>(type: "float", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastUpdatedById = table.Column<int>(type: "int", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeedInventory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FeedInventory_Employees_LastUpdatedById",
+                        column: x => x.LastUpdatedById,
+                        principalTable: "Employees",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -367,7 +439,7 @@ namespace Inyama_Yethu.Migrations
                     TagNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
-                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Weight = table.Column<double>(type: "float", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
@@ -401,6 +473,35 @@ namespace Inyama_Yethu.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AnimalSales",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AnimalId = table.Column<int>(type: "int", nullable: false),
+                    SaleDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SaleType = table.Column<int>(type: "int", nullable: false),
+                    SalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WeightAtSale = table.Column<double>(type: "float", nullable: true),
+                    PricePerKg = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    BuyerName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    InvoiceNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    PaymentReceived = table.Column<bool>(type: "bit", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnimalSales", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnimalSales_Animals_AnimalId",
+                        column: x => x.AnimalId,
+                        principalTable: "Animals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Births",
                 columns: table => new
                 {
@@ -410,6 +511,8 @@ namespace Inyama_Yethu.Migrations
                     AnimalId = table.Column<int>(type: "int", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NumberOfOffspring = table.Column<int>(type: "int", nullable: false),
+                    NumberAlive = table.Column<int>(type: "int", nullable: false),
+                    AverageBirthWeight = table.Column<double>(type: "float", nullable: true),
                     WasAssisted = table.Column<bool>(type: "bit", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
@@ -432,10 +535,14 @@ namespace Inyama_Yethu.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AnimalId = table.Column<int>(type: "int", nullable: false),
                     FeedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FeedTypeString = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FeedType = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
-                    CostPerKg = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    CostPerKg = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    FeedingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RecordedById = table.Column<int>(type: "int", nullable: true),
+                    RecordedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -446,6 +553,11 @@ namespace Inyama_Yethu.Migrations
                         principalTable: "Animals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Feedings_Employees_RecordedById",
+                        column: x => x.RecordedById,
+                        principalTable: "Employees",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -457,13 +569,18 @@ namespace Inyama_Yethu.Migrations
                     AnimalId = table.Column<int>(type: "int", nullable: false),
                     RecordDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RecordType = table.Column<int>(type: "int", nullable: false),
+                    TreatmentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Treatment = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     AdministeredBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     FollowUpDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     FollowUpCompleted = table.Column<bool>(type: "bit", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Medication = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Dosage = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TreatmentOutcome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PerformedById = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -474,6 +591,11 @@ namespace Inyama_Yethu.Migrations
                         principalTable: "Animals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_HealthRecords_Employees_PerformedById",
+                        column: x => x.PerformedById,
+                        principalTable: "Employees",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -486,19 +608,26 @@ namespace Inyama_Yethu.Migrations
                     FatherAnimalId = table.Column<int>(type: "int", nullable: false),
                     MatingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ExpectedPregnancyCheck1 = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpectedPregnancyCheck1 = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PregnancyCheck1Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     PregnancyCheck1Result = table.Column<bool>(type: "bit", nullable: true),
-                    ExpectedPregnancyCheck2 = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpectedPregnancyCheck2 = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PregnancyCheck2Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     PregnancyCheck2Result = table.Column<bool>(type: "bit", nullable: true),
-                    ExpectedFarrowingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpectedVaccinationDate1 = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PregnancyCheckNotes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    PregnancyCheckBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ExpectedFarrowingDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExpectedVaccinationDate1 = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Vaccination1Completed = table.Column<bool>(type: "bit", nullable: false),
-                    ExpectedVaccinationDate2 = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpectedVaccinationDate2 = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Vaccination2Completed = table.Column<bool>(type: "bit", nullable: false),
                     ActualFarrowingDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     NumberOfPigletsBorn = table.Column<int>(type: "int", nullable: true),
                     NumberOfPigletsBornAlive = table.Column<int>(type: "int", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    PigletsMummified = table.Column<int>(type: "int", nullable: true),
+                    RecordedById = table.Column<int>(type: "int", nullable: true),
+                    RecordedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -515,6 +644,11 @@ namespace Inyama_Yethu.Migrations
                         principalTable: "Animals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Matings_Employees_RecordedById",
+                        column: x => x.RecordedById,
+                        principalTable: "Employees",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -565,11 +699,13 @@ namespace Inyama_Yethu.Migrations
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Priority = table.Column<int>(type: "int", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TaskCategoryId = table.Column<int>(type: "int", nullable: false),
                     AnimalId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -584,6 +720,12 @@ namespace Inyama_Yethu.Migrations
                         name: "FK_TaskAssignments_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TaskAssignments_TaskCategories_TaskCategoryId",
+                        column: x => x.TaskCategoryId,
+                        principalTable: "TaskCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -619,6 +761,28 @@ namespace Inyama_Yethu.Migrations
                     { 2, "", new DateTime(1985, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "jane.smith@inyamayethu.co.za", "Jane", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Farm Manager", "Smith", "073-987-6543", null }
                 });
 
+            migrationBuilder.InsertData(
+                table: "FeedInventory",
+                columns: new[] { "Id", "CurrentStock", "FeedType", "LastUpdated", "LastUpdatedById", "MinimumStockLevel", "Notes" },
+                values: new object[,]
+                {
+                    { 1, 500.0, 0, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5879), 2, 100.0, null },
+                    { 2, 750.0, 1, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5907), 2, 150.0, null },
+                    { 3, 1000.0, 2, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5910), 2, 200.0, null },
+                    { 4, 800.0, 3, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5912), 2, 175.0, null },
+                    { 5, 400.0, 4, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5913), 2, 100.0, null }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityLogs_EmployeeId",
+                table: "ActivityLogs",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityLogs_UserId",
+                table: "ActivityLogs",
+                column: "UserId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Animals_AbattoirShipmentId",
                 table: "Animals",
@@ -638,6 +802,12 @@ namespace Inyama_Yethu.Migrations
                 name: "IX_Animals_MotherAnimalId",
                 table: "Animals",
                 column: "MotherAnimalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnimalSales_AnimalId",
+                table: "AnimalSales",
+                column: "AnimalId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -704,9 +874,24 @@ namespace Inyama_Yethu.Migrations
                 column: "AnimalId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Feedings_RecordedById",
+                table: "Feedings",
+                column: "RecordedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeedInventory_LastUpdatedById",
+                table: "FeedInventory",
+                column: "LastUpdatedById");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_HealthRecords_AnimalId",
                 table: "HealthRecords",
                 column: "AnimalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HealthRecords_PerformedById",
+                table: "HealthRecords",
+                column: "PerformedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Matings_FatherAnimalId",
@@ -717,6 +902,11 @@ namespace Inyama_Yethu.Migrations
                 name: "IX_Matings_MotherAnimalId",
                 table: "Matings",
                 column: "MotherAnimalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Matings_RecordedById",
+                table: "Matings",
+                column: "RecordedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
@@ -749,6 +939,11 @@ namespace Inyama_Yethu.Migrations
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TaskAssignments_TaskCategoryId",
+                table: "TaskAssignments",
+                column: "TaskCategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WeightRecords_AnimalId",
                 table: "WeightRecords",
                 column: "AnimalId");
@@ -765,12 +960,26 @@ namespace Inyama_Yethu.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_Employees_AspNetUsers_UserId",
+                table: "Employees");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Matings_Employees_RecordedById",
+                table: "Matings");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Animals_AbattoirShipments_AbattoirShipmentId",
                 table: "Animals");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Animals_Matings_MatingId",
                 table: "Animals");
+
+            migrationBuilder.DropTable(
+                name: "ActivityLogs");
+
+            migrationBuilder.DropTable(
+                name: "AnimalSales");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -800,6 +1009,9 @@ namespace Inyama_Yethu.Migrations
                 name: "Feedings");
 
             migrationBuilder.DropTable(
+                name: "FeedInventory");
+
+            migrationBuilder.DropTable(
                 name: "HealthRecords");
 
             migrationBuilder.DropTable(
@@ -824,13 +1036,16 @@ namespace Inyama_Yethu.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Employees");
+                name: "TaskCategories");
 
             migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "AbattoirShipments");

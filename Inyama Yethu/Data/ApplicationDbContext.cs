@@ -22,6 +22,7 @@ namespace Inyama_Yethu.Data
         public DbSet<Mating> Matings { get; set; }
         public DbSet<PigletProcessing> PigletProcessings { get; set; }
         public DbSet<Feeding> Feedings { get; set; }
+        public DbSet<FeedInventory> FeedInventory { get; set; }
         public DbSet<HealthRecord> HealthRecords { get; set; }
         public DbSet<WeightRecord> WeightRecords { get; set; }
         public DbSet<AbattoirShipment> AbattoirShipments { get; set; }
@@ -41,6 +42,11 @@ namespace Inyama_Yethu.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Configure ActivityLog UserId to match AspNetUsers.Id
+            modelBuilder.Entity<ActivityLog>()
+                .Property(a => a.UserId)
+                .HasMaxLength(450);  // This is the default length for AspNetUsers.Id
 
             // Configure decimal properties
             modelBuilder.Entity<AbattoirShipment>()
@@ -139,6 +145,55 @@ namespace Inyama_Yethu.Data
                     HireDate = new DateTime(2022, 8, 10),
                     IsActive = true,
                     DateOfBirth = new DateTime(1985, 6, 15)
+                }
+            );
+
+            // Seed initial feed inventory
+            modelBuilder.Entity<FeedInventory>().HasData(
+                new FeedInventory
+                {
+                    Id = 1,
+                    FeedType = FeedType.CreepPellets,
+                    CurrentStock = 500,
+                    MinimumStockLevel = 100,
+                    LastUpdated = DateTime.Now,
+                    LastUpdatedById = 2
+                },
+                new FeedInventory
+                {
+                    Id = 2,
+                    FeedType = FeedType.WeanerFeed,
+                    CurrentStock = 750,
+                    MinimumStockLevel = 150,
+                    LastUpdated = DateTime.Now,
+                    LastUpdatedById = 2
+                },
+                new FeedInventory
+                {
+                    Id = 3,
+                    FeedType = FeedType.GrowerFeed,
+                    CurrentStock = 1000,
+                    MinimumStockLevel = 200,
+                    LastUpdated = DateTime.Now,
+                    LastUpdatedById = 2
+                },
+                new FeedInventory
+                {
+                    Id = 4,
+                    FeedType = FeedType.SowFeed,
+                    CurrentStock = 800,
+                    MinimumStockLevel = 175,
+                    LastUpdated = DateTime.Now,
+                    LastUpdatedById = 2
+                },
+                new FeedInventory
+                {
+                    Id = 5,
+                    FeedType = FeedType.BoarFeed,
+                    CurrentStock = 400,
+                    MinimumStockLevel = 100,
+                    LastUpdated = DateTime.Now,
+                    LastUpdatedById = 2
                 }
             );
         }

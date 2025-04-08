@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250407161331_EmployeeNewFeatures")]
-    partial class EmployeeNewFeatures
+    [Migration("20250408190524_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,6 +72,63 @@ namespace Inyama_Yethu.Migrations
                     b.ToTable("AbattoirShipments");
                 });
 
+            modelBuilder.Entity("Inyama_Yethu.Models.ActivityLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActivityLogs");
+                });
+
             modelBuilder.Entity("Inyama_Yethu.Models.Animal", b =>
                 {
                     b.Property<int>("Id")
@@ -105,9 +162,6 @@ namespace Inyama_Yethu.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("SaleId")
-                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -397,6 +451,87 @@ namespace Inyama_Yethu.Migrations
                             JobTitle = "Farm Manager",
                             LastName = "Smith",
                             PhoneNumber = "073-987-6543"
+                        });
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.FeedInventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("CurrentStock")
+                        .HasColumnType("float");
+
+                    b.Property<int>("FeedType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LastUpdatedById")
+                        .HasColumnType("int");
+
+                    b.Property<double>("MinimumStockLevel")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LastUpdatedById");
+
+                    b.ToTable("FeedInventory");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CurrentStock = 500.0,
+                            FeedType = 0,
+                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5879),
+                            LastUpdatedById = 2,
+                            MinimumStockLevel = 100.0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CurrentStock = 750.0,
+                            FeedType = 1,
+                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5907),
+                            LastUpdatedById = 2,
+                            MinimumStockLevel = 150.0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CurrentStock = 1000.0,
+                            FeedType = 2,
+                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5910),
+                            LastUpdatedById = 2,
+                            MinimumStockLevel = 200.0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CurrentStock = 800.0,
+                            FeedType = 3,
+                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5912),
+                            LastUpdatedById = 2,
+                            MinimumStockLevel = 175.0
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CurrentStock = 400.0,
+                            FeedType = 4,
+                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5913),
+                            LastUpdatedById = 2,
+                            MinimumStockLevel = 100.0
                         });
                 });
 
@@ -1210,6 +1345,23 @@ namespace Inyama_Yethu.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Inyama_Yethu.Models.ActivityLog", b =>
+                {
+                    b.HasOne("Inyama_Yethu.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId");
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Inyama_Yethu.Models.Animal", b =>
                 {
                     b.HasOne("Inyama_Yethu.Models.AbattoirShipment", null)
@@ -1275,6 +1427,15 @@ namespace Inyama_Yethu.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.FeedInventory", b =>
+                {
+                    b.HasOne("Inyama_Yethu.Models.Employee", "LastUpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("LastUpdatedById");
+
+                    b.Navigation("LastUpdatedBy");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.Feedback", b =>

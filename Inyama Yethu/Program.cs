@@ -223,11 +223,72 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
+        // Create senior employee
+        var seniorEmail = "senior@inyamayethu.co.za";
+        var seniorUser = await userManager.FindByEmailAsync(seniorEmail);
+
+        if (seniorUser == null)
+        {
+            seniorUser = new IdentityUser
+            {
+                UserName = seniorEmail,
+                Email = seniorEmail,
+                EmailConfirmed = true
+            };
+
+            var password = "Senior@123456";
+            var result = await userManager.CreateAsync(seniorUser, password);
+
+            if (result.Succeeded)
+            {
+                logger.LogInformation("Created senior employee user with email {Email}", seniorEmail);
+                
+                // Assign senior employee role
+                await userManager.AddToRoleAsync(seniorUser, "SeniorEmployee");
+                logger.LogInformation("Added user to SeniorEmployee role");
+
+                // Create employee record
+                var seniorEmployee = new Employee
+                {
+                    FirstName = "John",
+                    LastName = "Smith",
+                    Email = seniorEmail,
+                    PhoneNumber = "0123456789",
+                    DateOfBirth = new DateTime(1985, 1, 1),
+                    HireDate = DateTime.Now,
+                    JobTitle = "Senior Farm Manager",
+                    IsActive = true,
+                    UserId = seniorUser.Id
+                };
+
+                context.Employees.Add(seniorEmployee);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Created senior employee record in database");
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                logger.LogError("Error creating senior employee user: {Errors}", errors);
+            }
+        }
+
         // Create default employee users for the two farm workers
         var defaultEmployees = new[]
         {
-            new { Email = "", FirstName = "John", LastName = "Doe" },
-            new { Email = "jane.smith@inyamayethu.co.za", FirstName = "Jane", LastName = "Smith" }
+            new { 
+                Email = "john.doe@inyamayethu.co.za", 
+                FirstName = "John", 
+                LastName = "Doe",
+                JobTitle = "Farm Worker",
+                PhoneNumber = "0123456789"
+            },
+            new { 
+                Email = "jane.smith@inyamayethu.co.za", 
+                FirstName = "Jane", 
+                LastName = "Smith",
+                JobTitle = "Livestock Specialist",
+                PhoneNumber = "0123456780"
+            }
         };
 
         foreach (var emp in defaultEmployees)
@@ -256,7 +317,7 @@ using (var scope = app.Services.CreateScope())
                     logger.LogInformation("Added user to Employee role");
 
                     // Create the employee record
-                    var employee = new Inyama_Yethu.Models.Employee
+                    var employee = new Employee
                     {
                         FirstName = emp.FirstName,
                         LastName = emp.LastName,
@@ -264,13 +325,15 @@ using (var scope = app.Services.CreateScope())
                         UserId = employeeUser.Id,
                         IsActive = true,
                         HireDate = DateTime.Now,
-                        JobTitle = "Farm Worker",
+                        JobTitle = emp.JobTitle,
                         Address = "123 Farm Road, Inyama Yethu",
                         DateOfBirth = new DateTime(1990, 1, 1),
-                        PhoneNumber = "0123456789"
+                        PhoneNumber = emp.PhoneNumber
                     };
                     context.Employees.Add(employee);
                     await context.SaveChangesAsync();
+                    
+                    logger.LogInformation("Created employee record for {Name}", $"{emp.FirstName} {emp.LastName}");
                 }
                 else
                 {

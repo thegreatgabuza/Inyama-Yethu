@@ -30,7 +30,8 @@ namespace Inyama_Yethu.Models
         [StringLength(500)]
         public string Description { get; set; }
         
-        [StringLength(255)]
+        [Required]
+        [StringLength(450)]
         public string UserId { get; set; }
         
         [ForeignKey("UserId")]

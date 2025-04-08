@@ -1,0 +1,137 @@
+@{
+    ViewData["Title"] = "Senior Employee Dashboard";
+    Layout = "~/Areas/SeniorEmployee/Views/Shared/_SeniorEmployeeLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Senior Employee Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Total Animals</div>
+                            <div class="h3 mb-0">@ViewBag.TotalAnimals</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-cow fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-area="SeniorEmployee" asp-controller="Animals" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Active Tasks</div>
+                            <div class="h3 mb-0">@ViewBag.ActiveTasks</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-tasks fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-area="SeniorEmployee" asp-controller="Tasks" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Pending Health Checks</div>
+                            <div class="h3 mb-0">@ViewBag.PendingHealthChecks</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-heartbeat fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-area="SeniorEmployee" asp-controller="Health" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Low Feed Alerts</div>
+                            <div class="h3 mb-0">@ViewBag.LowFeedAlerts</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-area="SeniorEmployee" asp-controller="Feed" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-list me-1"></i>
+                    Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a asp-area="SeniorEmployee" asp-controller="Tasks" asp-action="Create" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus me-2"></i> Create New Task
+                        </a>
+                        <a asp-area="SeniorEmployee" asp-controller="Health" asp-action="CreateProtocol" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-medical me-2"></i> Create Health Protocol
+                        </a>
+                        <a asp-area="SeniorEmployee" asp-controller="Feed" asp-action="ManageInventory" class="list-group-item list-group-item-action">
+                            <i class="fas fa-warehouse me-2"></i> Update Feed Inventory
+                        </a>
+                        <a asp-area="SeniorEmployee" asp-controller="Tasks" asp-action="CreateTemplate" class="list-group-item list-group-item-action">
+                            <i class="fas fa-copy me-2"></i> Create Task Template
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    System Status
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-0">
+                        <h5 class="alert-heading">Welcome, Senior Employee!</h5>
+                        <p>You have enhanced permissions to manage:</p>
+                        <ul class="mb-0">
+                            <li>Health protocols and checks</li>
+                            <li>Feed inventory and schedules</li>
+                            <li>Task assignments and templates</li>
+                            <li>Breeding records</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
