@@ -1,5 +1,6 @@
 using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
+using Inyama_Yethu.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -108,15 +109,31 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 .ToList();
 
             ViewBag.Animals = new SelectList(activeAnimals, "Id", "TagNumber");
-            return View();
+            
+            var viewModel = new MortalityRecordViewModel
+            {
+                RecordDate = DateTime.Now
+            };
+            
+            return View(viewModel);
         }
 
         // POST: Admin/MortalityRecords/Record
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Record(int AnimalId, DateTime DeathDate, string Cause, double? Weight, string Notes)
+        public async Task<IActionResult> Record(MortalityRecordViewModel viewModel)
         {
-            var animal = await _context.Animals.FindAsync(AnimalId);
+            if (!ModelState.IsValid)
+            {
+                var activeAnimals = _context.Animals
+                    .Where(a => a.Status == AnimalStatus.Active)
+                    .OrderBy(a => a.TagNumber)
+                    .ToList();
+                ViewBag.Animals = new SelectList(activeAnimals, "Id", "TagNumber");
+                return View(viewModel);
+            }
+
+            var animal = await _context.Animals.FindAsync(viewModel.AnimalId);
             
             if (animal == null)
             {
@@ -129,12 +146,12 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             // Create a health record for the death
             var healthRecord = new HealthRecord
             {
-                AnimalId = AnimalId,
-                RecordDate = DeathDate,
+                AnimalId = viewModel.AnimalId,
+                RecordDate = viewModel.RecordDate,
                 RecordType = HealthRecordType.Other,
                 Treatment = "Deceased",
-                Description = Cause,
-                Notes = Notes,
+                Description = viewModel.CauseOfDeath,
+                Notes = viewModel.Notes,
                 AdministeredBy = User.Identity?.Name ?? "System"
             };
 
@@ -229,14 +246,5 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             else
                 return "Adult (> 730 days)";
         }
-    }
-
-    public class MortalityRecordViewModel
-    {
-        public int AnimalId { get; set; }
-        public DateTime DeathDate { get; set; }
-        public string Cause { get; set; }
-        public double? Weight { get; set; }
-        public string Notes { get; set; }
     }
 } 

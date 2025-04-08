@@ -1,5 +1,6 @@
 using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
+using Inyama_Yethu.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace Inyama_Yethu.Areas.Employee.Controllers
 {
     [Area("Employee")]
-    [Authorize(Roles = "Employee")]
+    [Authorize(Roles = "Employee,SeniorEmployee")]
     public class HealthRecordsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -255,6 +256,49 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             ViewData["Employee"] = employee;
 
             return View(viewModel);
+        }
+
+        [Authorize(Policy = "CanManageHealth")]
+        public IActionResult CreateProtocol()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageHealth")]
+        public async Task<IActionResult> CreateProtocol(HealthProtocolViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for creating health protocol
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        [Authorize(Policy = "CanManageHealth")]
+        public IActionResult ScheduleHealthCheck()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageHealth")]
+        public async Task<IActionResult> ScheduleHealthCheck(HealthCheckScheduleViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for scheduling health check
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        [Authorize(Policy = "CanManageHealth")]
+        public async Task<IActionResult> GenerateReport()
+        {
+            // Implementation for generating health reports
+            return View();
         }
     }
 } 

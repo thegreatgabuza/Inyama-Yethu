@@ -1,5 +1,6 @@
 using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
+using Inyama_Yethu.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace Inyama_Yethu.Areas.Employee.Controllers
 {
     [Area("Employee")]
-    [Authorize(Roles = "Employee")]
+    [Authorize(Roles = "Employee,SeniorEmployee")]
     public class FeedRecordsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -163,6 +164,60 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             }
 
             return View(feeding);
+        }
+
+        [Authorize(Policy = "CanManageFeed")]
+        public IActionResult ManageInventory()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageFeed")]
+        public async Task<IActionResult> UpdateInventory(FeedInventoryViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for updating feed inventory
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        [Authorize(Policy = "CanManageFeed")]
+        public IActionResult CreateFeedSchedule()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageFeed")]
+        public async Task<IActionResult> CreateFeedSchedule(FeedScheduleViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for creating feed schedule
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        [Authorize(Policy = "CanManageFeed")]
+        public IActionResult AllocateBudget()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageFeed")]
+        public async Task<IActionResult> AllocateBudget(FeedBudgetViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for allocating feed budget
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
         }
     }
 } 

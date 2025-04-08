@@ -85,6 +85,12 @@
                                             <i class="fas fa-user-check"></i>
                                         </a>
                                     }
+                                    @if (employee.User != null)
+                                    {
+                                        <a asp-action="PromoteToSenior" asp-route-id="@employee.User.Id" class="btn btn-warning btn-sm" title="Manage Role">
+                                            <i class="fas fa-user-shield"></i>
+                                        </a>
+                                    }
                                 </div>
                             </td>
                         </tr>

@@ -68,6 +68,35 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddRazorPages();
 
+// Add Authorization Policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CanManageHealth", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("SeniorEmployee")));
+            
+    options.AddPolicy("CanManageFeed", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("SeniorEmployee")));
+            
+    options.AddPolicy("CanManageLivestock", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("SeniorEmployee")));
+            
+    options.AddPolicy("CanManageTasks", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("SeniorEmployee")));
+            
+    options.AddPolicy("CanManageBreeding", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("SeniorEmployee")));
+});
+
 // Register TimeZoneInfo for South Africa
 builder.Services.AddSingleton(TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time"));
 
@@ -108,6 +137,11 @@ app.UseRoleBasedRedirection();
 // Map Identity endpoints
 app.MapRazorPages();
 
+// Add area-specific routes first
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
 // Add a specific route for the Admin area
 app.MapControllerRoute(
     name: "admin",
@@ -119,11 +153,6 @@ app.MapControllerRoute(
     name: "employee",
     pattern: "Employee/{controller=Home}/{action=Index}/{id?}",
     defaults: new { area = "Employee" });
-
-// Map area routes
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 // Map default route
 app.MapControllerRoute(
@@ -150,7 +179,7 @@ using (var scope = app.Services.CreateScope())
 
         // Create roles
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var roles = new[] { "Administrator", "Employee", "Customer" };
+        var roles = new[] { "Administrator", "Employee", "Customer", "SeniorEmployee" };
 
         foreach (var role in roles)
         {

@@ -1,4 +1,4 @@
-@model Inyama_Yethu.Models.MortalityRecordViewModel
+@model Inyama_Yethu.ViewModels.MortalityRecordViewModel
 @{
     ViewData["Title"] = "Record Mortality";
     var employee = (Inyama_Yethu.Models.Employee)ViewData["Employee"];
@@ -31,7 +31,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label asp-for="AnimalId" class="control-label">Animal</label>
-                                    <select asp-for="AnimalId" class="form-select" asp-items="ViewBag.AnimalId" required>
+                                    <select asp-for="AnimalId" class="form-select" asp-items="ViewBag.Animals" required>
                                         <option value="">-- Select Animal --</option>
                                     </select>
                                     <span asp-validation-for="AnimalId" class="text-danger"></span>

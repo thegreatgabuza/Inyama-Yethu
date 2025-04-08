@@ -1,0 +1,95 @@
+@model Inyama_Yethu.ViewModels.PromoteToSeniorViewModel
+
+@{
+    ViewData["Title"] = "Manage Employee Role";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">Manage Employee Role</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-shield me-1"></i>
+                    Role Management
+                </div>
+                <div class="card-body">
+                    <form asp-action="PromoteToSenior" method="post">
+                        <input type="hidden" asp-for="UserId" />
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Email" class="form-label">Employee Email</label>
+                                    <input asp-for="Email" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="IsCurrentlySenior" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsCurrentlySenior" class="form-check-label">Senior Employee Status</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-4">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Senior Employee Permissions
+                            </h5>
+                            <p>Senior employees have access to the following additional features:</p>
+                            <ul class="mb-0">
+                                <li>Creating and managing health protocols</li>
+                                <li>Scheduling health checks and generating reports</li>
+                                <li>Managing feed inventory and creating feed schedules</li>
+                                <li>Creating and assigning tasks to other employees</li>
+                                <li>Managing breeding records and schedules</li>
+                                <li>Creating task templates for routine operations</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-start gap-2">
+                            <button type="submit" class="btn btn-primary" onclick="return confirmRoleChange()">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function confirmRoleChange() {
+            var isSenior = document.getElementById('@Html.IdFor(m => m.IsCurrentlySenior)').checked;
+            var message = isSenior ? 
+                'Are you sure you want to promote this employee to Senior status?' :
+                'Are you sure you want to change this employee back to regular status?';
+                
+            return confirm(message);
+        }
+    </script>
+} 

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using EmployeeModel = Inyama_Yethu.Models.Employee;
 using Inyama_Yethu.Models;
 using Inyama_Yethu.Services;
+using Microsoft.AspNetCore.Identity;
+using Inyama_Yethu.ViewModels;
 
 namespace Inyama_Yethu.Areas.Admin.Controllers
 {
@@ -18,11 +20,15 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public EmployeesController(ApplicationDbContext context, IEmailService emailService)
+        public EmployeesController(ApplicationDbContext context, IEmailService emailService, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _emailService = emailService;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // GET: Admin/Employees
@@ -319,6 +325,101 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             await _emailService.SendEmailAsync(employee.Email, subject, message);
             
             TempData["SuccessMessage"] = "Employee has been reactivated successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Admin/Employees/PromoteToSenior/5
+        [HttpGet]
+        [Route("PromoteToSenior/{id}")]
+        public async Task<IActionResult> PromoteToSenior(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.Email == user.Email);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            var model = new PromoteToSeniorViewModel
+            {
+                UserId = id,
+                Email = user.Email,
+                IsCurrentlySenior = await _userManager.IsInRoleAsync(user, "SeniorEmployee")
+            };
+
+            return View("~/Areas/Admin/Views/Employees/PromoteToSenior.cshtml", model);
+        }
+
+        // POST: Admin/Employees/PromoteToSenior
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("PromoteToSenior")]
+        public async Task<IActionResult> PromoteToSenior(PromoteToSeniorViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("~/Areas/Admin/Views/Employees/PromoteToSenior.cshtml", model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var isSenior = await _userManager.IsInRoleAsync(user, "SeniorEmployee");
+            
+            try
+            {
+                if (model.IsCurrentlySenior && !isSenior)
+                {
+                    // Promote to senior
+                    await _userManager.RemoveFromRoleAsync(user, "Employee");
+                    await _userManager.AddToRoleAsync(user, "SeniorEmployee");
+
+                    // Send notification email
+                    await _emailService.SendEmailAsync(
+                        user.Email,
+                        "Role Promotion Notification",
+                        "Congratulations! You have been promoted to Senior Employee status. You now have access to additional features in the system."
+                    );
+
+                    TempData["SuccessMessage"] = "Employee successfully promoted to Senior status.";
+                }
+                else if (!model.IsCurrentlySenior && isSenior)
+                {
+                    // Demote from senior
+                    await _userManager.RemoveFromRoleAsync(user, "SeniorEmployee");
+                    await _userManager.AddToRoleAsync(user, "Employee");
+
+                    // Send notification email
+                    await _emailService.SendEmailAsync(
+                        user.Email,
+                        "Role Change Notification",
+                        "Your role has been changed from Senior Employee to Employee."
+                    );
+
+                    TempData["SuccessMessage"] = "Employee role has been updated to regular Employee.";
+                }
+            }
+            catch (System.Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while updating the role. Please try again.");
+                return View("~/Areas/Admin/Views/Employees/PromoteToSenior.cshtml", model);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

@@ -1,6 +1,7 @@
 using Inyama_Yethu.Data;
 using Inyama_Yethu.Models;
 using Inyama_Yethu.Services;
+using Inyama_Yethu.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace Inyama_Yethu.Areas.Employee.Controllers
 {
     [Area("Employee")]
-    [Authorize(Roles = "Employee")]
+    [Authorize(Roles = "Employee,SeniorEmployee")]
     public class TasksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -266,6 +267,60 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
 
             TempData["SuccessMessage"] = $"Task status updated to {newStatus}.";
             return RedirectToAction(nameof(Details), new { id = taskId });
+        }
+
+        [Authorize(Policy = "CanManageTasks")]
+        public IActionResult CreateRoutineTask()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageTasks")]
+        public async Task<IActionResult> CreateRoutineTask(RoutineTaskViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for creating routine task
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        [Authorize(Policy = "CanManageTasks")]
+        public IActionResult AssignTask()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageTasks")]
+        public async Task<IActionResult> AssignTask(TaskAssignmentViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for assigning tasks
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
+        [Authorize(Policy = "CanManageTasks")]
+        public IActionResult CreateTaskTemplate()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanManageTasks")]
+        public async Task<IActionResult> CreateTaskTemplate(TaskTemplateViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Implementation for creating task template
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
         }
     }
 } 
