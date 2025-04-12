@@ -164,9 +164,11 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                     // Create a birth record
                     var birth = new Birth
                     {
-                        AnimalId = mating.MotherAnimalId,
+                        MotherAnimalId = mating.MotherAnimalId,
+                        FatherAnimalId = mating.FatherAnimalId,
                         BirthDate = mating.ActualFarrowingDate.Value,
-                        NumberOfOffspring = mating.NumberOfPigletsBorn ?? 0,
+                        LitterSize = mating.NumberOfPigletsBorn ?? 0,
+                        LiveBorn = mating.NumberOfPigletsBornAlive ?? 0,
                         Status = BirthStatus.Normal,
                         Notes = mating.Notes
                     };
@@ -287,14 +289,16 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                         if (mating.Status == MatingStatus.Farrowed && mating.ActualFarrowingDate.HasValue)
                         {
                             // Create a birth record if not already exists
-                            if (!await _context.Births.AnyAsync(b => b.AnimalId == mating.MotherAnimalId && 
+                            if (!await _context.Births.AnyAsync(b => b.MotherAnimalId == mating.MotherAnimalId && 
                                                                    b.BirthDate.Date == mating.ActualFarrowingDate.Value.Date))
                             {
                                 var birth = new Birth
                                 {
-                                    AnimalId = mating.MotherAnimalId,
+                                    MotherAnimalId = mating.MotherAnimalId,
+                                    FatherAnimalId = mating.FatherAnimalId,
                                     BirthDate = mating.ActualFarrowingDate.Value,
-                                    NumberOfOffspring = mating.NumberOfPigletsBorn ?? 0,
+                                    LitterSize = mating.NumberOfPigletsBorn ?? 0,
+                                    LiveBorn = mating.NumberOfPigletsBornAlive ?? 0,
                                     Status = BirthStatus.Normal,
                                     Notes = mating.Notes
                                 };

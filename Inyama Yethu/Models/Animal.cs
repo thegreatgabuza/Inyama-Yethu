@@ -75,6 +75,7 @@ namespace Inyama_Yethu.Models
         public virtual ICollection<TaskAssignment> Tasks { get; set; }
         public virtual ICollection<WeightRecord> WeightRecords { get; set; }
         public virtual ICollection<Birth> Births { get; set; }
+        public virtual ICollection<Birth> BirthsAsFather { get; set; }
         
         // Navigate to parent animals
         public virtual Animal Mother { get; set; }
@@ -94,8 +95,9 @@ namespace Inyama_Yethu.Models
             Feedings = new HashSet<Feeding>();
             Tasks = new HashSet<TaskAssignment>();
             WeightRecords = new HashSet<WeightRecord>();
-            Offspring = new HashSet<Animal>();
             Births = new HashSet<Birth>();
+            BirthsAsFather = new HashSet<Birth>();
+            Offspring = new HashSet<Animal>();
         }
     }
 } 

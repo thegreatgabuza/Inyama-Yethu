@@ -352,9 +352,11 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             // Create a birth record
             var birth = new Birth
             {
-                AnimalId = mating.MotherAnimalId,
+                MotherAnimalId = mating.MotherAnimalId,
+                FatherAnimalId = mating.FatherAnimalId,
                 BirthDate = farrowingDate,
-                NumberOfOffspring = totalBorn,
+                LitterSize = totalBorn,
+                LiveBorn = totalBorn, // Assuming all born are alive since we don't have stillborn data here
                 Status = BirthStatus.Normal,
                 Notes = notes
             };

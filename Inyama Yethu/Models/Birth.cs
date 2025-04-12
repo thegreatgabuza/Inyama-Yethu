@@ -12,23 +12,24 @@ namespace Inyama_Yethu.Models
         public DateTime BirthDate { get; set; }
 
         [Required]
-        public int AnimalId { get; set; }
+        public int MotherAnimalId { get; set; }
 
-        [ForeignKey("AnimalId")]
-        public Animal Animal { get; set; }
+        [ForeignKey("MotherAnimalId")]
+        public virtual Animal MotherAnimal { get; set; }
 
-        public string Notes { get; set; }
+        public int? FatherAnimalId { get; set; }
+
+        [ForeignKey("FatherAnimalId")]
+        public virtual Animal FatherAnimal { get; set; }
 
         [Required]
-        public int? NumberOfOffspring { get; set; }
+        [Display(Name = "Litter Size")]
+        public int LitterSize { get; set; }
 
-        // Properties for view compatibility
-        [Display(Name = "Number Born")]
-        public int NumberBorn => NumberOfOffspring ?? 0;
-        
-        [Display(Name = "Number Born Alive")]
-        public int NumberAlive { get; set; }
-        
+        [Required]
+        [Display(Name = "Live Born")]
+        public int LiveBorn { get; set; }
+
         [Display(Name = "Average Birth Weight")]
         public double? AverageBirthWeight { get; set; }
 
@@ -36,6 +37,9 @@ namespace Inyama_Yethu.Models
 
         [Required]
         public BirthStatus Status { get; set; }
+
+        [StringLength(500)]
+        public string Notes { get; set; }
     }
 
     public enum BirthStatus

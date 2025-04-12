@@ -240,9 +240,9 @@
                                     {
                                         <tr>
                                             <td>@birth.BirthDate.Day/@birth.BirthDate.Month/@birth.BirthDate.Year</td>
-                                            <td>@birth.NumberBorn</td>
-                                            <td>@birth.NumberAlive</td>
-                                            <td>@(birth.NumberBorn - birth.NumberAlive)</td>
+                                            <td>@birth.LitterSize</td>
+                                            <td>@birth.LiveBorn</td>
+                                            <td>@(birth.LitterSize - birth.LiveBorn)</td>
                                             <td>@(birth.AverageBirthWeight.HasValue ? $"{birth.AverageBirthWeight} kg" : "-")</td>
                                             <td>@(string.IsNullOrEmpty(birth.Notes) ? "-" : birth.Notes)</td>
                                         </tr>

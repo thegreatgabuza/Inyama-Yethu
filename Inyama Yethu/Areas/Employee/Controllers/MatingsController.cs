@@ -150,7 +150,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
 
             // Get all births for this sow
             var births = await _context.Births
-                .Where(b => b.AnimalId == id)
+                .Where(b => b.MotherAnimalId == id)
                 .OrderByDescending(b => b.BirthDate)
                 .ToListAsync();
 

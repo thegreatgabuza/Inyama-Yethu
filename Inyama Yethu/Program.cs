@@ -201,25 +201,14 @@ using (var scope = app.Services.CreateScope())
             {
                 UserName = adminEmail,
                 Email = adminEmail,
-                EmailConfirmed = true // Auto-confirm email for admin
+                EmailConfirmed = true
             };
 
-            // Use a secure password in production!
-            var password = "Admin@123456";
-            var result = await userManager.CreateAsync(adminUser, password);
-
+            var result = await userManager.CreateAsync(adminUser, "Admin@123456");
             if (result.Succeeded)
             {
-                logger.LogInformation("Created admin user with email {Email}", adminEmail);
-                
-                // Assign admin role to user
                 await userManager.AddToRoleAsync(adminUser, "Administrator");
-                logger.LogInformation("Added admin user to Administrator role");
-            }
-            else
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                logger.LogError("Error creating admin user: {Errors}", errors);
+                logger.LogInformation("Created admin user and added to Administrator role");
             }
         }
 
@@ -342,10 +331,13 @@ using (var scope = app.Services.CreateScope())
                 }
             }
         }
+
+        // Seed January 2024 data
+        await Inyama_Yethu.UpdateDatabase.SeedJanuary2024DataAsync(services, logger);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "An error occurred while seeding roles and users");
+        logger.LogError(ex, "An error occurred while seeding the database");
     }
 }
 

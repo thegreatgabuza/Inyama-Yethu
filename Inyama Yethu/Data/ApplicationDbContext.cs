@@ -101,9 +101,15 @@ namespace Inyama_Yethu.Data
 
             // Configure Birth entity
             modelBuilder.Entity<Birth>()
-                .HasOne(b => b.Animal)
+                .HasOne(b => b.MotherAnimal)
                 .WithMany(a => a.Births)
-                .HasForeignKey(b => b.AnimalId)
+                .HasForeignKey(b => b.MotherAnimalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Birth>()
+                .HasOne(b => b.FatherAnimal)
+                .WithMany()
+                .HasForeignKey(b => b.FatherAnimalId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure Animal-AnimalSale relationship
