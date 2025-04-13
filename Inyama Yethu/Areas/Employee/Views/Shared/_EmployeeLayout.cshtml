@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Inyama_Yethu.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -58,10 +59,10 @@
                     <a asp-area="Employee" asp-controller="Dashboard" asp-action="Index" class="list-group-item list-group-item-action bg-inyama-orange text-white">
                         My Dashboard
                     </a>
-                    <a asp-area="Employee" asp-controller="Tasks" asp-action="Today" class="list-group-item list-group-item-action">
+                    <a asp-area="Employee" asp-controller="Tasks" asp-action="TodaysTasks" class="list-group-item list-group-item-action">
                         Today's Tasks
                     </a>
-                    <a asp-area="Employee" asp-controller="Tasks" asp-action="Upcoming" class="list-group-item list-group-item-action">
+                    <a asp-area="Employee" asp-controller="Tasks" asp-action="UpcomingTasks" class="list-group-item list-group-item-action">
                         Upcoming Tasks
                     </a>
                     <a asp-area="Employee" asp-controller="Matings" asp-action="Index" class="list-group-item list-group-item-action">

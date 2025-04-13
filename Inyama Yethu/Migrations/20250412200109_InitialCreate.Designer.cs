@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250408190524_InitialCreate")]
+    [Migration("20250412200109_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -284,7 +284,7 @@ namespace Inyama_Yethu.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AnimalId")
+                    b.Property<int?>("AnimalId")
                         .HasColumnType("int");
 
                     b.Property<double?>("AverageBirthWeight")
@@ -293,16 +293,22 @@ namespace Inyama_Yethu.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("FatherAnimalId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LitterSize")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LiveBorn")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MotherAnimalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("NumberAlive")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("NumberOfOffspring")
-                        .IsRequired()
-                        .HasColumnType("int");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -313,6 +319,10 @@ namespace Inyama_Yethu.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnimalId");
+
+                    b.HasIndex("FatherAnimalId");
+
+                    b.HasIndex("MotherAnimalId");
 
                     b.ToTable("Births");
                 });
@@ -493,7 +503,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 1,
                             CurrentStock = 500.0,
                             FeedType = 0,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5879),
+                            LastUpdated = new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2146),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         },
@@ -502,7 +512,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 2,
                             CurrentStock = 750.0,
                             FeedType = 1,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5907),
+                            LastUpdated = new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2159),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 150.0
                         },
@@ -511,7 +521,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 3,
                             CurrentStock = 1000.0,
                             FeedType = 2,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5910),
+                            LastUpdated = new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2160),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 200.0
                         },
@@ -520,7 +530,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 4,
                             CurrentStock = 800.0,
                             FeedType = 3,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5912),
+                            LastUpdated = new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2161),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 175.0
                         },
@@ -529,7 +539,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 5,
                             CurrentStock = 400.0,
                             FeedType = 4,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5913),
+                            LastUpdated = new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2163),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         });
@@ -1411,13 +1421,24 @@ namespace Inyama_Yethu.Migrations
 
             modelBuilder.Entity("Inyama_Yethu.Models.Birth", b =>
                 {
-                    b.HasOne("Inyama_Yethu.Models.Animal", "Animal")
+                    b.HasOne("Inyama_Yethu.Models.Animal", null)
+                        .WithMany("BirthsAsFather")
+                        .HasForeignKey("AnimalId");
+
+                    b.HasOne("Inyama_Yethu.Models.Animal", "FatherAnimal")
+                        .WithMany()
+                        .HasForeignKey("FatherAnimalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Inyama_Yethu.Models.Animal", "MotherAnimal")
                         .WithMany("Births")
-                        .HasForeignKey("AnimalId")
+                        .HasForeignKey("MotherAnimalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Animal");
+                    b.Navigation("FatherAnimal");
+
+                    b.Navigation("MotherAnimal");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.Employee", b =>
@@ -1644,6 +1665,8 @@ namespace Inyama_Yethu.Migrations
             modelBuilder.Entity("Inyama_Yethu.Models.Animal", b =>
                 {
                     b.Navigation("Births");
+
+                    b.Navigation("BirthsAsFather");
 
                     b.Navigation("Feedings");
 

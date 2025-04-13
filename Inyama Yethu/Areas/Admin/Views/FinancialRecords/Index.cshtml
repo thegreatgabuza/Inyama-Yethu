@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Financial Records";
+    ViewData["Title"] = "Financial Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     
     var feedCosts = (double)ViewData["FeedCosts"];
@@ -21,350 +21,429 @@
     var currentYear = (int)ViewData["CurrentYear"];
     
     string[] monthNames = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    
+    // Calculate yearly data
+    var yearlyRevenue = yearlyData.AbattoirRevenue + yearlyData.DirectSalesRevenue;
+    var yearlyExpenses = yearlyData.FeedCosts + yearlyData.HealthCareCosts + yearlyData.TransportCosts;
+    var yearlyProfit = yearlyRevenue - yearlyExpenses;
+    var yearlyMargin = yearlyRevenue > 0 ? (yearlyProfit * 100 / yearlyRevenue) : 0;
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Financial Records</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
-        <li class="breadcrumb-item active">Financial Records</li>
-    </ol>
+    <!-- Top Section: Header & Main Actions -->
+    <div class="row align-items-center my-4">
+        <div class="col-md-6">
+            <h1 class="display-5 fw-bold text-primary mb-0">Financial Dashboard</h1>
+            <p class="text-muted">Overview of your farm's financial performance</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="btn-group">
+                <a asp-action="RecordAnimalSale" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i> Record Sale
+                </a>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" asp-action="AnimalSales">
+                        <i class="fas fa-piggy-bank me-2"></i> Animal Sales Report
+                    </a></li>
+                    <li><a class="dropdown-item" asp-action="Transactions">
+                        <i class="fas fa-exchange-alt me-2"></i> Transaction Management
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
     
-    <!-- Financial Summary Row -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white mb-4">
+    <!-- Financial Summary Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total Revenue Card -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between mb-3">
                         <div>
-                            <div class="small text-white-50">Revenue</div>
-                            <div class="h3">R @totalRevenue.ToString("N2")</div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Total Revenue</h6>
+                            <h2 class="mb-0 display-6 fw-bold">R @totalRevenue.ToString("N0")</h2>
                         </div>
-                        <div>
-                            <i class="fas fa-coins fa-2x"></i>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-coins fa-lg text-primary"></i>
                         </div>
                     </div>
+                    <div class="progress mb-2" style="height: 5px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="small"><i class="fas fa-industry me-1"></i> Abattoir</span>
+                        <span class="fw-bold small">R @abattoirRevenue.ToString("N0")</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="small"><i class="fas fa-shopping-cart me-1"></i> Direct</span>
+                        <span class="fw-bold small">R @directSalesRevenue.ToString("N0")</span>
+                    </div>
                 </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a asp-action="RevenueReport" class="small text-white stretched-link">View Revenue Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-footer bg-transparent border-0">
+                    <a asp-action="AnimalSales" class="stretched-link text-decoration-none">
+                        <span class="small text-primary">View Animal Sales <i class="fas fa-arrow-right ms-1"></i></span>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white mb-4">
+        
+        <!-- Expenses Card -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between mb-3">
                         <div>
-                            <div class="small text-white-50">Expenses</div>
-                            <div class="h3">R @totalCosts.ToString("N2")</div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Total Expenses</h6>
+                            <h2 class="mb-0 display-6 fw-bold">R @totalCosts.ToString("N0")</h2>
                         </div>
-                        <div>
-                            <i class="fas fa-file-invoice fa-2x"></i>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-file-invoice fa-lg text-danger"></i>
                         </div>
                     </div>
+                    <div class="progress mb-2" style="height: 5px;">
+                        <div class="progress-bar bg-danger" style="width: 100%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="small"><i class="fas fa-utensils me-1"></i> Feed</span>
+                        <span class="fw-bold small">R @feedCosts.ToString("N0")</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="small"><i class="fas fa-heartbeat me-1"></i> Healthcare</span>
+                        <span class="fw-bold small">R @healthCareCosts.ToString("N0")</span>
+                    </div>
                 </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a asp-action="ExpenseReport" class="small text-white stretched-link">View Expense Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-footer bg-transparent border-0">
+                    <a asp-action="Transactions" class="stretched-link text-decoration-none">
+                        <span class="small text-danger">View Transactions <i class="fas fa-arrow-right ms-1"></i></span>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card @(netProfit >= 0 ? "bg-success" : "bg-danger") text-white mb-4">
+        
+        <!-- Profit Card -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between mb-3">
                         <div>
-                            <div class="small text-white-50">Net Profit</div>
-                            <div class="h3">R @netProfit.ToString("N2")</div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Net Profit</h6>
+                            <h2 class="mb-0 display-6 fw-bold @(netProfit < 0 ? "text-danger" : "text-success")">
+                                R @(netProfit.ToString("N0"))
+                            </h2>
                         </div>
-                        <div>
-                            <i class="fas fa-chart-line fa-2x"></i>
+                        <div class="rounded-circle @(netProfit >= 0 ? "bg-success" : "bg-danger") bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-chart-line fa-lg @(netProfit >= 0 ? "text-success" : "text-danger")"></i>
                         </div>
                     </div>
+                    <div class="progress mb-2" style="height: 5px;">
+                        <div class="progress-bar @(profitMargin >= 15 ? "bg-success" : profitMargin >= 5 ? "bg-warning" : "bg-danger")" 
+                             style="width: @Math.Min(Math.Max(profitMargin, 0), 30)%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small">Profit Margin</span>
+                        <span class="badge @(profitMargin >= 15 ? "bg-success" : profitMargin >= 5 ? "bg-warning" : "bg-danger") rounded-pill">
+                            @profitMargin.ToString("F1")%
+                        </span>
+                    </div>
                 </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <span class="small text-white">
-                        @profitMargin.ToString("F1")% Profit Margin
-                    </span>
+                <div class="card-footer bg-transparent border-0">
+                    <a asp-action="Transactions" class="stretched-link text-decoration-none">
+                        <span class="small @(netProfit >= 0 ? "text-success" : "text-danger")">View Details <i class="fas fa-arrow-right ms-1"></i></span>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-info text-white mb-4">
+        
+        <!-- YTD Card -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between mb-3">
                         <div>
-                            <div class="small text-white-50">Reports</div>
-                            <div class="h3"><i class="fas fa-file-alt"></i></div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Year-to-Date</h6>
+                            <h2 class="mb-0 display-6 fw-bold @(yearlyProfit < 0 ? "text-danger" : "text-success")">
+                                R @(yearlyProfit.ToString("N0"))
+                            </h2>
                         </div>
-                        <div>
-                            <i class="fas fa-print fa-2x"></i>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-calendar-alt fa-lg text-info"></i>
                         </div>
                     </div>
+                    <div class="progress mb-2" style="height: 5px;">
+                        <div class="progress-bar @(yearlyMargin >= 15 ? "bg-success" : yearlyMargin >= 5 ? "bg-warning" : "bg-danger")" 
+                             style="width: @Math.Min(Math.Max(yearlyMargin, 0), 30)%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="small"><i class="fas fa-coins me-1"></i> Revenue</span>
+                        <span class="fw-bold small">R @yearlyRevenue.ToString("N0")</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="small"><i class="fas fa-file-invoice me-1"></i> Expenses</span>
+                        <span class="fw-bold small">R @yearlyExpenses.ToString("N0")</span>
+                    </div>
                 </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a asp-action="ProfitabilityReport" class="small text-white stretched-link">Profitability Reports</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-footer bg-transparent border-0">
+                    <span class="small text-info">@currentYear Annual Summary</span>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Charts Row -->
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-area me-1"></i>
-                    Monthly Financial Performance (@currentYear)
-                </div>
-                <div class="card-body">
-                    <canvas id="financialPerformanceChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie me-1"></i>
-                    Monthly Costs Breakdown (@currentMonth)
-                </div>
-                <div class="card-body">
-                    <canvas id="costsBreakdownChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Yearly Summary -->
-    <div class="row mb-4">
-        <div class="col-xl-12">
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-calendar-alt me-1"></i>
-                    Year-to-Date Financial Summary (@currentYear)
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card border-left-primary h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Total Revenue</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                R @((yearlyData.AbattoirRevenue + yearlyData.DirectSalesRevenue).ToString("N2"))
-                                            </div>
-                                            <div class="small text-muted mt-2">
-                                                Abattoir: R @yearlyData.AbattoirRevenue.ToString("N2")<br />
-                                                Direct Sales: R @yearlyData.DirectSalesRevenue.ToString("N2")
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-coins fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border-left-warning h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Total Expenses</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                R @((yearlyData.FeedCosts + yearlyData.HealthCareCosts + yearlyData.TransportCosts).ToString("N2"))
-                                            </div>
-                                            <div class="small text-muted mt-2">
-                                                Feed: R @yearlyData.FeedCosts.ToString("N2")<br />
-                                                Healthcare: R @yearlyData.HealthCareCosts.ToString("N2")<br />
-                                                Transport: R @yearlyData.TransportCosts.ToString("N2")
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border-left-success h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        @{
-                                            var yearlyRevenue = yearlyData.AbattoirRevenue + yearlyData.DirectSalesRevenue;
-                                            var yearlyExpenses = yearlyData.FeedCosts + yearlyData.HealthCareCosts + yearlyData.TransportCosts;
-                                            var yearlyProfit = yearlyRevenue - yearlyExpenses;
-                                            var yearlyMargin = yearlyRevenue > 0 ? (yearlyProfit * 100 / yearlyRevenue) : 0;
-                                        }
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Net Profit</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                R @yearlyProfit.ToString("N2")
-                                            </div>
-                                            <div class="small text-muted mt-2">
-                                                Profit Margin: @yearlyMargin.ToString("F1")%
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <div class="row g-4">
+        <!-- Monthly Financial Performance Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-chart-area text-primary me-2"></i>Monthly Financial Performance
+                        </h5>
+                        <div class="badge bg-light text-dark rounded-pill px-3 py-2">
+                            @currentYear
                         </div>
                     </div>
                 </div>
+                <div class="card-body">
+                    <canvas id="financialPerformanceChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expense Breakdown Chart -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-chart-pie text-danger me-2"></i>Expense Breakdown
+                        </h5>
+                        <div class="badge bg-light text-dark rounded-pill px-3 py-2">
+                            @currentMonth
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="costsBreakdownChart" height="250"></canvas>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Animal Sales -->
-    <div class="row mb-4">
-        <div class="col-xl-12">
-            <div class="card">
-                <div class="card-header">
+    <!-- Recent Activity Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
                     <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-history text-primary me-2"></i>Recent Activity
+                        </h5>
                         <div>
-                            <i class="fas fa-piggy-bank me-1"></i>
-                            Recent Animal Sales
-                        </div>
-                        <div>
-                            <a asp-action="AnimalSales" class="btn btn-primary btn-sm">
-                                <i class="fas fa-search"></i> View All Sales
+                            <a asp-action="AnimalSales" class="btn btn-sm btn-outline-primary rounded-pill me-2">
+                                <i class="fas fa-piggy-bank me-1"></i> Sales Report
+                            </a>
+                            <a asp-action="RecordAnimalSale" class="btn btn-sm btn-primary rounded-pill">
+                                <i class="fas fa-plus me-1"></i> Record Sale
                             </a>
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <h5 class="card-title">Abattoir Shipments</h5>
-                    <div class="table-responsive mb-4">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Number of Pigs</th>
-                                    <th>Status</th>
-                                    <th>Value</th>
-                                    <th>Transport Cost</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (abattoirSales != null && abattoirSales.Any())
-                                {
-                                    foreach (var shipment in abattoirSales)
-                                    {
+                <div class="card-body p-0">
+                    <ul class="nav nav-tabs nav-justified" id="recentActivityTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-0 py-3" id="abattoir-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#abattoir-tab-pane" type="button" role="tab" 
+                                    aria-controls="abattoir-tab-pane" aria-selected="true">
+                                <i class="fas fa-industry me-2"></i>Abattoir Shipments
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-0 py-3" id="direct-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#direct-tab-pane" type="button" role="tab" 
+                                    aria-controls="direct-tab-pane" aria-selected="false">
+                                <i class="fas fa-shopping-cart me-2"></i>Direct Sales
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="recentActivityTabsContent">
+                        <!-- Abattoir Shipments Tab -->
+                        <div class="tab-pane fade show active p-4" id="abattoir-tab-pane" role="tabpanel" 
+                             aria-labelledby="abattoir-tab" tabindex="0">
+                            <div class="table-responsive">
+                                <table class="table table-hover border-0 align-middle">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>@shipment.ShipmentDate.ToString("dd MMM yyyy")</td>
-                                            <td>@shipment.NumberOfPigs</td>
-                                            <td>
-                                                @switch (shipment.Status)
-                                                {
-                                                    case Inyama_Yethu.Models.ShipmentStatus.Scheduled:
-                                                        <span class="badge bg-info">Scheduled</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.ShipmentStatus.InTransit:
-                                                        <span class="badge bg-warning">In Transit</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.ShipmentStatus.Delivered:
-                                                        <span class="badge bg-success">Delivered</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.ShipmentStatus.Processed:
-                                                        <span class="badge bg-primary">Processed</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.ShipmentStatus.Cancelled:
-                                                        <span class="badge bg-danger">Cancelled</span>
-                                                        break;
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (shipment.ActualPayment.HasValue)
-                                                {
-                                                    <span>R @shipment.ActualPayment.Value.ToString("N2")</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Est. R @shipment.EstimatedValue.ToString("N2")</span>
-                                                }
-                                            </td>
-                                            <td>R @shipment.TransportationCost.ToString("N2")</td>
+                                            <th>Date</th>
+                                            <th>Abattoir</th>
+                                            <th>Number of Pigs</th>
+                                            <th>Status</th>
+                                            <th>Value</th>
+                                            <th class="text-end">Actions</th>
                                         </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="5" class="text-center">No abattoir shipments for this period.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <h5 class="card-title">Direct Sales</h5>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Customer</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (directSales != null && directSales.Any())
-                                {
-                                    foreach (var order in directSales)
-                                    {
+                                    </thead>
+                                    <tbody>
+                                        @if (abattoirSales != null && abattoirSales.Any())
+                                        {
+                                            foreach (var shipment in abattoirSales)
+                                            {
+                                                <tr>
+                                                    <td>@shipment.ShipmentDate.ToString("dd MMM yyyy")</td>
+                                                    <td>@shipment.AbattoirName</td>
+                                                    <td>
+                                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
+                                                            @shipment.NumberOfPigs pigs
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        @switch (shipment.Status)
+                                                        {
+                                                            case Inyama_Yethu.Models.ShipmentStatus.Scheduled:
+                                                                <span class="badge bg-info rounded-pill">Scheduled</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.ShipmentStatus.InTransit:
+                                                                <span class="badge bg-warning rounded-pill">In Transit</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.ShipmentStatus.Delivered:
+                                                                <span class="badge bg-success rounded-pill">Delivered</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.ShipmentStatus.Processed:
+                                                                <span class="badge bg-primary rounded-pill">Processed</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.ShipmentStatus.Cancelled:
+                                                                <span class="badge bg-danger rounded-pill">Cancelled</span>
+                                                                break;
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (shipment.ActualPayment.HasValue)
+                                                        {
+                                                            <span class="text-success fw-bold">R @shipment.ActualPayment.Value.ToString("N2")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Est. R @shipment.EstimatedValue.ToString("N2")</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4">
+                                                    <div class="d-flex flex-column align-items-center py-5">
+                                                        <i class="fas fa-truck-loading text-muted mb-3" style="font-size: 2.5rem;"></i>
+                                                        <h5 class="text-muted">No recent shipments</h5>
+                                                        <p class="text-muted">Abattoir shipments will appear here when processed</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Direct Sales Tab -->
+                        <div class="tab-pane fade p-4" id="direct-tab-pane" role="tabpanel" 
+                             aria-labelledby="direct-tab" tabindex="0">
+                            <div class="table-responsive">
+                                <table class="table table-hover border-0 align-middle">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>@order.OrderDate.ToString("dd MMM yyyy")</td>
-                                            <td>@(order.Customer?.BusinessName ?? "Unknown")</td>
-                                            <td>R @order.TotalAmount.ToString("N2")</td>
-                                            <td>
-                                                @switch (order.Status)
-                                                {
-                                                    case Inyama_Yethu.Models.OrderStatus.Pending:
-                                                        <span class="badge bg-warning">Pending</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.OrderStatus.Confirmed:
-                                                        <span class="badge bg-info">Confirmed</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.OrderStatus.Processing:
-                                                        <span class="badge bg-primary">Processing</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.OrderStatus.ReadyForDelivery:
-                                                        <span class="badge bg-secondary">Ready</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.OrderStatus.InTransit:
-                                                        <span class="badge bg-info">In Transit</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.OrderStatus.Delivered:
-                                                        <span class="badge bg-success">Delivered</span>
-                                                        break;
-                                                    case Inyama_Yethu.Models.OrderStatus.Cancelled:
-                                                        <span class="badge bg-danger">Cancelled</span>
-                                                        break;
-                                                }
-                                            </td>
+                                            <th>Date</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
                                         </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center">No direct sales for this period.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                        @if (directSales != null && directSales.Any())
+                                        {
+                                            foreach (var order in directSales)
+                                            {
+                                                <tr>
+                                                    <td>@order.OrderDate.ToString("dd MMM yyyy")</td>
+                                                    <td>@(order.Customer?.BusinessName ?? "Unknown")</td>
+                                                    <td>
+                                                        @if (order.OrderItems != null)
+                                                        {
+                                                            <span class="badge bg-light text-dark">@order.OrderItems.Count items</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-light text-dark">N/A</span>
+                                                        }
+                                                    </td>
+                                                    <td class="fw-bold">R @order.TotalAmount.ToString("N2")</td>
+                                                    <td>
+                                                        @switch (order.Status)
+                                                        {
+                                                            case Inyama_Yethu.Models.OrderStatus.Pending:
+                                                                <span class="badge bg-warning rounded-pill">Pending</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.OrderStatus.Confirmed:
+                                                                <span class="badge bg-info rounded-pill">Confirmed</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.OrderStatus.Processing:
+                                                                <span class="badge bg-primary rounded-pill">Processing</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.OrderStatus.ReadyForDelivery:
+                                                                <span class="badge bg-secondary rounded-pill">Ready</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.OrderStatus.InTransit:
+                                                                <span class="badge bg-info rounded-pill">In Transit</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.OrderStatus.Delivered:
+                                                                <span class="badge bg-success rounded-pill">Delivered</span>
+                                                                break;
+                                                            case Inyama_Yethu.Models.OrderStatus.Cancelled:
+                                                                <span class="badge bg-danger rounded-pill">Cancelled</span>
+                                                                break;
+                                                        }
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4">
+                                                    <div class="d-flex flex-column align-items-center py-5">
+                                                        <i class="fas fa-shopping-basket text-muted mb-3" style="font-size: 2.5rem;"></i>
+                                                        <h5 class="text-muted">No recent direct sales</h5>
+                                                        <p class="text-muted">Direct sales will appear here when processed</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <div class="card-footer bg-light py-3 text-center border-0">
+                    <a asp-action="AnimalSales" class="btn btn-link text-decoration-none">
+                        <i class="fas fa-angle-double-right me-1"></i> View All Sales History
+                    </a>
                 </div>
             </div>
         </div>
@@ -372,115 +451,190 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Financial performance chart
-        var financialCtx = document.getElementById('financialPerformanceChart');
-        var monthlyData = @Html.Raw(Json.Serialize(monthlyData));
-        
-        var months = [];
-        var revenues = [];
-        var costs = [];
-        var profits = [];
-        
-        monthlyData.forEach(function(item) {
-            var monthNames = @Html.Raw(Json.Serialize(monthNames));
-            months.push(monthNames[item.Month]);
-            revenues.push(item.Revenue);
-            costs.push(item.Costs);
-            profits.push(item.Profit);
-        });
-        
-        new Chart(financialCtx, {
-            type: 'bar',
-            data: {
-                labels: months,
-                datasets: [
-                    {
-                        label: 'Revenue',
-                        data: revenues,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        order: 2
-                    },
-                    {
-                        label: 'Expenses',
-                        data: costs,
-                        backgroundColor: 'rgba(255, 159, 64, 0.5)',
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        order: 3
-                    },
-                    {
-                        label: 'Profit',
-                        data: profits,
-                        type: 'line',
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        order: 1,
-                        tension: 0.4,
-                        fill: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Amount (ZAR)'
+        // Monthly Financial Performance Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('financialPerformanceChart').getContext('2d');
+            const monthlyData = @Html.Raw(Json.Serialize(monthlyData));
+            
+            const months = [];
+            const revenues = [];
+            const costs = [];
+            const profits = [];
+            
+            monthlyData.forEach(function(item) {
+                const monthNames = @Html.Raw(Json.Serialize(monthNames));
+                months.push(monthNames[item.Month]);
+                revenues.push(item.Revenue);
+                costs.push(item.Costs);
+                profits.push(item.Profit);
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: revenues,
+                            backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                            borderColor: 'rgb(13, 110, 253)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            order: 2
+                        },
+                        {
+                            label: 'Expenses',
+                            data: costs,
+                            backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                            borderColor: 'rgb(220, 53, 69)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            order: 3
+                        },
+                        {
+                            label: 'Profit',
+                            data: profits,
+                            type: 'line',
+                            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                            borderColor: 'rgb(25, 135, 84)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: 'rgb(25, 135, 84)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            order: 1
                         }
-                    }
-                }
-            }
-        });
-        
-        // Cost breakdown chart
-        var costBreakdownCtx = document.getElementById('costsBreakdownChart');
-        var costData = @Html.Raw(Json.Serialize(costBreakdown));
-        
-        var costCategories = costData.map(function(item) { return item.Category; });
-        var costAmounts = costData.map(function(item) { return item.Amount; });
-        var backgroundColors = [
-            'rgba(255, 159, 64, 0.5)',  // Orange
-            'rgba(255, 99, 132, 0.5)',  // Red
-            'rgba(153, 102, 255, 0.5)', // Purple
-            'rgba(75, 192, 192, 0.5)'   // Green
-        ];
-        
-        new Chart(costBreakdownCtx, {
-            type: 'pie',
-            data: {
-                labels: costCategories,
-                datasets: [{
-                    data: costAmounts,
-                    backgroundColor: backgroundColors,
-                    borderColor: backgroundColors.map(color => color.replace('0.5', '1')),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#000',
+                            bodyColor: '#000',
+                            bodyFont: {
+                                weight: 'bold'
+                            },
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            boxPadding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.raw || 0;
+                                    return label + ': R' + value.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            }
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                var label = context.label || '';
-                                var value = context.raw || 0;
-                                var total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                var percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                return label + ': R' + value.toFixed(2) + ' (' + percentage + '%)';
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R' + value.toLocaleString();
+                                }
                             }
                         }
                     }
                 }
-            }
+            });
+        });
+        
+        // Expense Breakdown Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('costsBreakdownChart').getContext('2d');
+            const costData = @Html.Raw(Json.Serialize(costBreakdown));
+            
+            const costCategories = costData.map(item => item.Category);
+            const costAmounts = costData.map(item => item.Amount);
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: costCategories,
+                    datasets: [{
+                        data: costAmounts,
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.8)',   // Feed - Red
+                            'rgba(13, 110, 253, 0.8)',  // Healthcare - Blue
+                            'rgba(255, 193, 7, 0.8)'    // Transport - Yellow
+                        ],
+                        borderColor: [
+                            'rgb(220, 53, 69)',
+                            'rgb(13, 110, 253)',
+                            'rgb(255, 193, 7)'
+                        ],
+                        borderWidth: 1,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#000',
+                            bodyColor: '#000',
+                            bodyFont: {
+                                weight: 'bold'
+                            },
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            boxPadding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw || 0;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return label + ': R' + value.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         });
     </script>
 } 

@@ -4,7 +4,7 @@
     
     var employee = ViewData["Employee"] as Inyama_Yethu.Models.Employee;
     var today = (DateTime)ViewData["Today"];
-    var todaysTasks = ViewData["TodaysTasks"] as List<Inyama_Yethu.Models.TaskAssignment>;
+    var todaysTasks = ViewData["TodaysTasks"] as List<Inyama_Yethu.Models.TaskAssignment> ?? new List<Inyama_Yethu.Models.TaskAssignment>();
 }
 
 <div class="container-fluid">
@@ -64,7 +64,7 @@
                                         <a asp-action="Details" asp-route-id="@task.Id">@task.Title</a>
                                     </td>
                                     <td>@task.Description</td>
-                                    <td>@task.Category.Name</td>
+                                    <td>@(task.Category?.Name ?? "No Category")</td>
                                     <td>
                                         @{
                                             string priorityClass = task.Priority == Inyama_Yethu.Models.TaskPriority.Low ? "badge-info" :
@@ -119,7 +119,7 @@
                     <p>Are you sure you want to mark <strong id="taskTitleDisplay"></strong> as completed?</p>
                     
                     <input type="hidden" id="taskIdInput" name="taskId" value="" />
-                    <input type="hidden" name="employeeId" value="@employee.Id" />
+                    <input type="hidden" name="employeeId" value="@(employee?.Id ?? 0)" />
                     
                     <div class="form-group">
                         <label for="notes">Notes (optional)</label>
@@ -138,18 +138,25 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
-            $('#todaysTaskTable').DataTable({
-                order: [[4, 'asc']] // Sort by due time
-            });
+            // Initialize DataTable with error handling
+            try {
+                $('#todaysTaskTable').DataTable({
+                    order: [[4, 'asc']], // Sort by due time
+                    language: {
+                        emptyTable: "No tasks found for today"
+                    }
+                });
+            } catch (e) {
+                console.error("DataTable initialization error:", e);
+            }
             
             // Handle modal data
             $('.complete-task-btn').on('click', function() {
                 var taskId = $(this).data('task-id');
                 var taskTitle = $(this).data('task-title');
                 
-                $('#taskIdInput').val(taskId);
-                $('#taskTitleDisplay').text(taskTitle);
+                $('#taskIdInput').val(taskId || '');
+                $('#taskTitleDisplay').text(taskTitle || 'this task');
             });
             
             // Auto-dismiss alerts

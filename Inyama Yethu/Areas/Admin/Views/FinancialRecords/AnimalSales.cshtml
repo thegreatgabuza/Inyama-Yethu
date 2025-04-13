@@ -5,6 +5,7 @@
     var startDate = (DateTime)ViewData["StartDate"];
     var endDate = (DateTime)ViewData["EndDate"];
     var abattoirShipments = ViewData["AbattoirShipments"] as List<Inyama_Yethu.Models.AbattoirShipment>;
+    var animalSales = ViewData["AnimalSales"] as List<Inyama_Yethu.Models.AnimalSale>;
     var animalProductSales = ViewData["AnimalProductSales"] as List<dynamic>;
     var totalPigsShipped = (int)ViewData["TotalPigsShipped"];
     var totalAbattoirRevenue = (double)ViewData["TotalAbattoirRevenue"];
@@ -14,156 +15,272 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Animal Sales Report</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a asp-action="Index">Financial Records</a></li>
-        <li class="breadcrumb-item active">Animal Sales</li>
-    </ol>
+    <!-- Header Section -->
+    <div class="row align-items-center my-4">
+        <div class="col-md-6">
+            <h1 class="display-5 fw-bold text-primary mb-0">Animal Sales Report</h1>
+            <p class="text-muted">
+                <a asp-action="Index" class="text-decoration-none">Dashboard</a> / Animal Sales Report
+            </p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="RecordAnimalSale" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Record New Sale
+            </a>
+            <a asp-action="Transactions" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-exchange-alt me-2"></i> View Transactions
+            </a>
+        </div>
+    </div>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3 border-0" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     
     <!-- Report Filter -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-filter me-1"></i>
-            Report Period
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white pt-3 pb-2 border-0">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-filter text-primary me-2"></i> Report Period
+            </h5>
         </div>
         <div class="card-body">
-            <form asp-action="AnimalSales" method="get" class="row g-3">
+            <form asp-action="AnimalSales" method="get" class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label for="startDate" class="form-label">Start Date</label>
+                    <label for="startDate" class="form-label small fw-bold">Start Date</label>
                     <input type="date" class="form-control" id="startDate" name="startDate" value="@startDate.ToString("yyyy-MM-dd")">
                 </div>
                 <div class="col-md-4">
-                    <label for="endDate" class="form-label">End Date</label>
+                    <label for="endDate" class="form-label small fw-bold">End Date</label>
                     <input type="date" class="form-control" id="endDate" name="endDate" value="@endDate.ToString("yyyy-MM-dd")">
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i> Generate Report
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i> Generate Report
                     </button>
                 </div>
             </form>
         </div>
     </div>
     
-    <!-- Sales Summary -->
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-piggy-bank me-1"></i>
-                    Animal Sales Summary (@startDate.ToString("dd MMM yyyy") - @endDate.ToString("dd MMM yyyy"))
-                </div>
+    <!-- Sales Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card border-left-primary h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Total Pigs Shipped</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@totalPigsShipped</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-truck fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Total Pigs Shipped</h6>
+                            <h2 class="mb-0 display-6 fw-bold text-primary">@totalPigsShipped</h2>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-success h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Abattoir Revenue</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">R @totalAbattoirRevenue.ToString("N2")</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-industry fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-truck fa-lg text-primary"></i>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-info h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                                Avg. Price Per Pig</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">R @averagePricePerPig.ToString("N2")</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Abattoir Revenue</h6>
+                            <h2 class="mb-0 display-6 fw-bold text-success">R @totalAbattoirRevenue.ToString("N0")</h2>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-warning h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Direct Sales Revenue</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">R @totalDirectSalesRevenue.ToString("N2")</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-industry fa-lg text-success"></i>
                         </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Avg. Price Per Pig</h6>
+                            <h2 class="mb-0 display-6 fw-bold text-info">R @averagePricePerPig.ToString("N0")</h2>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-money-bill-wave fa-lg text-info"></i>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Direct Sales Revenue</h6>
+                            <h2 class="mb-0 display-6 fw-bold text-warning">R @totalDirectSalesRevenue.ToString("N0")</h2>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-shopping-cart fa-lg text-warning"></i>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-warning" style="width: 100%"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Monthly Trend -->
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-line me-1"></i>
-                    Monthly Animal Sales Trend
+    <!-- Individual Animal Sales Table -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white pt-4 pb-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-piggy-bank text-primary me-2"></i> Individual Animal Sales
+                </h5>
+                <div class="badge bg-light text-dark px-3 py-2">
+                    @startDate.ToString("dd MMM yyyy") - @endDate.ToString("dd MMM yyyy")
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover border-0 align-middle" id="animalSalesTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sale Date</th>
+                            <th>Animal Tag</th>
+                            <th>Type</th>
+                            <th>Weight (kg)</th>
+                            <th>Sale Type</th>
+                            <th>Price (R)</th>
+                            <th>Price/kg</th>
+                            <th>Buyer</th>
+                            <th>Payment Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (animalSales != null && animalSales.Any())
+                        {
+                            foreach (var sale in animalSales)
+                            {
+                                <tr>
+                                    <td>@sale.SaleDate.ToString("dd MMM yyyy")</td>
+                                    <td>@sale.Animal.TagNumber</td>
+                                    <td>@sale.Animal.Type</td>
+                                    <td>@(sale.WeightAtSale?.ToString("F1") ?? "N/A")</td>
+                                    <td>
+                                        <span class="badge @(sale.SaleType.ToString() == "DirectSale" ? "bg-warning" : "bg-primary") rounded-pill px-3">
+                                            @(sale.SaleType.ToString() == "DirectSale" ? "Direct" : "Abattoir")
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold">R @sale.SalePrice.ToString("N2")</td>
+                                    <td>
+                                        @if (sale.PricePerKg.HasValue)
+                                        {
+                                            <span>R @sale.PricePerKg.Value.ToString("N2")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>@(string.IsNullOrEmpty(sale.BuyerName) ? "N/A" : sale.BuyerName)</td>
+                                    <td>
+                                        @if (sale.PaymentReceived)
+                                        {
+                                            <span class="badge bg-success rounded-pill px-3">Paid</span>
+                                            @if (sale.PaymentDate.HasValue)
+                                            {
+                                                <small class="d-block text-muted">@sale.PaymentDate.Value.ToString("dd MMM yyyy")</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning rounded-pill px-3">Pending</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="EditAnimalSale" asp-route-animalId="@sale.AnimalId" class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="fas fa-piggy-bank text-muted mb-3" style="font-size: 2.5rem;"></i>
+                                        <h5 class="text-muted">No animal sales found for this period</h5>
+                                        <p class="text-muted">Try adjusting your date range or add new sales</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-line text-primary me-2"></i> Monthly Sales Trend
+                    </h5>
                 </div>
                 <div class="card-body">
                     <canvas id="monthlyTrendChart" height="300"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Revenue Split -->
-    <div class="row">
         <div class="col-xl-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie me-1"></i>
-                    Revenue Distribution
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-pie text-primary me-2"></i> Revenue Distribution
+                    </h5>
                 </div>
                 <div class="card-body">
                     <canvas id="revenueSplitChart" height="300"></canvas>
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Additional Info Sections -->
+    <div class="row g-4 mb-4">
+        <!-- Product Sales Breakdown -->
         <div class="col-xl-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-shopping-basket me-1"></i>
-                    Product Sales Breakdown
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-shopping-basket text-primary me-2"></i> Product Sales Breakdown
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
+                        <table class="table table-hover border-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Product</th>
                                     <th>Quantity</th>
@@ -183,109 +300,217 @@
                                         <tr>
                                             <td>@item.ProductName</td>
                                             <td>@item.Quantity</td>
-                                            <td>R @item.Revenue.ToString("N2")</td>
-                                            <td>@(percentOfTotal.ToString("F1"))%</td>
+                                            <td class="fw-bold">R @item.Revenue.ToString("N2")</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                        <div class="progress-bar" style="width: @Math.Min(percentOfTotal, 100)%;"></div>
+                                                    </div>
+                                                    <span>@(percentOfTotal.ToString("F1"))%</span>
+                                                </div>
+                                            </td>
                                         </tr>
                                     }
                                 }
                                 else
                                 {
                                     <tr>
-                                        <td colspan="4" class="text-center">No product sales data available.</td>
+                                        <td colspan="4" class="text-center py-4">
+                                            <span class="text-muted">No product sales data available</span>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
-                            <tfoot>
-                                <tr class="table-dark">
-                                    <th>TOTAL</th>
-                                    <th>-</th>
-                                    <th>R @totalDirectSalesRevenue.ToString("N2")</th>
-                                    <th>100%</th>
-                                </tr>
-                            </tfoot>
+                            @if (animalProductSales != null && animalProductSales.Any())
+                            {
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th>TOTAL</th>
+                                        <th>-</th>
+                                        <th>R @totalDirectSalesRevenue.ToString("N2")</th>
+                                        <th>100%</th>
+                                    </tr>
+                                </tfoot>
+                            }
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Abattoir Shipments -->
+        <div class="col-xl-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-truck text-primary me-2"></i> Abattoir Shipments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover border-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Abattoir</th>
+                                    <th>Pigs</th>
+                                    <th>Status</th>
+                                    <th>Net Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (abattoirShipments != null && abattoirShipments.Any())
+                                {
+                                    foreach (var shipment in abattoirShipments.Take(5))
+                                    {
+                                        var netValue = (shipment.ActualPayment ?? shipment.EstimatedValue) - shipment.TransportationCost;
+                                        
+                                        <tr>
+                                            <td>@shipment.ShipmentDate.ToString("dd MMM")</td>
+                                            <td>@shipment.AbattoirName</td>
+                                            <td>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
+                                                    @shipment.NumberOfPigs pigs
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @switch (shipment.Status)
+                                                {
+                                                    case Inyama_Yethu.Models.ShipmentStatus.Scheduled:
+                                                        <span class="badge bg-info rounded-pill">Scheduled</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.ShipmentStatus.InTransit:
+                                                        <span class="badge bg-warning rounded-pill">In Transit</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.ShipmentStatus.Delivered:
+                                                        <span class="badge bg-primary rounded-pill">Delivered</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.ShipmentStatus.Processed:
+                                                        <span class="badge bg-success rounded-pill">Processed</span>
+                                                        break;
+                                                    case Inyama_Yethu.Models.ShipmentStatus.Cancelled:
+                                                        <span class="badge bg-danger rounded-pill">Cancelled</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td class="@(netValue >= 0 ? "text-success fw-bold" : "text-danger fw-bold")">
+                                                R @netValue.ToString("N2")
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <span class="text-muted">No shipments recorded during this period</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @if (abattoirShipments != null && abattoirShipments.Count > 5)
+                        {
+                            <div class="text-center mt-3">
+                                <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#allShipments">
+                                    <i class="fas fa-chevron-down me-1"></i> Show All Shipments
+                                </button>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Abattoir Shipments -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-truck me-1"></i>
-            Abattoir Shipments
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover" id="shipmentsTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Abattoir</th>
-                            <th>Number of Pigs</th>
-                            <th>Status</th>
-                            <th>Est. Value</th>
-                            <th>Actual Payment</th>
-                            <th>Transport Cost</th>
-                            <th>Net Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (abattoirShipments != null && abattoirShipments.Any())
-                        {
-                            foreach (var shipment in abattoirShipments)
-                            {
-                                var netValue = (shipment.ActualPayment ?? shipment.EstimatedValue) - shipment.TransportationCost;
-                                
+    <!-- Full Abattoir Shipments (Collapsed) -->
+    @if (abattoirShipments != null && abattoirShipments.Count > 5)
+    {
+        <div class="collapse" id="allShipments">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white pt-4 pb-3 border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-truck text-primary me-2"></i> All Abattoir Shipments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover border-0 align-middle" id="shipmentsTable">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>@shipment.ShipmentDate.ToString("dd MMM yyyy")</td>
-                                    <td>@shipment.AbattoirName</td>
-                                    <td>@shipment.NumberOfPigs</td>
-                                    <td>
-                                        @switch (shipment.Status)
-                                        {
-                                            case Inyama_Yethu.Models.ShipmentStatus.Scheduled:
-                                                <span class="badge bg-info">Scheduled</span>
-                                                break;
-                                            case Inyama_Yethu.Models.ShipmentStatus.InTransit:
-                                                <span class="badge bg-warning">In Transit</span>
-                                                break;
-                                            case Inyama_Yethu.Models.ShipmentStatus.Delivered:
-                                                <span class="badge bg-primary">Delivered</span>
-                                                break;
-                                            case Inyama_Yethu.Models.ShipmentStatus.Processed:
-                                                <span class="badge bg-success">Processed</span>
-                                                break;
-                                            case Inyama_Yethu.Models.ShipmentStatus.Cancelled:
-                                                <span class="badge bg-danger">Cancelled</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td>R @shipment.EstimatedValue.ToString("N2")</td>
-                                    <td>
-                                        @if (shipment.ActualPayment.HasValue)
-                                        {
-                                            <span>R @shipment.ActualPayment.Value.ToString("N2")</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Pending</span>
-                                        }
-                                    </td>
-                                    <td>R @shipment.TransportationCost.ToString("N2")</td>
-                                    <td class="@(netValue >= 0 ? "text-success" : "text-danger")">R @netValue.ToString("N2")</td>
+                                    <th>Date</th>
+                                    <th>Abattoir</th>
+                                    <th>Number of Pigs</th>
+                                    <th>Status</th>
+                                    <th>Est. Value</th>
+                                    <th>Actual Payment</th>
+                                    <th>Transport Cost</th>
+                                    <th>Net Value</th>
                                 </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center">No abattoir shipments for this period.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var shipment in abattoirShipments)
+                                {
+                                    var netValue = (shipment.ActualPayment ?? shipment.EstimatedValue) - shipment.TransportationCost;
+                                    
+                                    <tr>
+                                        <td>@shipment.ShipmentDate.ToString("dd MMM yyyy")</td>
+                                        <td>@shipment.AbattoirName</td>
+                                        <td>@shipment.NumberOfPigs</td>
+                                        <td>
+                                            @switch (shipment.Status)
+                                            {
+                                                case Inyama_Yethu.Models.ShipmentStatus.Scheduled:
+                                                    <span class="badge bg-info rounded-pill">Scheduled</span>
+                                                    break;
+                                                case Inyama_Yethu.Models.ShipmentStatus.InTransit:
+                                                    <span class="badge bg-warning rounded-pill">In Transit</span>
+                                                    break;
+                                                case Inyama_Yethu.Models.ShipmentStatus.Delivered:
+                                                    <span class="badge bg-primary rounded-pill">Delivered</span>
+                                                    break;
+                                                case Inyama_Yethu.Models.ShipmentStatus.Processed:
+                                                    <span class="badge bg-success rounded-pill">Processed</span>
+                                                    break;
+                                                case Inyama_Yethu.Models.ShipmentStatus.Cancelled:
+                                                    <span class="badge bg-danger rounded-pill">Cancelled</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>R @shipment.EstimatedValue.ToString("N2")</td>
+                                        <td>
+                                            @if (shipment.ActualPayment.HasValue)
+                                            {
+                                                <span class="fw-bold">R @shipment.ActualPayment.Value.ToString("N2")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Pending</span>
+                                            }
+                                        </td>
+                                        <td>R @shipment.TransportationCost.ToString("N2")</td>
+                                        <td class="@(netValue >= 0 ? "text-success fw-bold" : "text-danger fw-bold")">
+                                            R @netValue.ToString("N2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <!-- Integration Note -->
+    <div class="alert alert-info border-0 rounded-4 shadow-sm mb-4">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="fas fa-info-circle fa-2x text-primary"></i>
+            </div>
+            <div>
+                <h5 class="alert-heading mb-1">Financial Integration</h5>
+                <p class="mb-0">All animal sales are automatically recorded as income transactions. You can view the complete financial impact of these sales in the <a asp-action="Transactions" class="alert-link">Transaction Management</a> section.</p>
             </div>
         </div>
     </div>
@@ -295,7 +520,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
+            // Initialize DataTable for individual sales
+            $('#animalSalesTable').DataTable({
+                order: [[0, 'desc']], // Sort by date descending
+                pageLength: 10,
+                responsive: true
+            });
+            
+            // Initialize DataTable for shipments
             $('#shipmentsTable').DataTable({
                 order: [[0, 'desc']],
                 pageLength: 10
@@ -311,20 +543,74 @@
                     datasets: [{
                         label: 'Revenue (R)',
                         data: monthlyData.map(x => x.Revenue),
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
+                        borderColor: 'rgb(25, 135, 84)',
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
                     }, {
                         label: 'Number of Sales',
                         data: monthlyData.map(x => x.Count),
-                        borderColor: 'rgb(255, 99, 132)',
-                        tension: 0.1
+                        borderColor: 'rgb(13, 110, 253)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        pointRadius: 4,
+                        fill: false
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#000',
+                            bodyColor: '#000',
+                            bodyFont: {
+                                weight: 'bold'
+                            },
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            boxPadding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.raw || 0;
+                                    if (label.includes('Revenue')) {
+                                        return label + ': R' + value.toLocaleString();
+                                    } else {
+                                        return label + ': ' + value;
+                                    }
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 }
@@ -333,22 +619,55 @@
             // Revenue Split Chart
             var revenueSplitCtx = document.getElementById('revenueSplitChart').getContext('2d');
             new Chart(revenueSplitCtx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: ['Abattoir Sales', 'Direct Sales'],
                     datasets: [{
                         data: [@totalAbattoirRevenue, @totalDirectSalesRevenue],
                         backgroundColor: [
-                            'rgb(255, 99, 132)',
-                            'rgb(54, 162, 235)'
-                        ]
+                            'rgba(25, 135, 84, 0.8)',  // Success green
+                            'rgba(255, 193, 7, 0.8)'   // Warning yellow
+                        ],
+                        borderColor: [
+                            'rgb(25, 135, 84)',
+                            'rgb(255, 193, 7)'
+                        ],
+                        borderWidth: 1,
+                        hoverOffset: 15
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#000',
+                            bodyColor: '#000',
+                            bodyFont: {
+                                weight: 'bold'
+                            },
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            boxPadding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw || 0;
+                                    let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    let percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return label + ': R' + value.toLocaleString() + ' (' + percentage + '%)';
+                                }
+                            }
                         }
                     }
                 }

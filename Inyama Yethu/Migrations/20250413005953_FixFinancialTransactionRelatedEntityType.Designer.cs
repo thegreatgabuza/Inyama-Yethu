@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250408193939_Upda")]
-    partial class Upda
+    [Migration("20250413005953_FixFinancialTransactionRelatedEntityType")]
+    partial class FixFinancialTransactionRelatedEntityType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -503,7 +503,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 1,
                             CurrentStock = 500.0,
                             FeedType = 0,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 39, 35, 232, DateTimeKind.Local).AddTicks(2606),
+                            LastUpdated = new DateTime(2025, 4, 13, 2, 59, 53, 355, DateTimeKind.Local).AddTicks(3516),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         },
@@ -512,7 +512,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 2,
                             CurrentStock = 750.0,
                             FeedType = 1,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 39, 35, 232, DateTimeKind.Local).AddTicks(2642),
+                            LastUpdated = new DateTime(2025, 4, 13, 2, 59, 53, 355, DateTimeKind.Local).AddTicks(3532),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 150.0
                         },
@@ -521,7 +521,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 3,
                             CurrentStock = 1000.0,
                             FeedType = 2,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 39, 35, 232, DateTimeKind.Local).AddTicks(2646),
+                            LastUpdated = new DateTime(2025, 4, 13, 2, 59, 53, 355, DateTimeKind.Local).AddTicks(3533),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 200.0
                         },
@@ -530,7 +530,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 4,
                             CurrentStock = 800.0,
                             FeedType = 3,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 39, 35, 232, DateTimeKind.Local).AddTicks(2649),
+                            LastUpdated = new DateTime(2025, 4, 13, 2, 59, 53, 355, DateTimeKind.Local).AddTicks(3534),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 175.0
                         },
@@ -539,7 +539,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 5,
                             CurrentStock = 400.0,
                             FeedType = 4,
-                            LastUpdated = new DateTime(2025, 4, 8, 21, 39, 35, 232, DateTimeKind.Local).AddTicks(2653),
+                            LastUpdated = new DateTime(2025, 4, 13, 2, 59, 53, 355, DateTimeKind.Local).AddTicks(3535),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         });
@@ -646,6 +646,74 @@ namespace Inyama_Yethu.Migrations
                     b.HasIndex("RecordedById");
 
                     b.ToTable("Feedings");
+                });
+
+            modelBuilder.Entity("Inyama_Yethu.Models.FinancialTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsReconciled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("RecordedBy")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("ReferenceNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("RelatedEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RelatedEntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FinancialTransactions");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.HealthRecord", b =>

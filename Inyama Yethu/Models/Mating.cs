@@ -51,10 +51,10 @@ namespace Inyama_Yethu.Models
         // Pregnancy check details
         [StringLength(500)]
         [Display(Name = "Pregnancy Check Notes")]
-        public string PregnancyCheckNotes { get; set; }
+        public string PregnancyCheckNotes { get; set; } = "";
         [StringLength(50)]
         [Display(Name = "Pregnancy Checked By")]
-        public string PregnancyCheckBy { get; set; }
+        public string PregnancyCheckBy { get; set; } = "Unknown";
         
         [Display(Name = "Expected Farrowing Date")]
         public DateTime? ExpectedFarrowingDate { get; set; }
@@ -79,7 +79,7 @@ namespace Inyama_Yethu.Models
         public int? NumberOfPigletsBornAlive { get; set; }
         
         [StringLength(500)]
-        public string Notes { get; set; }
+        public string Notes { get; set; } = "";
         
         // New properties needed for views
         [Display(Name = "Total Piglets Born")]

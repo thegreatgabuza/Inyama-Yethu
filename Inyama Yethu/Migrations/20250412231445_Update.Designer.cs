@@ -4,6 +4,7 @@ using Inyama_Yethu.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250412231445_Update")]
+    partial class Update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -500,7 +503,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 1,
                             CurrentStock = 500.0,
                             FeedType = 0,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8541),
+                            LastUpdated = new DateTime(2025, 4, 13, 1, 14, 44, 611, DateTimeKind.Local).AddTicks(2169),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         },
@@ -509,7 +512,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 2,
                             CurrentStock = 750.0,
                             FeedType = 1,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8559),
+                            LastUpdated = new DateTime(2025, 4, 13, 1, 14, 44, 611, DateTimeKind.Local).AddTicks(2183),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 150.0
                         },
@@ -518,7 +521,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 3,
                             CurrentStock = 1000.0,
                             FeedType = 2,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8561),
+                            LastUpdated = new DateTime(2025, 4, 13, 1, 14, 44, 611, DateTimeKind.Local).AddTicks(2185),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 200.0
                         },
@@ -527,7 +530,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 4,
                             CurrentStock = 800.0,
                             FeedType = 3,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8563),
+                            LastUpdated = new DateTime(2025, 4, 13, 1, 14, 44, 611, DateTimeKind.Local).AddTicks(2186),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 175.0
                         },
@@ -536,7 +539,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 5,
                             CurrentStock = 400.0,
                             FeedType = 4,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8564),
+                            LastUpdated = new DateTime(2025, 4, 13, 1, 14, 44, 611, DateTimeKind.Local).AddTicks(2187),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         });

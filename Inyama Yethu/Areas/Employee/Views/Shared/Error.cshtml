@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Error";
+    Layout = "_EmployeeLayout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-lg">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle mr-2"></i>Error</h4>
+                </div>
+                <div class="card-body text-center py-5">
+                    <h2 class="mb-4">Something went wrong</h2>
+                    <p class="lead">We apologize for the inconvenience. The requested page could not be found or an error has occurred.</p>
+                    <hr class="my-4">
+                    <p>Please try again later or contact the administrator if the problem persists.</p>
+                    <a asp-area="Employee" asp-controller="Dashboard" asp-action="Index" class="btn btn-primary btn-lg mt-3">
+                        <i class="fas fa-home mr-2"></i>Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

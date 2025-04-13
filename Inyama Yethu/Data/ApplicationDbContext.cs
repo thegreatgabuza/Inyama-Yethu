@@ -38,6 +38,9 @@ namespace Inyama_Yethu.Data
         
         // Activity Logging
         public DbSet<ActivityLog> ActivityLogs { get; set; }
+        
+        // Financial Management
+        public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,6 +70,11 @@ namespace Inyama_Yethu.Data
 
             modelBuilder.Entity<HealthRecord>()
                 .Property(h => h.Cost)
+                .HasColumnType("decimal(18,2)");
+                
+            // Configure FinancialTransaction decimal properties
+            modelBuilder.Entity<FinancialTransaction>()
+                .Property(f => f.Amount)
                 .HasColumnType("decimal(18,2)");
 
             // Configure relationships

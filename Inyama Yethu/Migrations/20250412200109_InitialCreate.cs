@@ -508,13 +508,15 @@ namespace Inyama_Yethu.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AnimalId = table.Column<int>(type: "int", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NumberOfOffspring = table.Column<int>(type: "int", nullable: false),
-                    NumberAlive = table.Column<int>(type: "int", nullable: false),
+                    MotherAnimalId = table.Column<int>(type: "int", nullable: false),
+                    FatherAnimalId = table.Column<int>(type: "int", nullable: true),
+                    LitterSize = table.Column<int>(type: "int", nullable: false),
+                    LiveBorn = table.Column<int>(type: "int", nullable: false),
                     AverageBirthWeight = table.Column<double>(type: "float", nullable: true),
                     WasAssisted = table.Column<bool>(type: "bit", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    AnimalId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -522,6 +524,17 @@ namespace Inyama_Yethu.Migrations
                     table.ForeignKey(
                         name: "FK_Births_Animals_AnimalId",
                         column: x => x.AnimalId,
+                        principalTable: "Animals",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Births_Animals_FatherAnimalId",
+                        column: x => x.FatherAnimalId,
+                        principalTable: "Animals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Births_Animals_MotherAnimalId",
+                        column: x => x.MotherAnimalId,
                         principalTable: "Animals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -766,11 +779,11 @@ namespace Inyama_Yethu.Migrations
                 columns: new[] { "Id", "CurrentStock", "FeedType", "LastUpdated", "LastUpdatedById", "MinimumStockLevel", "Notes" },
                 values: new object[,]
                 {
-                    { 1, 500.0, 0, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5879), 2, 100.0, null },
-                    { 2, 750.0, 1, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5907), 2, 150.0, null },
-                    { 3, 1000.0, 2, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5910), 2, 200.0, null },
-                    { 4, 800.0, 3, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5912), 2, 175.0, null },
-                    { 5, 400.0, 4, new DateTime(2025, 4, 8, 21, 5, 24, 27, DateTimeKind.Local).AddTicks(5913), 2, 100.0, null }
+                    { 1, 500.0, 0, new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2146), 2, 100.0, null },
+                    { 2, 750.0, 1, new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2159), 2, 150.0, null },
+                    { 3, 1000.0, 2, new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2160), 2, 200.0, null },
+                    { 4, 800.0, 3, new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2161), 2, 175.0, null },
+                    { 5, 400.0, 4, new DateTime(2025, 4, 12, 22, 1, 9, 138, DateTimeKind.Local).AddTicks(2163), 2, 100.0, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -857,6 +870,16 @@ namespace Inyama_Yethu.Migrations
                 name: "IX_Births_AnimalId",
                 table: "Births",
                 column: "AnimalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Births_FatherAnimalId",
+                table: "Births",
+                column: "FatherAnimalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Births_MotherAnimalId",
+                table: "Births",
+                column: "MotherAnimalId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_UserId",

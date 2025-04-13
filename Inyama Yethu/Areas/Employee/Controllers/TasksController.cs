@@ -48,6 +48,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             // Get all tasks for this employee
             var tasks = await _context.TaskAssignments
                 .Include(t => t.Animal)
+                .Include(t => t.Category)
                 .Where(t => t.EmployeeId == employee.Id)
                 .OrderBy(t => t.Status) // Show incomplete tasks first
                 .ThenBy(t => t.DueDate)
@@ -99,6 +100,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             // Get today's tasks for this employee
             var todaysTasks = await _context.TaskAssignments
                 .Include(t => t.Animal)
+                .Include(t => t.Category)
                 .Where(t => t.EmployeeId == employee.Id && 
                           t.DueDate.Date == today && 
                           t.Status != FarmTaskStatus.Completed)
@@ -131,6 +133,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
             // Get upcoming tasks for this employee
             var upcomingTasks = await _context.TaskAssignments
                 .Include(t => t.Animal)
+                .Include(t => t.Category)
                 .Where(t => t.EmployeeId == employee.Id && 
                           t.DueDate.Date > today && 
                           t.Status != FarmTaskStatus.Completed)
@@ -165,6 +168,7 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
 
             var task = await _context.TaskAssignments
                 .Include(t => t.Animal)
+                .Include(t => t.Category)
                 .FirstOrDefaultAsync(t => t.Id == id && t.EmployeeId == employee.Id);
 
             if (task == null)

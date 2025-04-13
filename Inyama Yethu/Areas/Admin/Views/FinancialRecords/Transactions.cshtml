@@ -1,0 +1,708 @@
+@model IEnumerable<Inyama_Yethu.Models.FinancialTransaction>
+
+@{
+    ViewData["Title"] = "Financial Transactions";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    
+    var startDate = ViewData["StartDate"] as DateTime? ?? DateTime.Now.AddMonths(-1);
+    var endDate = ViewData["EndDate"] as DateTime? ?? DateTime.Now;
+    var filterCategory = ViewData["FilterCategory"] as string ?? "";
+    var filterType = ViewData["FilterType"] as string ?? "";
+    var searchTerm = ViewData["SearchTerm"] as string ?? "";
+    var categories = ViewData["Categories"] as List<string> ?? new List<string>();
+    var transactionTypes = ViewData["TransactionTypes"] as List<string> ?? new List<string>();
+    var totalIncome = ViewData["TotalIncome"] as decimal? ?? 0;
+    var totalExpense = ViewData["TotalExpense"] as decimal? ?? 0;
+    var netAmount = totalIncome - totalExpense;
+}
+
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="row align-items-center my-4">
+        <div class="col-md-6">
+            <h1 class="display-5 fw-bold text-primary mb-0">Transaction Management</h1>
+            <p class="text-muted">
+                <a asp-action="Index" class="text-decoration-none">Dashboard</a> / Transaction Records
+            </p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+                <i class="fas fa-plus-circle me-2"></i> Add Transaction
+            </button>
+            <a href="@Url.Action("ExportTransactions", new { startDate, endDate, filterType, filterCategory, searchTerm })" 
+               class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-file-export me-2"></i> Export CSV
+            </a>
+        </div>
+    </div>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3 border-0" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    <!-- Financial Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Total Income</h6>
+                            <h2 class="mb-0 display-6 fw-bold text-primary">R @totalIncome.ToString("N0")</h2>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-arrow-up fa-lg text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Total Expenses</h6>
+                            <h2 class="mb-0 display-6 fw-bold text-danger">R @totalExpense.ToString("N0")</h2>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-arrow-down fa-lg text-danger"></i>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-danger" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold">Net Amount</h6>
+                            <h2 class="mb-0 display-6 fw-bold @(netAmount >= 0 ? "text-success" : "text-danger")">
+                                R @netAmount.ToString("N0")
+                            </h2>
+                        </div>
+                        <div class="rounded-circle @(netAmount >= 0 ? "bg-success" : "bg-danger") bg-opacity-10 p-3 d-flex align-items-center justify-content-center" style="height: 56px; width: 56px;">
+                            <i class="fas fa-balance-scale fa-lg @(netAmount >= 0 ? "text-success" : "text-danger")"></i>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar @(netAmount >= 0 ? "bg-success" : "bg-danger")" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Transactions Table -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white pt-4 pb-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-exchange-alt text-primary me-2"></i>
+                    Transaction Records
+                </h5>
+                <div class="badge bg-light text-dark px-3 py-2">
+                    @startDate.ToString("dd MMM yyyy") - @endDate.ToString("dd MMM yyyy")
+                </div>
+            </div>
+        </div>
+        <div class="card-body" data-get-transaction-url="@Url.Action("GetTransaction")">
+            <div class="table-responsive">
+                <table class="table table-hover border-0 align-middle" id="transactionsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Reference</th>
+                            <th>Amount</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var transaction in Model)
+                            {
+                                <tr>
+                                    <td>@transaction.TransactionDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        <span class="badge @(transaction.TransactionType == "Income" ? "bg-success" : 
+                                                              transaction.TransactionType == "Expense" ? "bg-danger" : 
+                                                              transaction.TransactionType == "Transfer" ? "bg-info" : "bg-secondary") rounded-pill px-3">
+                                            @transaction.TransactionType
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @transaction.Category
+                                        @if (transaction.Category == "DirectSale" || transaction.Category == "AbattoirSale")
+                                        {
+                                            <span class="badge bg-primary ms-1" title="Animal Sale Transaction">
+                                                <i class="fas fa-cow"></i>
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>@transaction.Description</td>
+                                    <td>@transaction.ReferenceNumber</td>
+                                    <td class="@(transaction.TransactionType == "Income" ? "text-success fw-bold" : 
+                                               transaction.TransactionType == "Expense" ? "text-danger fw-bold" : "")">
+                                        R @transaction.Amount.ToString("N2")
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary edit-transaction" 
+                                                    data-id="@transaction.Id" data-bs-toggle="modal" data-bs-target="#editTransactionModal">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-info view-transaction" 
+                                                    data-id="@transaction.Id" data-bs-toggle="modal" data-bs-target="#viewTransactionModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-transaction" 
+                                                    data-id="@transaction.Id" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="fas fa-receipt text-muted mb-3" style="font-size: 2.5rem;"></i>
+                                        <h5 class="text-muted">No transactions found</h5>
+                                        <p class="text-muted">Try adjusting your search filters</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addTransactionModalLabel">Add New Transaction</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="AddTransaction" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <!-- Hidden field for RelatedEntityType -->
+                    <input type="hidden" id="RelatedEntityType" name="RelatedEntityType" value="Manual" />
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="TransactionType" class="form-label fw-bold">Transaction Type</label>
+                            <select class="form-select" id="TransactionType" name="TransactionType" required>
+                                <option value="">-- Select Type --</option>
+                                <option value="Income">Income</option>
+                                <option value="Expense">Expense</option>
+                                <option value="Transfer">Transfer</option>
+                                <option value="Adjustment">Adjustment</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="Category" class="form-label fw-bold">Category</label>
+                            <select class="form-select" id="Category" name="Category" required>
+                                <option value="">-- Select Category --</option>
+                                <optgroup label="Income Categories">
+                                    <option value="DirectSale">Direct Sale</option>
+                                    <option value="AbattoirSale">Abattoir Sale</option>
+                                    <option value="Other Income">Other Income</option>
+                                </optgroup>
+                                <optgroup label="Expense Categories">
+                                    <option value="Feed">Feed</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Labor">Labor</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Equipment">Equipment</option>
+                                    <option value="Other Expense">Other Expense</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="Amount" class="form-label fw-bold">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input type="number" class="form-control" id="Amount" name="Amount" step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="TransactionDate" class="form-label fw-bold">Transaction Date</label>
+                            <input type="date" class="form-control" id="TransactionDate" name="TransactionDate" data-default-date="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="ReferenceNumber" class="form-label fw-bold">Reference Number</label>
+                            <input type="text" class="form-control" id="ReferenceNumber" name="ReferenceNumber" maxlength="100">
+                            <small class="text-muted">Invoice number, receipt number, etc.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="PaymentMethod" class="form-label fw-bold">Payment Method</label>
+                            <select class="form-select" id="PaymentMethod" name="PaymentMethod">
+                                <option value="">-- Select Method --</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Check">Check</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label fw-bold">Description</label>
+                        <input type="text" class="form-control" id="Description" name="Description" maxlength="500" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Notes" class="form-label fw-bold">Notes</label>
+                        <textarea class="form-control" id="Notes" name="Notes" rows="3" maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="IsReconciled" name="IsReconciled">
+                        <label class="form-check-label" for="IsReconciled">
+                            Transaction has been reconciled with bank statement
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Transaction Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1" aria-labelledby="editTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editTransactionModalLabel">Edit Transaction</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="EditTransaction" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editId" name="Id" />
+                <!-- Hidden field for RelatedEntityType -->
+                <input type="hidden" id="editRelatedEntityType" name="RelatedEntityType" value="Manual" />
+                
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editTransactionType" class="form-label fw-bold">Transaction Type</label>
+                            <select class="form-select" id="editTransactionType" name="TransactionType" required>
+                                <option value="">-- Select Type --</option>
+                                <option value="Income">Income</option>
+                                <option value="Expense">Expense</option>
+                                <option value="Transfer">Transfer</option>
+                                <option value="Adjustment">Adjustment</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editCategory" class="form-label fw-bold">Category</label>
+                            <select class="form-select" id="editCategory" name="Category" required>
+                                <option value="">-- Select Category --</option>
+                                <!-- Categories will be loaded via JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editAmount" class="form-label fw-bold">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input type="number" class="form-control" id="editAmount" name="Amount" step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editTransactionDate" class="form-label fw-bold">Transaction Date</label>
+                            <input type="date" class="form-control" id="editTransactionDate" name="TransactionDate" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editReferenceNumber" class="form-label fw-bold">Reference Number</label>
+                            <input type="text" class="form-control" id="editReferenceNumber" name="ReferenceNumber" maxlength="100">
+                            <small class="text-muted">Invoice number, receipt number, etc.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editPaymentMethod" class="form-label fw-bold">Payment Method</label>
+                            <select class="form-select" id="editPaymentMethod" name="PaymentMethod">
+                                <option value="">-- Select Method --</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Check">Check</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label fw-bold">Description</label>
+                        <input type="text" class="form-control" id="editDescription" name="Description" maxlength="500" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editNotes" class="form-label fw-bold">Notes</label>
+                        <textarea class="form-control" id="editNotes" name="Notes" rows="3" maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="editIsReconciled" name="IsReconciled">
+                        <label class="form-check-label" for="editIsReconciled">
+                            Transaction has been reconciled with bank statement
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Transaction Modal -->
+<div class="modal fade" id="viewTransactionModal" tabindex="-1" aria-labelledby="viewTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="viewTransactionModalLabel">Transaction Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 p-3 rounded-3 bg-light">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-2 mb-2" id="viewTransactionTypeBadge">Type</span>
+                            <h4 class="mb-0" id="viewAmount">R 0.00</h4>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">Transaction Date</small>
+                            <strong id="viewTransactionDate">Date</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted small text-uppercase">Category</h6>
+                        <p class="fw-bold" id="viewCategory">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small text-uppercase">Reference</h6>
+                        <p class="fw-bold" id="viewReferenceNumber">-</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted small text-uppercase">Payment Method</h6>
+                        <p class="fw-bold" id="viewPaymentMethod">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small text-uppercase">Reconciled</h6>
+                        <p class="fw-bold" id="viewIsReconciled">-</p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted small text-uppercase">Description</h6>
+                    <p class="fw-bold" id="viewDescription">-</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted small text-uppercase">Notes</h6>
+                    <p id="viewNotes">-</p>
+                </div>
+                
+                <div class="bg-light p-3 rounded-3 small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Created</span>
+                        <span id="viewCreatedDate" class="fw-bold">-</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Recorded By</span>
+                        <span id="viewRecordedBy" class="fw-bold">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary edit-from-view" data-bs-dismiss="modal">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Transaction Modal -->
+<div class="modal fade" id="deleteTransactionModal" tabindex="-1" aria-labelledby="deleteTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteTransactionModalLabel">Delete Transaction</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="display-1 text-danger mb-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4>Are you sure you want to delete this transaction?</h4>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                
+                <div class="alert alert-light border">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-4 text-muted">Type:</div>
+                        <div class="col-8 fw-bold" id="deleteTransactionType">-</div>
+                    </div>
+                    <div class="row align-items-center mb-2">
+                        <div class="col-4 text-muted">Amount:</div>
+                        <div class="col-8 fw-bold" id="deleteAmount">-</div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-4 text-muted">Description:</div>
+                        <div class="col-8" id="deleteDescription">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="DeleteTransaction" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteId" name="id">
+                    <button type="submit" class="btn btn-danger px-4">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Set default values for inputs with data-default attributes
+            $('input[data-default-date]').each(function() {
+                $(this).val($(this).data('default-date'));
+            });
+            
+            // Initialize datatables
+            var table = $('#transactionsTable').DataTable({
+                paging: true,
+                searching: false, // We have our own search
+                ordering: true,
+                order: [[0, 'desc']], // Sort by date descending
+                info: true,
+                lengthChange: true,
+                pageLength: 25,
+                language: {
+                    emptyTable: "No transactions found matching the search criteria."
+                }
+            });
+            
+            // Get URL from data attribute with fallback
+            var getTransactionUrl = $('.card-body').data('get-transaction-url');
+            if (!getTransactionUrl) {
+                // Fallback URL if data attribute is not set
+                getTransactionUrl = '/Admin/FinancialRecords/GetTransaction';
+                console.log('Using fallback URL:', getTransactionUrl);
+            }
+            
+            // Category filtering based on transaction type
+            $('#TransactionType, #editTransactionType').change(function() {
+                var type = $(this).val();
+                var categorySelect = $(this).closest('.row').find('select[name="Category"]');
+                
+                // Clear the current options
+                categorySelect.empty();
+                categorySelect.append('<option value="">-- Select Category --</option>');
+                
+                if (type === 'Income') {
+                    categorySelect.append('<option value="DirectSale">Direct Sale</option>');
+                    categorySelect.append('<option value="AbattoirSale">Abattoir Sale</option>');
+                    categorySelect.append('<option value="Other Income">Other Income</option>');
+                } else if (type === 'Expense') {
+                    categorySelect.append('<option value="Feed">Feed</option>');
+                    categorySelect.append('<option value="Healthcare">Healthcare</option>');
+                    categorySelect.append('<option value="Transport">Transport</option>');
+                    categorySelect.append('<option value="Labor">Labor</option>');
+                    categorySelect.append('<option value="Utilities">Utilities</option>');
+                    categorySelect.append('<option value="Equipment">Equipment</option>');
+                    categorySelect.append('<option value="Other Expense">Other Expense</option>');
+                } else if (type === 'Transfer') {
+                    categorySelect.append('<option value="Internal Transfer">Internal Transfer</option>');
+                } else if (type === 'Adjustment') {
+                    categorySelect.append('<option value="Sale Adjustment">Sale Adjustment</option>');
+                    categorySelect.append('<option value="Expense Adjustment">Expense Adjustment</option>');
+                    categorySelect.append('<option value="Inventory Adjustment">Inventory Adjustment</option>');
+                }
+            });
+            
+            // Load transaction data for edit modal with error handling
+            $('.edit-transaction').click(function() {
+                var id = $(this).data('id');
+                console.log('Edit transaction clicked, ID:', id);
+                
+                // Clear previous values
+                $('#editId').val('');
+                
+                // Fetch transaction data
+                $.ajax({
+                    url: getTransactionUrl + '?id=' + id,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log('Transaction data received:', data);
+                        $('#editId').val(data.id);
+                        $('#editTransactionType').val(data.transactionType);
+                        
+                        // Set the RelatedEntityType value
+                        $('#editRelatedEntityType').val(data.relatedEntityType || 'Manual');
+                        
+                        // Trigger the change to populate categories
+                        $('#editTransactionType').trigger('change');
+                        
+                        // Set values after categories are populated
+                        setTimeout(function() {
+                            $('#editCategory').val(data.category);
+                            $('#editAmount').val(data.amount);
+                            $('#editTransactionDate').val(data.transactionDate.split('T')[0]);
+                            $('#editReferenceNumber').val(data.referenceNumber);
+                            $('#editPaymentMethod').val(data.paymentMethod);
+                            $('#editDescription').val(data.description);
+                            $('#editNotes').val(data.notes);
+                            $('#editIsReconciled').prop('checked', data.isReconciled);
+                        }, 100);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching transaction:', error);
+                        alert('Error loading transaction data. See console for details.');
+                    }
+                });
+            });
+            
+            // Load transaction data for view modal with error handling
+            $('.view-transaction').click(function() {
+                var id = $(this).data('id');
+                console.log('View transaction clicked, ID:', id);
+                
+                // Fetch transaction data
+                $.ajax({
+                    url: getTransactionUrl + '?id=' + id,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log('Transaction data received:', data);
+                        $('#viewTransactionType').text(data.transactionType);
+                        
+                        // Set the badge class based on transaction type
+                        var badgeClass = '';
+                        switch(data.transactionType) {
+                            case 'Income': badgeClass = 'bg-success'; break;
+                            case 'Expense': badgeClass = 'bg-danger'; break;
+                            case 'Transfer': badgeClass = 'bg-info'; break;
+                            default: badgeClass = 'bg-secondary';
+                        }
+                        
+                        $('#viewTransactionTypeBadge')
+                            .attr('class', 'badge rounded-pill px-3 py-2 mb-2 ' + badgeClass)
+                            .text(data.transactionType);
+                        
+                        $('#viewAmount').text('R ' + data.amount.toFixed(2))
+                            .removeClass('text-success text-danger')
+                            .addClass(data.transactionType === 'Income' ? 'text-success' : 
+                                     data.transactionType === 'Expense' ? 'text-danger' : '');
+                        
+                        $('#viewTransactionDate').text(new Date(data.transactionDate).toLocaleDateString());
+                        $('#viewCategory').text(data.category || 'N/A');
+                        $('#viewReferenceNumber').text(data.referenceNumber || 'N/A');
+                        $('#viewPaymentMethod').text(data.paymentMethod || 'N/A');
+                        $('#viewDescription').text(data.description);
+                        $('#viewNotes').text(data.notes || 'N/A');
+                        $('#viewIsReconciled').text(data.isReconciled ? 'Yes' : 'No');
+                        $('#viewCreatedDate').text(new Date(data.createdDate).toLocaleString());
+                        $('#viewRecordedBy').text(data.recordedBy || 'System');
+                        
+                        // Store the transaction ID for the edit button
+                        $('.edit-from-view').data('id', data.id);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching transaction:', error);
+                        alert('Error loading transaction data. See console for details.');
+                    }
+                });
+            });
+            
+            // Edit button in view modal
+            $('.edit-from-view').click(function() {
+                var id = $(this).data('id');
+                console.log('Edit from view clicked, ID:', id);
+                
+                // Close view modal before opening edit modal
+                $('#viewTransactionModal').modal('hide');
+                
+                // Allow time for the first modal to close
+                setTimeout(function() {
+                    // Trigger the edit modal with the same ID
+                    $('.edit-transaction[data-id="' + id + '"]').click();
+                }, 500);
+            });
+            
+            // Load transaction data for delete modal with error handling
+            $('.delete-transaction').click(function() {
+                var id = $(this).data('id');
+                console.log('Delete transaction clicked, ID:', id);
+                
+                // Fetch transaction data
+                $.ajax({
+                    url: getTransactionUrl + '?id=' + id,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log('Transaction data received:', data);
+                        $('#deleteId').val(data.id);
+                        $('#deleteTransactionType').text(data.transactionType);
+                        $('#deleteAmount').text('R ' + data.amount.toFixed(2));
+                        $('#deleteDescription').text(data.description);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching transaction:', error);
+                        alert('Error loading transaction data. See console for details.');
+                    }
+                });
+            });
+        });
+    </script>
+} 

@@ -70,13 +70,13 @@
                         <div class="col-md-6">
                             <p class="mb-2">
                                 <span class="font-weight-bold">Category:</span>
-                                @Model.Category
+                                @(Model?.Category?.Name ?? "No Category")
                             </p>
                             <p class="mb-2">
                                 <span class="font-weight-bold">Due Date:</span>
-                                @Model.DueDate.ToString("dd MMMM yyyy")
+                                @(Model?.DueDate.ToString("dd MMMM yyyy") ?? "Not specified")
                             </p>
-                            @if (Model.CompletionDate.HasValue)
+                            @if (Model?.CompletionDate.HasValue == true)
                             {
                                 <p class="mb-2">
                                     <span class="font-weight-bold">Completed On:</span>
@@ -85,7 +85,7 @@
                             }
                         </div>
                         <div class="col-md-6">
-                            @if (Model.Animal != null)
+                            @if (Model?.Animal != null)
                             {
                                 <p class="mb-2">
                                     <span class="font-weight-bold">Related Animal:</span>
@@ -95,7 +95,7 @@
                         </div>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    @if (!string.IsNullOrEmpty(Model?.Notes))
                     {
                         <div class="mt-4">
                             <h6 class="font-weight-bold">Notes:</h6>
@@ -119,7 +119,7 @@
                 </div>
                 <div class="card-body">
                     <div class="timeline">
-                        @if (Model.CompletionDate.HasValue)
+                        @if (Model?.CompletionDate.HasValue == true)
                         {
                             <div class="timeline-item">
                                 <div class="timeline-marker bg-success"></div>
@@ -129,7 +129,7 @@
                                 </div>
                             </div>
                         }
-                        @if (Model.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress)
+                        @if (Model?.Status == Inyama_Yethu.Models.FarmTaskStatus.InProgress)
                         {
                             <div class="timeline-item">
                                 <div class="timeline-marker bg-primary"></div>
@@ -143,7 +143,7 @@
                             <div class="timeline-marker bg-info"></div>
                             <div class="timeline-content">
                                 <h6 class="timeline-title">Task Created</h6>
-                                <p class="timeline-date">Due by @Model.DueDate.ToString("dd MMM yyyy")</p>
+                                <p class="timeline-date">Due by @(Model?.DueDate.ToString("dd MMM yyyy") ?? "Not specified")</p>
                             </div>
                         </div>
                     </div>
@@ -165,13 +165,13 @@
             </div>
             <form asp-action="UpdateStatus" method="post">
                 <div class="modal-body">
-                    <input type="hidden" name="taskId" value="@Model.Id" />
+                    <input type="hidden" name="taskId" value="@(Model?.Id ?? 0)" />
                     <div class="form-group">
                         <label for="newStatus">New Status:</label>
                         <select class="form-control" id="newStatus" name="newStatus">
                             @foreach (var status in Enum.GetValues(typeof(Inyama_Yethu.Models.FarmTaskStatus)))
                             {
-                                if ((Inyama_Yethu.Models.FarmTaskStatus)status != Model.Status)
+                                if (Model != null && (Inyama_Yethu.Models.FarmTaskStatus)status != Model.Status)
                                 {
                                     <option value="@status">@status</option>
                                 }
@@ -244,6 +244,13 @@
             setTimeout(function() {
                 $('.alert').alert('close');
             }, 5000);
+            
+            // Add error handling for all JS operations
+            try {
+                // Any additional JS operations can go here
+            } catch (e) {
+                console.error("JavaScript error:", e);
+            }
         });
     </script>
 } 

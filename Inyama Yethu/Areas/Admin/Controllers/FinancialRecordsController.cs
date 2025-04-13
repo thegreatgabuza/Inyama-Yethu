@@ -21,6 +21,59 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         public FinancialRecordsController(ApplicationDbContext context)
         {
             _context = context;
+            // Ensure the FinancialTransactions table exists
+            EnsureFinancialTransactionsExists().Wait();
+        }
+
+        // Add method to ensure FinancialTransactions table exists
+        private async Task EnsureFinancialTransactionsExists()
+        {
+            try
+            {
+                // Check if table exists by attempting to query it
+                await _context.FinancialTransactions.FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                // If an exception occurs, the table might not exist
+                try
+                {
+                    // Log the error
+                    Console.WriteLine($"Error querying FinancialTransactions table: {ex.Message}");
+                    Console.WriteLine("Attempting to create the table manually...");
+                    
+                    // Try to create the table manually if it doesn't exist
+                    await _context.Database.ExecuteSqlRawAsync(@"
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+                                      WHERE TABLE_NAME = 'FinancialTransactions')
+                        BEGIN
+                            CREATE TABLE FinancialTransactions (
+                                Id INT IDENTITY(1,1) PRIMARY KEY,
+                                TransactionType NVARCHAR(50) NOT NULL,
+                                Category NVARCHAR(100) NOT NULL,
+                                Amount DECIMAL(18,2) NOT NULL,
+                                Description NVARCHAR(500) NULL,
+                                ReferenceNumber NVARCHAR(100) NULL,
+                                TransactionDate DATETIME2 NOT NULL,
+                                CreatedDate DATETIME2 NOT NULL,
+                                RelatedEntityId INT NULL,
+                                RelatedEntityType NVARCHAR(100) NOT NULL,
+                                PaymentMethod NVARCHAR(50) NULL,
+                                IsReconciled BIT NOT NULL,
+                                RecordedBy NVARCHAR(256) NULL,
+                                Notes NVARCHAR(1000) NULL
+                            )
+                        END");
+                    
+                    Console.WriteLine("FinancialTransactions table created successfully");
+                }
+                catch (Exception createEx)
+                {
+                    // Log the error but don't crash the application
+                    Console.WriteLine($"Error creating FinancialTransactions table: {createEx.Message}");
+                    Console.WriteLine($"Inner exception: {createEx.InnerException?.Message}");
+                }
+            }
         }
 
         // GET: Admin/FinancialRecords
@@ -193,255 +246,6 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             return View();
         }
         
-        // GET: Admin/FinancialRecords/ExpenseReport
-        public async Task<IActionResult> ExpenseReport(DateTime? startDate, DateTime? endDate)
-        {
-            var today = DateTime.Now.Date;
-            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
-            
-            // Default to current month if no dates provided
-            var reportStartDate = startDate ?? firstDayOfMonth;
-            var reportEndDate = endDate ?? today;
-            
-            // Get feed costs by type
-            var feedCosts = await _context.Feedings
-                .Where(f => f.FeedDate >= reportStartDate && f.FeedDate <= reportEndDate)
-                .GroupBy(f => f.FeedType)
-                .Select(g => new {
-                    FeedType = g.Key,
-                    Quantity = g.Sum(f => f.Quantity),
-                    Cost = g.Sum(f => f.Quantity * (double)f.CostPerKg)
-                })
-                .OrderByDescending(x => x.Cost)
-                .ToListAsync();
-                
-            // Get healthcare costs by type
-            var healthcareCosts = await _context.HealthRecords
-                .Where(h => h.RecordDate >= reportStartDate && h.RecordDate <= reportEndDate)
-                .GroupBy(h => h.RecordType)
-                .Select(g => new {
-                    RecordType = g.Key,
-                    Count = g.Count(),
-                    Cost = g.Sum(h => (double)h.Cost)
-                })
-                .OrderByDescending(x => x.Cost)
-                .ToListAsync();
-                
-            // Get transport costs
-            var transportCosts = await _context.AbattoirShipments
-                .Where(s => s.ShipmentDate >= reportStartDate && s.ShipmentDate <= reportEndDate)
-                .Select(s => new {
-                    ShipmentDate = s.ShipmentDate,
-                    NumberOfPigs = s.NumberOfPigs,
-                    TransportCost = (double)(s.TransportationCost)
-                })
-                .ToListAsync();
-                
-            // Other miscellaneous costs (placeholder for future expansion)
-            var otherCosts = new List<object>();
-            
-            // Calculate totals
-            var totalFeedCost = feedCosts.Sum(f => f.Cost);
-            var totalHealthcareCost = healthcareCosts.Sum(h => h.Cost);
-            var totalTransportCost = transportCosts.Sum(t => t.TransportCost);
-            var totalOtherCost = 0.0; // Initialize with zero instead of using reflection
-            
-            var totalCost = totalFeedCost + totalHealthcareCost + totalTransportCost + totalOtherCost;
-            
-            ViewData["FeedCosts"] = feedCosts;
-            ViewData["HealthcareCosts"] = healthcareCosts;
-            ViewData["TransportCosts"] = transportCosts;
-            ViewData["OtherCosts"] = otherCosts;
-            ViewData["TotalFeedCost"] = totalFeedCost;
-            ViewData["TotalHealthcareCost"] = totalHealthcareCost;
-            ViewData["TotalTransportCost"] = totalTransportCost;
-            ViewData["TotalOtherCost"] = totalOtherCost;
-            ViewData["TotalCost"] = totalCost;
-            ViewData["StartDate"] = reportStartDate;
-            ViewData["EndDate"] = reportEndDate;
-            
-            return View();
-        }
-        
-        // GET: Admin/FinancialRecords/RevenueReport
-        public async Task<IActionResult> RevenueReport(DateTime? startDate, DateTime? endDate)
-        {
-            var today = DateTime.Now.Date;
-            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
-            
-            // Default to current month if no dates provided
-            var reportStartDate = startDate ?? firstDayOfMonth;
-            var reportEndDate = endDate ?? today;
-            
-            // Get abattoir sales
-            var abattoirSales = await _context.AbattoirShipments
-                .Where(s => s.ShipmentDate >= reportStartDate && 
-                          s.ShipmentDate <= reportEndDate && 
-                          s.Status == ShipmentStatus.Processed)
-                .Select(s => new {
-                    ShipmentDate = s.ShipmentDate,
-                    NumberOfPigs = s.NumberOfPigs,
-                    Revenue = (double)(s.ActualPayment ?? s.EstimatedValue)
-                })
-                .ToListAsync();
-                
-            // Get direct sales by product
-            var directSalesByProduct = await _context.OrderItems
-                .Include(i => i.Order)
-                .Include(i => i.Product)
-                .Where(i => i.Order.OrderDate >= reportStartDate && 
-                          i.Order.OrderDate <= reportEndDate &&
-                          i.Order.PaymentReceived)
-                .GroupBy(i => i.ProductId)
-                .Select(g => new {
-                    ProductId = g.Key,
-                    ProductName = g.First().Product.Name,
-                    Quantity = g.Sum(i => i.Quantity),
-                    Revenue = g.Sum(i => (double)(i.UnitPrice * i.Quantity))
-                })
-                .OrderByDescending(x => x.Revenue)
-                .ToListAsync();
-                
-            // Get direct sales by township
-            var directSalesByTownship = await _context.Orders
-                .Include(o => o.Customer)
-                .Where(o => o.OrderDate >= reportStartDate && 
-                          o.OrderDate <= reportEndDate &&
-                          o.PaymentReceived)
-                .GroupBy(o => o.Customer.Township)
-                .Select(g => new {
-                    Township = g.Key,
-                    OrderCount = g.Count(),
-                    Revenue = g.Sum(o => (double)o.TotalAmount)
-                })
-                .OrderByDescending(x => x.Revenue)
-                .ToListAsync();
-                
-            // Calculate totals
-            var totalAbattoirRevenue = abattoirSales.Sum(s => s.Revenue);
-            var totalDirectSalesRevenue = directSalesByProduct.Sum(p => p.Revenue);
-            var totalRevenue = totalAbattoirRevenue + totalDirectSalesRevenue;
-            
-            ViewData["AbattoirSales"] = abattoirSales;
-            ViewData["DirectSalesByProduct"] = directSalesByProduct;
-            ViewData["DirectSalesByTownship"] = directSalesByTownship;
-            ViewData["TotalAbattoirRevenue"] = totalAbattoirRevenue;
-            ViewData["TotalDirectSalesRevenue"] = totalDirectSalesRevenue;
-            ViewData["TotalRevenue"] = totalRevenue;
-            ViewData["StartDate"] = reportStartDate;
-            ViewData["EndDate"] = reportEndDate;
-            
-            return View();
-        }
-        
-        // GET: Admin/FinancialRecords/ProfitabilityReport
-        public async Task<IActionResult> ProfitabilityReport(int year = 0)
-        {
-            var currentYear = DateTime.Now.Year;
-            
-            // Default to current year
-            if (year == 0)
-            {
-                year = currentYear;
-            }
-            
-            var startOfYear = new DateTime(year, 1, 1);
-            var endOfYear = new DateTime(year, 12, 31);
-            
-            // Monthly data
-            var monthlyData = new List<dynamic>();
-            
-            // Generate monthly financial data for the specified year
-            for (int month = 1; month <= 12; month++)
-            {
-                var startDate = new DateTime(year, month, 1);
-                var endDate = startDate.AddMonths(1).AddDays(-1);
-                
-                if (startDate > DateTime.Now)
-                {
-                    // Don't include future months
-                    break;
-                }
-                
-                // Get costs for the month
-                var monthlyCosts = await _context.Feedings
-                    .Where(f => f.FeedDate >= startDate && f.FeedDate <= endDate)
-                    .SumAsync(f => f.Quantity * (double)f.CostPerKg);
-                    
-                monthlyCosts += await _context.HealthRecords
-                    .Where(h => h.RecordDate >= startDate && h.RecordDate <= endDate)
-                    .SumAsync(h => (double)h.Cost);
-                    
-                monthlyCosts += await _context.AbattoirShipments
-                    .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate <= endDate)
-                    .SumAsync(s => (double)(s.TransportationCost));
-                
-                // Get revenue for the month
-                var monthlyRevenue = await _context.AbattoirShipments
-                    .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate <= endDate && s.Status == ShipmentStatus.Processed)
-                    .SumAsync(s => (double)(s.ActualPayment ?? s.EstimatedValue));
-                    
-                monthlyRevenue += await _context.Orders
-                    .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate && o.PaymentReceived)
-                    .SumAsync(o => (double)o.TotalAmount);
-                
-                // Calculate profit
-                var monthlyProfit = monthlyRevenue - monthlyCosts;
-                var profitMargin = monthlyRevenue > 0 ? (monthlyProfit / monthlyRevenue) * 100 : 0;
-                
-                dynamic monthData = new System.Dynamic.ExpandoObject();
-                monthData.Month = month;
-                monthData.MonthName = startDate.ToString("MMMM");
-                monthData.Costs = monthlyCosts;
-                monthData.Revenue = monthlyRevenue;
-                monthData.Profit = monthlyProfit;
-                monthData.ProfitMargin = profitMargin;
-                
-                monthlyData.Add(monthData);
-            }
-            
-            // Yearly totals
-            double yearlyTotalCosts = 0;
-            double yearlyTotalRevenue = 0;
-            double yearlyTotalProfit = 0;
-            
-            foreach (var data in monthlyData)
-            {
-                yearlyTotalCosts += data.Costs;
-                yearlyTotalRevenue += data.Revenue;
-                yearlyTotalProfit += data.Profit;
-            }
-            
-            var yearlyTotals = new {
-                Costs = yearlyTotalCosts,
-                Revenue = yearlyTotalRevenue,
-                Profit = yearlyTotalProfit
-            };
-            
-            var yearlyProfitMargin = yearlyTotals.Revenue > 0 ? (yearlyTotals.Profit / yearlyTotals.Revenue) * 100 : 0;
-            
-            // Get available years for dropdown
-            var availableYears = await _context.Feedings
-                .Select(f => f.FeedDate.Year)
-                .Distinct()
-                .OrderByDescending(y => y)
-                .ToListAsync();
-                
-            // Ensure current year is in the list
-            if (!availableYears.Contains(currentYear))
-            {
-                availableYears.Insert(0, currentYear);
-            }
-            
-            ViewData["MonthlyData"] = monthlyData;
-            ViewData["YearlyTotals"] = yearlyTotals;
-            ViewData["YearlyProfitMargin"] = yearlyProfitMargin;
-            ViewData["SelectedYear"] = year;
-            ViewData["AvailableYears"] = availableYears;
-            
-            return View();
-        }
-        
         // GET: Admin/FinancialRecords/AnimalSales
         public async Task<IActionResult> AnimalSales(DateTime? startDate, DateTime? endDate)
         {
@@ -502,6 +306,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             ViewData["StartDate"] = startDate;
             ViewData["EndDate"] = endDate;
             ViewData["AbattoirShipments"] = abattoirShipments;
+            ViewData["AnimalSales"] = animalSales;
             ViewData["AnimalProductSales"] = animalProductSales;
             ViewData["TotalPigsShipped"] = totalPigsShipped;
             ViewData["TotalAbattoirRevenue"] = totalAbattoirRevenue;
@@ -513,102 +318,264 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         }
 
         // GET: Admin/FinancialRecords/RecordAnimalSale
-        public IActionResult RecordAnimalSale()
+        public async Task<IActionResult> RecordAnimalSale()
         {
-            var activeAnimals = _context.Animals
-                .Where(a => a.Status == AnimalStatus.Active)
-                .OrderBy(a => a.TagNumber)
-                .Select(a => new
+            try
+            {
+                // Initialize the model with default values
+                var model = new Inyama_Yethu.Models.ViewModels.AnimalSaleViewModel
                 {
-                    Id = a.Id,
-                    DisplayText = $"{a.TagNumber} - {a.Type} ({a.Weight:F1} kg)"
-                })
-                .ToList();
+                    SaleDate = DateTime.Today,
+                    PaymentReceived = false
+                };
 
-            ViewBag.Animals = new SelectList(activeAnimals, "Id", "DisplayText");
-            return View(new AnimalSaleViewModel());
+                // Get active animals for the dropdown
+                var activeAnimals = await _context.Animals
+                    .Where(a => a.Status == AnimalStatus.Active)
+                    .OrderBy(a => a.TagNumber)
+                    .Select(a => new
+                    {
+                        Id = a.Id,
+                        DisplayText = $"{a.TagNumber} - {a.Type} ({a.Weight:F1} kg)"
+                    })
+                    .ToListAsync();
+                
+                // Check if there are any active animals available
+                if (activeAnimals == null || !activeAnimals.Any())
+                {
+                    // Use TempData for error messages
+                    TempData["ErrorMessage"] = "No active animals available for sale. Please add animals to the inventory first.";
+                    ViewBag.Animals = new SelectList(new List<SelectListItem>());
+                    return View(model);
+                }
+
+                ViewBag.Animals = new SelectList(activeAnimals, "Id", "DisplayText");
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error loading RecordAnimalSale: {ex.Message}");
+                
+                // Use TempData for error messages
+                TempData["ErrorMessage"] = "An error occurred while loading the form. Please try again later.";
+                
+                // Create an empty select list to avoid null reference exceptions
+                ViewBag.Animals = new SelectList(new List<SelectListItem>());
+                
+                // Return the view with the default model
+                return View(new Inyama_Yethu.Models.ViewModels.AnimalSaleViewModel { SaleDate = DateTime.Today });
+            }
         }
 
         // POST: Admin/FinancialRecords/RecordAnimalSale
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RecordAnimalSale(AnimalSaleViewModel model)
+        public async Task<IActionResult> RecordAnimalSale(AnimalSaleViewModel model, string receiptNumber)
         {
-            if (ModelState.IsValid)
+            try 
             {
-                var animal = await _context.Animals.FindAsync(model.AnimalId);
-                if (animal == null)
+                if (!ModelState.IsValid)
                 {
-                    ModelState.AddModelError("", "Selected animal not found.");
-                    await PopulateAnimalDropdowns();
-                    return View(model);
-                }
+                    var animal = await _context.Animals.FindAsync(model.AnimalId);
+                    if (animal == null)
+                    {
+                        TempData["ErrorMessage"] = "Selected animal not found.";
+                        await PopulateAnimalDropdowns();
+                        return View(model);
+                    }
 
-                if (animal.Status == AnimalStatus.Sold)
-                {
-                    ModelState.AddModelError("", "This animal has already been sold.");
-                    await PopulateAnimalDropdowns();
-                    return View(model);
-                }
+                    if (animal.Status == AnimalStatus.Sold)
+                    {
+                        TempData["ErrorMessage"] = "This animal has already been sold.";
+                        await PopulateAnimalDropdowns();
+                        return View(model);
+                    }
 
-                // Generate invoice number if not provided
-                if (string.IsNullOrEmpty(model.InvoiceNumber))
-                {
-                    model.InvoiceNumber = $"INV{DateTime.Now:yyyyMMdd}-{await GetNextInvoiceNumber():D4}";
-                }
+                    // Generate invoice number if not provided
+                    if (string.IsNullOrEmpty(model.InvoiceNumber))
+                    {
+                        model.InvoiceNumber = $"INV{DateTime.Now:yyyyMMdd}-{await GetNextInvoiceNumber():D4}";
+                    }
 
-                var sale = new AnimalSale
-                {
-                    AnimalId = model.AnimalId,
-                    SaleDate = model.SaleDate,
-                    SaleType = model.SaleType,
-                    SalePrice = model.SalePrice,
-                    WeightAtSale = model.WeightAtSale,
-                    PricePerKg = model.WeightAtSale.HasValue ? 
-                        Math.Round(model.SalePrice / (decimal)model.WeightAtSale.Value, 2) : null,
-                    BuyerName = model.BuyerName,
-                    InvoiceNumber = model.InvoiceNumber,
-                    PaymentReceived = model.PaymentReceived,
-                    PaymentDate = model.PaymentDate,
-                    Notes = model.Notes ?? string.Empty
-                };
+                    // Verify the invoice number is unique
+                    var existingInvoice = await _context.AnimalSales
+                        .FirstOrDefaultAsync(s => s.InvoiceNumber == model.InvoiceNumber);
+                    
+                    if (existingInvoice != null)
+                    {
+                        // Append a counter to make it unique
+                        model.InvoiceNumber = $"{model.InvoiceNumber}-{DateTime.Now.Ticks % 1000}";
+                    }
 
-                _context.AnimalSales.Add(sale);
-                
-                // Update animal status
-                animal.Status = AnimalStatus.Sold;
-                _context.Animals.Update(animal);
+                    // Calculate price per kg safely to avoid division by zero
+                    decimal? pricePerKg = null;
+                    if (model.WeightAtSale.HasValue && model.WeightAtSale.Value > 0)
+                    {
+                        pricePerKg = Math.Round(model.SalePrice / (decimal)model.WeightAtSale.Value, 2);
+                    }
 
-                try
-                {
-                    await _context.SaveChangesAsync();
+                    var sale = new AnimalSale
+                    {
+                        AnimalId = model.AnimalId,
+                        SaleDate = model.SaleDate,
+                        SaleType = model.SaleType,
+                        SalePrice = model.SalePrice,
+                        WeightAtSale = model.WeightAtSale,
+                        PricePerKg = pricePerKg,
+                        BuyerName = model.BuyerName ?? string.Empty, // Ensure not null
+                        InvoiceNumber = model.InvoiceNumber,
+                        PaymentReceived = model.PaymentReceived,
+                        PaymentDate = model.PaymentReceived ? (model.PaymentDate ?? DateTime.Now) : null,
+                        Notes = model.Notes ?? string.Empty // Ensure not null
+                    };
+
+                    // Add receipt number if provided
+                    if (!string.IsNullOrWhiteSpace(receiptNumber))
+                    {
+                        sale.Notes = $"Receipt Number: {receiptNumber}\n{sale.Notes}";
+                    }
+
+                    // Use the execution strategy to perform database operations
+                    var strategy = _context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () => 
+                    {
+                        // Begin transaction to ensure all operations succeed or fail together
+                        using (var transaction = await _context.Database.BeginTransactionAsync())
+                        {
+                            try
+                            {
+                                _context.AnimalSales.Add(sale);
+                                
+                                // Update animal status
+                                animal.Status = AnimalStatus.Sold;
+                                _context.Animals.Update(animal);
+
+                                // Save changes first
+                                await _context.SaveChangesAsync();
+
+                                // Record financial transaction
+                                try
+                                {
+                                    var financialTransaction = new FinancialTransaction
+                                    {
+                                        TransactionType = "Income",
+                                        Category = model.SaleType.ToString(),
+                                        Amount = model.SalePrice,
+                                        Description = $"Sale of {animal.TagNumber} - {animal.Type}",
+                                        ReferenceNumber = model.InvoiceNumber ?? "None",
+                                        TransactionDate = model.SaleDate,
+                                        CreatedDate = DateTime.Now,
+                                        Notes = string.Empty,
+                                        PaymentMethod = "N/A",
+                                        RecordedBy = User.Identity?.Name ?? "System",
+                                        IsReconciled = false,
+                                        RelatedEntityId = sale.Id,
+                                        RelatedEntityType = "AnimalSale"
+                                    };
+                                    
+                                    _context.FinancialTransactions.Add(financialTransaction);
+                                    await _context.SaveChangesAsync();
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Log the error but continue - don't fail the animal sale because of financial transaction
+                                    Console.WriteLine($"Warning: Financial transaction recording failed: {ex.Message}");
+                                }
+
+                                // Commit the transaction
+                                await transaction.CommitAsync();
+                            }
+                            catch (Exception)
+                            {
+                                // Roll back the transaction
+                                await transaction.RollbackAsync();
+                                throw; // Re-throw to be caught by outer catch block
+                            }
+                        }
+                    });
+                    
+                    TempData["SuccessMessage"] = $"Sale for animal {animal.TagNumber} successfully recorded.";
                     return RedirectToAction(nameof(AnimalSales));
                 }
-                catch (Exception ex)
+                else
                 {
-                    ModelState.AddModelError("", "Failed to save the sale. Please try again.");
-                    Console.WriteLine($"Error saving sale: {ex.Message}");
+                    // If model state is invalid, manually collect error messages to use with TempData
+                    var errorMessages = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                        
+                    if (errorMessages.Any())
+                    {
+                        TempData["ErrorMessage"] = string.Join("<br>", errorMessages);
+                    }
                 }
-            }
 
-            // If we got this far, something failed; redisplay form
-            await PopulateAnimalDropdowns();
-            return View(model);
+                // If we got this far, something failed; redisplay form
+                await PopulateAnimalDropdowns();
+                return View(model);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Database-specific exceptions
+                Console.WriteLine($"Database error saving sale: {dbEx.Message}");
+                Console.WriteLine($"Inner exception: {dbEx.InnerException?.Message}");
+                
+                TempData["ErrorMessage"] = "Database error: " + (dbEx.InnerException?.Message ?? dbEx.Message);
+                
+                await PopulateAnimalDropdowns();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors
+                Console.WriteLine($"Error in RecordAnimalSale POST: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}. Please try again later.";
+                
+                await PopulateAnimalDropdowns();
+                return View(model);
+            }
         }
 
         private async Task PopulateAnimalDropdowns()
         {
-            var animals = await _context.Animals
-                .Where(a => a.Status != AnimalStatus.Deceased)
-                .OrderBy(a => a.TagNumber)
-                .Select(a => new SelectListItem
-                {
-                    Value = a.Id.ToString(),
-                    Text = $"{a.TagNumber} - {a.Type} ({a.Status}) - {a.Weight:F1} kg"
-                })
-                .ToListAsync();
+            try
+            {
+                // For new sales, only show active animals
+                // For editing, also include sold animals
+                var animals = await _context.Animals
+                    .Where(a => a.Status == AnimalStatus.Active) // Only active animals can be sold
+                    .OrderBy(a => a.TagNumber)
+                    .Select(a => new SelectListItem
+                    {
+                        Value = a.Id.ToString(),
+                        Text = $"{a.TagNumber} - {a.Type} ({a.Status}) - {a.Weight:F1} kg"
+                    })
+                    .ToListAsync();
 
-            ViewBag.Animals = new SelectList(animals, "Value", "Text");
+                // Show a helpful message if no animals are available
+                if (animals.Count == 0)
+                {
+                    TempData["ErrorMessage"] = "No active animals available for sale. Please add animals to the inventory first.";
+                    Console.WriteLine("No active animals found in the database.");
+                }
+
+                ViewBag.Animals = new SelectList(animals, "Value", "Text");
+                
+                // Debug info
+                Console.WriteLine($"Populated {animals.Count} animals in dropdown");
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error in PopulateAnimalDropdowns: {ex.Message}");
+                
+                // Create an empty select list to avoid null reference exceptions
+                ViewBag.Animals = new SelectList(new List<SelectListItem>());
+            }
         }
 
         // GET: Admin/FinancialRecords/EditAnimalSale
@@ -656,7 +623,7 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
         // POST: Admin/FinancialRecords/EditAnimalSale
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditAnimalSale(int animalId, AnimalSaleViewModel model)
+        public async Task<IActionResult> EditAnimalSale(int animalId, AnimalSaleViewModel model, string receiptNumber)
         {
             if (ModelState.IsValid)
             {
@@ -667,6 +634,52 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                 if (animal == null)
                 {
                     return NotFound();
+                }
+
+                string existingReceiptInfo = "";
+                
+                // Extract existing receipt number if present
+                if (animal.Sale != null && animal.Sale.Notes.Contains("Receipt Number:"))
+                {
+                    var lines = animal.Sale.Notes.Split('\n');
+                    foreach (var line in lines)
+                    {
+                        if (line.StartsWith("Receipt Number:"))
+                        {
+                            existingReceiptInfo = line;
+                            break;
+                        }
+                    }
+                }
+
+                // Process notes to handle receipt number
+                string updatedNotes = model.Notes ?? "";
+                
+                // Add or update receipt number
+                if (!string.IsNullOrWhiteSpace(receiptNumber))
+                {
+                    if (string.IsNullOrEmpty(existingReceiptInfo))
+                    {
+                        // Add new receipt info
+                        updatedNotes = $"Receipt Number: {receiptNumber}\n{updatedNotes}";
+                    }
+                    else
+                    {
+                        // Replace existing receipt info
+                        updatedNotes = updatedNotes.Replace(existingReceiptInfo, $"Receipt Number: {receiptNumber}");
+                        if (!updatedNotes.Contains("Receipt Number:"))
+                        {
+                            updatedNotes = $"Receipt Number: {receiptNumber}\n{updatedNotes}";
+                        }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(existingReceiptInfo) && animal.Sale != null)
+                {
+                    // Keep existing receipt info
+                    if (!updatedNotes.Contains(existingReceiptInfo))
+                    {
+                        updatedNotes = $"{existingReceiptInfo}\n{updatedNotes}";
+                    }
                 }
 
                 if (animal.Sale == null)
@@ -684,15 +697,61 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                         BuyerName = model.BuyerName,
                         InvoiceNumber = model.InvoiceNumber ?? $"INV{DateTime.Now:yyyyMMdd}-{await GetNextInvoiceNumber():D4}",
                         PaymentReceived = model.PaymentReceived,
-                        PaymentDate = model.PaymentDate,
-                        Notes = model.Notes
+                        PaymentDate = model.PaymentReceived ? (model.PaymentDate ?? DateTime.Now) : null,
+                        Notes = updatedNotes
                     };
 
-                    _context.AnimalSales.Add(sale);
-                    animal.Status = AnimalStatus.Sold;
+                    // Use execution strategy for database operations
+                    var strategy = _context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () => 
+                    {
+                        using (var transaction = await _context.Database.BeginTransactionAsync())
+                        {
+                            try
+                            {
+                                _context.AnimalSales.Add(sale);
+                                animal.Status = AnimalStatus.Sold;
+                                _context.Animals.Update(animal);
+                                
+                                await _context.SaveChangesAsync();
+                                
+                                // Record financial transaction
+                                var financialTransaction = new FinancialTransaction
+                                {
+                                    TransactionType = "Income",
+                                    Category = model.SaleType.ToString(),
+                                    Amount = model.SalePrice,
+                                    Description = $"Sale of {animal.TagNumber} - {animal.Type}",
+                                    ReferenceNumber = sale.InvoiceNumber,
+                                    TransactionDate = model.SaleDate,
+                                    CreatedDate = DateTime.Now,
+                                    Notes = string.Empty,
+                                    PaymentMethod = "N/A",
+                                    RecordedBy = User.Identity?.Name ?? "System",
+                                    IsReconciled = false,
+                                    RelatedEntityId = sale.Id,
+                                    RelatedEntityType = "AnimalSale"
+                                };
+                                
+                                _context.FinancialTransactions.Add(financialTransaction);
+                                await _context.SaveChangesAsync();
+                                
+                                await transaction.CommitAsync();
+                            }
+                            catch
+                            {
+                                await transaction.RollbackAsync();
+                                throw;
+                            }
+                        }
+                    });
                 }
                 else
                 {
+                    // Calculate if there was a price change
+                    bool priceChanged = animal.Sale.SalePrice != model.SalePrice;
+                    decimal oldPrice = animal.Sale.SalePrice;
+                    
                     // Update existing sale record
                     animal.Sale.SaleDate = model.SaleDate;
                     animal.Sale.SaleType = model.SaleType;
@@ -703,15 +762,59 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
                     animal.Sale.BuyerName = model.BuyerName;
                     animal.Sale.InvoiceNumber = model.InvoiceNumber;
                     animal.Sale.PaymentReceived = model.PaymentReceived;
-                    animal.Sale.PaymentDate = model.PaymentDate;
-                    animal.Sale.Notes = model.Notes;
+                    animal.Sale.PaymentDate = model.PaymentReceived ? (model.PaymentDate ?? DateTime.Now) : null;
+                    animal.Sale.Notes = updatedNotes;
 
-                    _context.AnimalSales.Update(animal.Sale);
+                    // Use execution strategy for database operations
+                    var strategy = _context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () => 
+                    {
+                        using (var transaction = await _context.Database.BeginTransactionAsync())
+                        {
+                            try
+                            {
+                                _context.AnimalSales.Update(animal.Sale);
+                                _context.Animals.Update(animal);
+                                
+                                await _context.SaveChangesAsync();
+                                
+                                // If price changed, record an adjustment transaction
+                                if (priceChanged)
+                                {
+                                    decimal adjustmentAmount = model.SalePrice - oldPrice;
+                                    var adjustmentTransaction = new FinancialTransaction
+                                    {
+                                        TransactionType = adjustmentAmount >= 0 ? "Income" : "Expense",
+                                        Category = "Sale Adjustment",
+                                        Amount = Math.Abs(adjustmentAmount),
+                                        Description = $"Adjustment to sale price for {animal.TagNumber} - {animal.Type}",
+                                        ReferenceNumber = animal.Sale.InvoiceNumber,
+                                        TransactionDate = DateTime.Now,
+                                        CreatedDate = DateTime.Now,
+                                        Notes = string.Empty,
+                                        PaymentMethod = "N/A",
+                                        RecordedBy = User.Identity?.Name ?? "System",
+                                        IsReconciled = false,
+                                        RelatedEntityId = animal.Sale.Id,
+                                        RelatedEntityType = "AnimalSale"
+                                    };
+                                    
+                                    _context.FinancialTransactions.Add(adjustmentTransaction);
+                                    await _context.SaveChangesAsync();
+                                }
+                                
+                                await transaction.CommitAsync();
+                            }
+                            catch
+                            {
+                                await transaction.RollbackAsync();
+                                throw;
+                            }
+                        }
+                    });
                 }
 
-                _context.Animals.Update(animal);
-                await _context.SaveChangesAsync();
-
+                TempData["SuccessMessage"] = $"Sale for animal {animal.TagNumber} successfully updated.";
                 return RedirectToAction(nameof(AnimalSales));
             }
 
@@ -737,6 +840,496 @@ namespace Inyama_Yethu.Areas.Admin.Controllers
             {
                 return 1;
             }
+        }
+
+        // Helper method to record financial transactions
+        private void RecordFinancialTransaction(string transactionType, string category, decimal amount, 
+            string description, string referenceNumber, DateTime transactionDate)
+        {
+            // Check if FinancialTransaction model exists in the system
+            // If not, this will be a no-op (we'll implement the full model below)
+            try
+            {
+                var transaction = new FinancialTransaction
+                {
+                    TransactionType = transactionType,
+                    Category = category,
+                    Amount = amount,
+                    Description = description ?? "No description provided", // Ensure not null
+                    ReferenceNumber = referenceNumber ?? "None", // Ensure not null
+                    TransactionDate = transactionDate,
+                    CreatedDate = DateTime.Now,
+                    Notes = string.Empty, // Set an empty string instead of null
+                    PaymentMethod = "N/A", // Default value for required fields
+                    RecordedBy = User.Identity?.Name ?? "System", // Default value if not authenticated
+                    IsReconciled = false, // Default value
+                    RelatedEntityType = "Manual" // Default for manually created transactions
+                };
+                
+                _context.FinancialTransactions.Add(transaction);
+            }
+            catch (Exception ex)
+            {
+                // The model or DbSet might not exist yet, we'll implement it in the next step
+                Console.WriteLine($"FinancialTransaction recording failed: {ex.Message}");
+            }
+        }
+
+        // GET: Admin/FinancialRecords/Transactions
+        public async Task<IActionResult> Transactions(DateTime? startDate, DateTime? endDate, string filterType, string filterCategory, string searchTerm)
+        {
+            // Set default date range if not provided
+            var today = DateTime.Now.Date;
+            startDate ??= new DateTime(today.Year, today.Month, 1);
+            endDate ??= today;
+            
+            // Query transactions with filters
+            var query = _context.FinancialTransactions.AsQueryable();
+            
+            // Apply date filter
+            query = query.Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate);
+            
+            // Apply type filter
+            if (!string.IsNullOrWhiteSpace(filterType))
+            {
+                query = query.Where(t => t.TransactionType == filterType);
+            }
+            
+            // Apply category filter
+            if (!string.IsNullOrWhiteSpace(filterCategory))
+            {
+                query = query.Where(t => t.Category == filterCategory);
+            }
+            
+            // Apply search term
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(t => 
+                    t.Description.Contains(searchTerm) || 
+                    t.ReferenceNumber.Contains(searchTerm) || 
+                    t.Notes.Contains(searchTerm));
+            }
+            
+            // Execute query and get results
+            var transactions = await query.OrderByDescending(t => t.TransactionDate).ToListAsync();
+            
+            // Calculate totals for the summary section
+            var totalIncome = transactions
+                .Where(t => t.TransactionType == "Income")
+                .Sum(t => t.Amount);
+            
+            var totalExpense = transactions
+                .Where(t => t.TransactionType == "Expense")
+                .Sum(t => t.Amount);
+            
+            // Get unique categories and transaction types for filters
+            var categories = await _context.FinancialTransactions
+                .Select(t => t.Category)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+            
+            var transactionTypes = await _context.FinancialTransactions
+                .Select(t => t.TransactionType)
+                .Distinct()
+                .OrderBy(t => t)
+                .ToListAsync();
+            
+            // Add default transaction types if none exist yet
+            if (!transactionTypes.Any())
+            {
+                transactionTypes = new List<string> { "Income", "Expense", "Transfer", "Adjustment" };
+            }
+            
+            // Set ViewData
+            ViewData["StartDate"] = startDate;
+            ViewData["EndDate"] = endDate;
+            ViewData["FilterType"] = filterType;
+            ViewData["FilterCategory"] = filterCategory;
+            ViewData["SearchTerm"] = searchTerm;
+            ViewData["Categories"] = categories;
+            ViewData["TransactionTypes"] = transactionTypes;
+            ViewData["TotalIncome"] = totalIncome;
+            ViewData["TotalExpense"] = totalExpense;
+            
+            return View(transactions);
+        }
+
+        // POST: Admin/FinancialRecords/AddTransaction
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTransaction(FinancialTransaction transaction)
+        {
+            try
+            {
+                // Debug what's coming from the form
+                Console.WriteLine($"AddTransaction called with: {transaction?.TransactionType ?? "null"}, {transaction?.Category ?? "null"}, {transaction?.Amount}");
+                
+                if (!ModelState.IsValid)
+                {
+                    // Collect the errors for debugging
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    
+                    Console.WriteLine($"ModelState errors: {string.Join(", ", errors)}");
+                    TempData["ErrorMessage"] = $"Please correct the following errors: {string.Join(", ", errors)}";
+                    return RedirectToAction(nameof(Transactions));
+                }
+                
+                // Set default values for all required fields to prevent NULL errors
+                transaction.CreatedDate = DateTime.Now;
+                transaction.RecordedBy = User.Identity?.Name ?? "System";
+                
+                // Ensure strings aren't null
+                transaction.Description = transaction.Description ?? "No description";
+                transaction.Notes = transaction.Notes ?? "";
+                transaction.ReferenceNumber = transaction.ReferenceNumber ?? "None";
+                transaction.PaymentMethod = transaction.PaymentMethod ?? "N/A";
+                
+                // Ensure RelatedEntityType is set
+                if (string.IsNullOrEmpty(transaction.RelatedEntityType))
+                {
+                    transaction.RelatedEntityType = "Manual";
+                }
+                
+                try
+                {
+                    _context.FinancialTransactions.Add(transaction);
+                    await _context.SaveChangesAsync();
+                    
+                    TempData["SuccessMessage"] = "Transaction recorded successfully.";
+                    Console.WriteLine($"Transaction saved successfully: ID = {transaction.Id}");
+                    return RedirectToAction(nameof(Transactions));
+                }
+                catch (DbUpdateException dbEx)
+                {
+                    Console.WriteLine($"Database error saving transaction: {dbEx.Message}");
+                    Console.WriteLine($"Inner exception: {dbEx.InnerException?.Message}");
+                    TempData["ErrorMessage"] = $"Database error: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                    return RedirectToAction(nameof(Transactions));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error in AddTransaction: {ex.Message}");
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}";
+                return RedirectToAction(nameof(Transactions));
+            }
+        }
+
+        // POST: Admin/FinancialRecords/EditTransaction
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditTransaction(FinancialTransaction transaction)
+        {
+            try
+            {
+                // Debug what's coming from the form
+                Console.WriteLine($"EditTransaction called with ID: {transaction.Id}, Type: {transaction?.TransactionType ?? "null"}");
+                
+                if (!ModelState.IsValid)
+                {
+                    // Collect the errors for debugging
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    
+                    Console.WriteLine($"ModelState errors: {string.Join(", ", errors)}");
+                    TempData["ErrorMessage"] = $"Please correct the following errors: {string.Join(", ", errors)}";
+                    return RedirectToAction(nameof(Transactions));
+                }
+                
+                var existingTransaction = await _context.FinancialTransactions.FindAsync(transaction.Id);
+                
+                if (existingTransaction == null)
+                {
+                    TempData["ErrorMessage"] = "Transaction not found.";
+                    return RedirectToAction(nameof(Transactions));
+                }
+                
+                // Update fields with null checks
+                existingTransaction.TransactionType = transaction.TransactionType;
+                existingTransaction.Category = transaction.Category;
+                existingTransaction.Amount = transaction.Amount;
+                existingTransaction.Description = transaction.Description ?? existingTransaction.Description ?? "No description";
+                existingTransaction.ReferenceNumber = transaction.ReferenceNumber ?? existingTransaction.ReferenceNumber ?? "None";
+                existingTransaction.TransactionDate = transaction.TransactionDate;
+                existingTransaction.PaymentMethod = transaction.PaymentMethod ?? existingTransaction.PaymentMethod ?? "N/A";
+                existingTransaction.IsReconciled = transaction.IsReconciled;
+                existingTransaction.Notes = transaction.Notes ?? existingTransaction.Notes ?? "";
+                
+                // Make sure RelatedEntityType is preserved
+                if (string.IsNullOrEmpty(transaction.RelatedEntityType))
+                {
+                    // Keep existing value or set default
+                    if (string.IsNullOrEmpty(existingTransaction.RelatedEntityType))
+                    {
+                        existingTransaction.RelatedEntityType = "Manual";
+                    }
+                }
+                else
+                {
+                    existingTransaction.RelatedEntityType = transaction.RelatedEntityType;
+                }
+                
+                try
+                {
+                    _context.Update(existingTransaction);
+                    await _context.SaveChangesAsync();
+                    
+                    TempData["SuccessMessage"] = "Transaction updated successfully.";
+                    return RedirectToAction(nameof(Transactions));
+                }
+                catch (DbUpdateException dbEx)
+                {
+                    Console.WriteLine($"Database error updating transaction: {dbEx.Message}");
+                    Console.WriteLine($"Inner exception: {dbEx.InnerException?.Message}");
+                    TempData["ErrorMessage"] = $"Database error: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                    return RedirectToAction(nameof(Transactions));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error in EditTransaction: {ex.Message}");
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}";
+                return RedirectToAction(nameof(Transactions));
+            }
+        }
+
+        // POST: Admin/FinancialRecords/DeleteTransaction
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteTransaction(int id)
+        {
+            try
+            {
+                Console.WriteLine($"DeleteTransaction called with ID: {id}");
+                
+                var transaction = await _context.FinancialTransactions.FindAsync(id);
+                
+                if (transaction == null)
+                {
+                    Console.WriteLine($"Transaction with ID {id} not found");
+                    TempData["ErrorMessage"] = "Transaction not found.";
+                    return RedirectToAction(nameof(Transactions));
+                }
+                
+                _context.FinancialTransactions.Remove(transaction);
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Transaction deleted successfully.";
+                return RedirectToAction(nameof(Transactions));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting transaction: {ex.Message}");
+                TempData["ErrorMessage"] = $"Error deleting transaction: {ex.Message}";
+                return RedirectToAction(nameof(Transactions));
+            }
+        }
+
+        // GET: Admin/FinancialRecords/GetTransaction
+        [HttpGet]
+        public async Task<IActionResult> GetTransaction(int id)
+        {
+            try
+            {
+                Console.WriteLine($"GetTransaction called with ID: {id}");
+                
+                var transaction = await _context.FinancialTransactions.FindAsync(id);
+                
+                if (transaction == null)
+                {
+                    Console.WriteLine($"Transaction with ID {id} not found");
+                    return NotFound(new { error = "Transaction not found" });
+                }
+                
+                return Json(transaction);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving transaction: {ex.Message}");
+                return StatusCode(500, new { error = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        // GET: Admin/FinancialRecords/ExportTransactions
+        public async Task<IActionResult> ExportTransactions(DateTime? startDate, DateTime? endDate, string filterType, string filterCategory, string searchTerm)
+        {
+            // Set default date range if not provided
+            var today = DateTime.Now.Date;
+            startDate ??= new DateTime(today.Year, today.Month, 1);
+            endDate ??= today;
+            
+            // Query transactions with filters (same as Transactions action)
+            var query = _context.FinancialTransactions.AsQueryable();
+            
+            // Apply date filter
+            query = query.Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate);
+            
+            // Apply type filter
+            if (!string.IsNullOrWhiteSpace(filterType))
+            {
+                query = query.Where(t => t.TransactionType == filterType);
+            }
+            
+            // Apply category filter
+            if (!string.IsNullOrWhiteSpace(filterCategory))
+            {
+                query = query.Where(t => t.Category == filterCategory);
+            }
+            
+            // Apply search term
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(t => 
+                    t.Description.Contains(searchTerm) || 
+                    t.ReferenceNumber.Contains(searchTerm) || 
+                    t.Notes.Contains(searchTerm));
+            }
+            
+            // Execute query and get results
+            var transactions = await query.OrderByDescending(t => t.TransactionDate).ToListAsync();
+            
+            // Build CSV content
+            var csv = new System.Text.StringBuilder();
+            
+            // Add headers
+            csv.AppendLine("Date,Type,Category,Description,Reference,Amount,Payment Method,Reconciled,Notes");
+            
+            // Add data
+            foreach (var t in transactions)
+            {
+                var date = t.TransactionDate.ToString("yyyy-MM-dd");
+                var type = t.TransactionType;
+                var category = t.Category;
+                var description = $"\"{t.Description?.Replace("\"", "\"\"")}\""; // Handle quotes in CSV
+                var reference = $"\"{t.ReferenceNumber?.Replace("\"", "\"\"")}\"";
+                var amount = t.Amount.ToString("F2");
+                var paymentMethod = t.PaymentMethod ?? "";
+                var reconciled = t.IsReconciled ? "Yes" : "No";
+                var notes = $"\"{t.Notes?.Replace("\"", "\"\"")}\"";
+                
+                csv.AppendLine($"{date},{type},{category},{description},{reference},{amount},{paymentMethod},{reconciled},{notes}");
+            }
+            
+            // Set file name
+            var fileName = $"Financial_Transactions_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.csv";
+            
+            // Return as file
+            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", fileName);
+        }
+
+        // GET: Admin/FinancialRecords/TestRecordAnimalSale
+        public IActionResult TestRecordAnimalSale()
+        {
+            try
+            {
+                // Create a basic model
+                var model = new Inyama_Yethu.Models.ViewModels.AnimalSaleViewModel
+                {
+                    SaleDate = DateTime.Today,
+                    PaymentReceived = false
+                };
+
+                // Create an empty animals list
+                ViewBag.Animals = new SelectList(new List<SelectListItem>());
+                
+                // Add a model error for testing
+                ModelState.AddModelError("", "This is a test error message");
+                
+                // Return the view with the model
+                return View("RecordAnimalSale", model);
+            }
+            catch (Exception ex)
+            {
+                // Return a view with the error details
+                return Content($"Error: {ex.Message}\nStack Trace: {ex.StackTrace}");
+            }
+        }
+
+        // GET: Admin/FinancialRecords/DiagnoseSalesIssues
+        public async Task<IActionResult> DiagnoseSalesIssues()
+        {
+            var report = new Dictionary<string, string>();
+            
+            try
+            {
+                // 1. Check if Animals table exists and has records
+                var animalCount = await _context.Animals.CountAsync();
+                report["Animals Table"] = $"Found {animalCount} total animals";
+                
+                // 2. Check if any animals are active
+                var activeAnimalCount = await _context.Animals
+                    .Where(a => a.Status == AnimalStatus.Active)
+                    .CountAsync();
+                report["Active Animals"] = $"Found {activeAnimalCount} active animals";
+                
+                // 3. Check if AnimalSales table exists
+                bool salesTableExists = true;
+                try
+                {
+                    var salesCount = await _context.AnimalSales.CountAsync();
+                    report["Animal Sales Table"] = $"Found {salesCount} existing sales";
+                }
+                catch (Exception ex)
+                {
+                    salesTableExists = false;
+                    report["Animal Sales Table"] = $"Error: {ex.Message}";
+                }
+                
+                // 4. Check if FinancialTransactions table exists
+                bool financialTableExists = true;
+                try
+                {
+                    var transactionCount = await _context.FinancialTransactions.CountAsync();
+                    report["Financial Transactions Table"] = $"Found {transactionCount} existing transactions";
+                }
+                catch (Exception ex)
+                {
+                    financialTableExists = false;
+                    report["Financial Transactions Table"] = $"Error: {ex.Message}";
+                }
+                
+                // 5. Verify database connection
+                report["Database Connection"] = "Active";
+                
+                // 6. Check if all necessary enum values exist
+                var saleTypeValues = Enum.GetNames(typeof(SaleType)).ToList();
+                report["Sale Types"] = string.Join(", ", saleTypeValues);
+                
+                // 7. Check if AnimalStatus enum has Sold value
+                var statusValues = Enum.GetNames(typeof(AnimalStatus)).ToList();
+                report["Animal Status Values"] = string.Join(", ", statusValues);
+                
+                // 8. Overall assessment
+                if (activeAnimalCount == 0)
+                {
+                    report["DIAGNOSIS"] = "NO ACTIVE ANIMALS: You need to add animals with 'Active' status before you can record sales.";
+                }
+                else if (!salesTableExists)
+                {
+                    report["DIAGNOSIS"] = "MISSING SALES TABLE: The AnimalSales table does not exist or is inaccessible.";
+                }
+                else if (!financialTableExists)
+                {
+                    report["DIAGNOSIS"] = "MISSING FINANCIAL TABLE: The system will now try to create the Financial Transactions table.";
+                    await EnsureFinancialTransactionsExists();
+                }
+                else
+                {
+                    report["DIAGNOSIS"] = "All systems appear to be functioning correctly. If you're still having issues, check the error logs for more details.";
+                }
+            }
+            catch (Exception ex)
+            {
+                report["ERROR"] = $"Exception during diagnosis: {ex.Message}";
+            }
+            
+            return Json(report);
         }
     }
 } 

@@ -150,7 +150,14 @@
                         <select class="form-control" id="newStatus" name="newStatus">
                             @foreach (var status in Enum.GetValues(typeof(Inyama_Yethu.Models.FarmTaskStatus)))
                             {
-                                <option value="@status" selected="@(status.Equals(Model.Status))">@status</option>
+                                @if (status.Equals(Model.Status))
+                                {
+                                    <option value="@status" selected>@status</option>
+                                }
+                                else
+                                {
+                                    <option value="@status">@status</option>
+                                }
                             }
                         </select>
                     </div>

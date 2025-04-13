@@ -114,5 +114,12 @@ namespace Inyama_Yethu.Areas.Employee.Controllers
 
             return View();
         }
+
+        // Add error handling for invalid routes
+        [Route("Employee/Dashboard/Error")]
+        public IActionResult Error()
+        {
+            return View("Error");
+        }
     }
 } 

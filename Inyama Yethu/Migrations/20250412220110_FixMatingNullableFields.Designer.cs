@@ -4,6 +4,7 @@ using Inyama_Yethu.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inyama_Yethu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250412220110_FixMatingNullableFields")]
+    partial class FixMatingNullableFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -500,7 +503,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 1,
                             CurrentStock = 500.0,
                             FeedType = 0,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8541),
+                            LastUpdated = new DateTime(2025, 4, 13, 0, 1, 9, 680, DateTimeKind.Local).AddTicks(9287),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         },
@@ -509,7 +512,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 2,
                             CurrentStock = 750.0,
                             FeedType = 1,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8559),
+                            LastUpdated = new DateTime(2025, 4, 13, 0, 1, 9, 680, DateTimeKind.Local).AddTicks(9304),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 150.0
                         },
@@ -518,7 +521,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 3,
                             CurrentStock = 1000.0,
                             FeedType = 2,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8561),
+                            LastUpdated = new DateTime(2025, 4, 13, 0, 1, 9, 680, DateTimeKind.Local).AddTicks(9305),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 200.0
                         },
@@ -527,7 +530,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 4,
                             CurrentStock = 800.0,
                             FeedType = 3,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8563),
+                            LastUpdated = new DateTime(2025, 4, 13, 0, 1, 9, 680, DateTimeKind.Local).AddTicks(9306),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 175.0
                         },
@@ -536,7 +539,7 @@ namespace Inyama_Yethu.Migrations
                             Id = 5,
                             CurrentStock = 400.0,
                             FeedType = 4,
-                            LastUpdated = new DateTime(2025, 4, 13, 3, 0, 4, 408, DateTimeKind.Local).AddTicks(8564),
+                            LastUpdated = new DateTime(2025, 4, 13, 0, 1, 9, 680, DateTimeKind.Local).AddTicks(9307),
                             LastUpdatedById = 2,
                             MinimumStockLevel = 100.0
                         });
@@ -643,74 +646,6 @@ namespace Inyama_Yethu.Migrations
                     b.HasIndex("RecordedById");
 
                     b.ToTable("Feedings");
-                });
-
-            modelBuilder.Entity("Inyama_Yethu.Models.FinancialTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsReconciled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("RecordedBy")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("ReferenceNumber")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("RelatedEntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RelatedEntityType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FinancialTransactions");
                 });
 
             modelBuilder.Entity("Inyama_Yethu.Models.HealthRecord", b =>
